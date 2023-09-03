@@ -1,5 +1,4 @@
-mod reflect;
-use reflect::Config;
+use reflector::Config;
 
 fn main() {
     let cfg: Config = Default::default();
