@@ -1,4 +1,4 @@
-// use reflector::reflect::Config;
+use reflector::Config;
 use toml;
 
 fn basic_toml() -> &'static str {
@@ -23,6 +23,5 @@ periodmin = 10
 
 #[test]
 fn test_basic_toml() {
-    let basic: Config = toml::from_str(basic_toml());
-    basic.unwrap();
+    let _basic: Config = toml::from_str(basic_toml()).unwrap();
 }
