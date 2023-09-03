@@ -1,2 +1,2 @@
-mod reflect;
-pub use reflect::Config;
+mod config;
+pub use config::Config;
