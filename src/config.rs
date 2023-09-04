@@ -6,7 +6,7 @@ use std::default::Default;
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
-    sources: Vec<SourceConfig>,
+    pub sources: Vec<SourceConfig>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -20,13 +20,13 @@ use Frequency::*;
 
 #[derive(Debug, Deserialize)]
 pub struct SourceConfig {
-    name: String,
-    remote: String,
-    local: String,
-    pathmaker: String, // fixme: stringly type
-    freq: Frequency,
-    flatten: Option<bool>,
-    periodmin: Option<u16>,
+    pub name: String,
+    pub remote: String,
+    pub local: String,
+    pub pathmaker: String, // fixme: stringly type
+    pub freq: Frequency,
+    pub flatten: Option<bool>,
+    pub periodmin: Option<u16>,
 }
 
 impl Default for Config {
