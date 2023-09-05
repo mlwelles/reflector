@@ -21,10 +21,31 @@ Capture represents a single mirrored entity.
 Mirror methods:
   GetLatest -> Result<Capture>
     grab the latest, if necessary, or else return from local cache
-  EnsureLatest(Duration) -> Result<CaptureList>
+  EnsureSince(Duration) -> Result<CaptureList>
     ensure our local mirror is up to date, going back from now - Duration
 
-What else??
+TimeRange is (StartSystemTime, EndSystemtime)
+
+We need a number of supporting fuctions.  Start by considering EnsureLatest,
+consider a naive implementation that going from more recent to least:
+  - p is the period of the Mirror, e.g., 24 hours for a daily mirror
+  - t starts as now
+  - loop:
+    - consider time range (t-p, t)
+    - if we have a Capture within that period, collect it
+    - take away p from t
+    - keep looping while the span from t to now is less than Duration
+
+Capture constructors, these are probably methods on the Mirror:
+  CapturesInRange(TimeRange) -> Result<CaptureList>
+  CapturesSince(Duration) -> Result<CaptureList>
+    - implied now
+  LatestCapture() -> Result<Capture>
+
+Maybe this is blue sky but it would also be nice to have a way for the
+mirror to qualify the regularity of the source:
+  Deviation(Since)
+
 
 * First pass
 
