@@ -62,7 +62,7 @@ fetch for a given TimeRange.
 We want to capture
 https://sdo.gsfc.nasa.gov/assets/img/dailymov/2023/02/20/20230220_1024_0094.ogv
 
-One per day.
+Once per day.
 
 A possible TOML file:
 
