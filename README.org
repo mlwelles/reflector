@@ -31,7 +31,7 @@ consider a naive implementation that going from more recent to least:
   - p is the period of the Mirror, e.g., 24 hours for a daily mirror
   - t starts as now
   - loop:
-    - consider time range (t-p, t)
+    - consider TimeRange (t-p, t)
     - if we have a Capture within that period, collect it
     - take away p from t
     - keep looping while the span from t to now is less than Duration
@@ -46,6 +46,16 @@ Maybe this is blue sky but it would also be nice to have a way for the
 mirror to qualify the regularity of the source:
   Deviation(Since)
 
+Retrieval has its own sets of issues.  I wonder....  Since we need to
+support ftp and http both, I wonder if we can boil out a simple common
+API, define that as a trait, and put up some wrapper classes for them.
+The trait might be defined by:
+ - SizeOf(url) -> Result<Size>
+ - Get(url)
+ - List(TimeRange) -> returns list of URLs and timestamps within range
+
+We also need a URL factory that the mirrors can use to find what to
+fetch for a given TimeRange.
 
 * First pass
 
