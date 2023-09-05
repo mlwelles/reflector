@@ -4,6 +4,28 @@ A period script, possibly run by timer, which mirrors upstream data as needed.
 
 Optional argument specifies how far back to go, default is 24 hours.
 
+* Application Design
+
+Config has SourceConfigs, described below.
+
+a SourceConfig can be used to construct a Mirror -- if all looks good!
+
+Does it make sense to make Mirror a typestate, e.g, Mirror<STATE> where STATE is:
+ - untested
+ - ok
+ - failing
+?  I'm not sure it does, we don't really need to track state.
+
+Capture represents a single mirrored entity.
+
+Mirror methods:
+  GetLatest -> Result<Capture>
+    grab the latest, if necessary, or else return from local cache
+  EnsureLatest(Duration) -> Result<CaptureList>
+    ensure our local mirror is up to date, going back from now - Duration
+
+What else??
+
 * First pass
 
 We want to capture
