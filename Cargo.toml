@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 serde = { version = "1.0.188", features = ["derive", "serde_derive"] }
 toml = "0.7.6"
+url = "2.4.1"

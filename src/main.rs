@@ -5,6 +5,11 @@ fn main() {
     println!("{:#?}", cfg);
     for src in cfg.sources {
         println!("{:#?}", src);
-        let mut r = Mirror::new(src);
+        match Mirror::new(src) {
+            Ok(r) => {
+                println!("ok, {:#?}", r)
+            }
+            Err(e) => eprintln!("error: {:#?}", e),
+        }
     }
 }
