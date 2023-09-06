@@ -33,6 +33,7 @@ impl Mirror {
 
         let localmd = fs::metadata(&cfg.local);
         if localmd.is_err() {
+            eprintln!("{}", localmd.unwrap_err());
             return Err(InvalidLocalMetadata);
         }
         let local = path::PathBuf::from(&cfg.local);
