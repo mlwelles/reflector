@@ -29,6 +29,8 @@ impl Mirror {
         }
         let remote = remote.unwrap();
 
+        let period = time::Duration::from_secs(cfg.period);
+
         let localmd = fs::metadata(&cfg.local);
         if localmd.is_err() {
             return Err(InvalidLocalMetadata);
@@ -49,7 +51,7 @@ impl Mirror {
 
         let m = Mirror {
             name: cfg.name,
-            period: cfg.period,
+            period,
             local,
             remote,
             flatten,

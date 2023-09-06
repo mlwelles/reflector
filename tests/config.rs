@@ -7,17 +7,16 @@ fn basic_toml() -> &'static str {
 name      = "Solar Data Observatory"
 remote	  = "https://sdo.gsfc.nasa.gov/assets/img/dailymov"
 pathmaker = "SDO"
-local     = "/home/adam/tmp/sat/sdo"
-freq      = "Daily"
+local     = "/tmp"
+period    = 86400
 flatten   = true
 
 [[sources]]
 name      = "GOES ABI_TrueColor"
 remote    = "ftp://ftp.nnvl.noaa.gov/GOES/ABI_TrueColor"
 pathmaker = "GOES"
-local     = "/home/adam/tmp/sat/abi_truecolor"
-freq      = "Momentarily"
-periodmin = 10
+local     = "/tmp"
+period    = 600
     "#
 }
 

@@ -3,7 +3,6 @@
 
 use serde::Deserialize;
 use std::default::Default;
-use std::time::Duration;
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
@@ -16,7 +15,7 @@ pub struct SourceConfig {
     pub remote: String,
     pub local: String,
     pub pathmaker: String,
-    pub period: Duration,
+    pub period: u64,
     pub flatten: Option<bool>,
 }
 
@@ -29,7 +28,7 @@ impl Default for Config {
                 local: "/home/adam/tmp/sat/sdo".to_string(),
                 pathmaker: "SDO".to_string(),
                 flatten: Some(true),
-                period: Duration::new(5 * 60 * 60 * 24, 0),
+                period: 5 * 60 * 60 * 24,
             },
             SourceConfig {
                 name: "GOES ABI_TrueColor".to_string(),
@@ -37,7 +36,7 @@ impl Default for Config {
                 local: "/home/adam/tmp/sat/abi_truecolor".to_string(),
                 pathmaker: "GOES".to_string(),
                 flatten: None,
-                period: Duration::new(5 * 60 * 10, 0),
+                period: 5 * 60 * 10,
             },
         ];
         Config { sources: srcs }
