@@ -51,8 +51,10 @@ support ftp and http both, I wonder if we can boil out a simple common
 API, define that as a trait, and put up some wrapper classes for them.
 The trait might be defined by:
  - SizeOf(url) -> Result<Size>
- - Get(url)
  - List(TimeRange) -> returns list of URLs and timestamps within range
+ - Get(url) -> Result<Bytes> 
+   or
+   Grab(url, writer) -> Result<Capture>
 
 We also need a URL factory that the mirrors can use to find what to
 fetch for a given TimeRange.
