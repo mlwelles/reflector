@@ -15,7 +15,7 @@ pub struct SourceConfig {
     pub name: String,
     pub remote: String,
     pub local: String,
-    pub pathmaker: String, // fixme: stringly type
+    pub pathmaker: String,
     pub period: Duration,
     pub flatten: Option<bool>,
 }
