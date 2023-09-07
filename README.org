@@ -57,7 +57,8 @@ The trait might be defined by:
    Grab(url, writer) -> Result<Capture>
 
 We also need a URL factory that the mirrors can use to find what to
-fetch for a given TimeRange.
+fetch for a given TimeRange.  In fact, we need a bunch of these
+factories.  Use a trait.
 
 * First pass
 

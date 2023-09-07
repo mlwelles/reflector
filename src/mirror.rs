@@ -1,49 +1,49 @@
+use crate::capture::{Capture, CaptureList};
 use crate::config::SourceConfig;
-use std::{fs, path, time};
+use crate::store::FileStore;
+use crate::{PathMaker, PathMakerError, StoreError, TimeRange};
+use std::time;
 use url::Url;
 
 #[derive(Debug)]
 pub struct Mirror {
     pub name: String,
     pub period: time::Duration,
-    pub local: path::PathBuf,
+    // TODO: generalize this as a trait
+    pub local: FileStore,
     pub remote: Url,
-    flatten: bool,
-    // TODO pathmaker
+    pub flatten: bool,
+    pub pathmaker: PathMaker,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug)]
 pub enum FactoryError {
-    NotDirectory(path::PathBuf),
-    NotWritable(path::PathBuf),
-    InvalidURL,
-    InvalidLocalMetadata,
+    InvalidURL(url::ParseError),
+    InvalidStore(StoreError),
+    InvalidPathMaker(PathMakerError),
 }
 use FactoryError::*;
 
 impl Mirror {
     pub fn new(cfg: SourceConfig) -> Result<Mirror, FactoryError> {
+        let period = time::Duration::from_secs(cfg.period);
+        let pathmaker = PathMaker::new(&cfg.pathmaker);
+        if pathmaker.is_err() {
+            return Err(InvalidPathMaker(pathmaker.unwrap_err()));
+        }
+        let pathmaker = pathmaker.unwrap();
+
         let remote = Url::parse(&cfg.remote);
         if remote.is_err() {
-            return Err(InvalidURL);
+            return Err(InvalidURL(remote.unwrap_err()));
         }
         let remote = remote.unwrap();
 
-        let period = time::Duration::from_secs(cfg.period);
-
-        let localmd = fs::metadata(&cfg.local);
-        if localmd.is_err() {
-            eprintln!("{}", localmd.unwrap_err());
-            return Err(InvalidLocalMetadata);
+        let local = FileStore::new(&cfg.local, &pathmaker);
+        if local.is_err() {
+            return Err(InvalidStore(local.unwrap_err()));
         }
-        let local = path::PathBuf::from(&cfg.local);
-        let permissions = localmd.unwrap().permissions();
-        if permissions.readonly() {
-            return Err(NotWritable(local));
-        }
-        if !local.is_dir() {
-            return Err(NotDirectory(local));
-        }
+        let local = local.unwrap();
 
         let mut flatten = false;
         if cfg.flatten == Some(true) {
@@ -55,8 +55,22 @@ impl Mirror {
             period,
             local,
             remote,
+            pathmaker,
             flatten,
         };
         Ok(m)
+    }
+
+    // pub fn ping(&self) -> Result<(), T> {}
+
+    pub fn captures_in_range(&self, range: &TimeRange) -> CaptureList {
+        match self.local.from_range(range) {
+            Ok(x) => x,
+            Err(_) => CaptureList::empty(),
+        }
+    }
+
+    pub fn latest_capture(&self, range: TimeRange) -> Option<Capture> {
+        None
     }
 }
