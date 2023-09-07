@@ -12,8 +12,8 @@ pub struct FileStore {
 impl FileStore {
     pub fn new(path: &str, pathmaker: &PathMaker) -> Result<Self, StoreError> {
         let localmd = fs::metadata(path);
-        if localmd.is_err() {
-            return Err(InvalidLocalMetadata(localmd.unwrap_err()));
+        if let Err(e) = localmd {
+            return Err(InvalidLocalMetadata(e));
         }
         let local = path::PathBuf::from(path);
         let permissions = localmd.unwrap().permissions();

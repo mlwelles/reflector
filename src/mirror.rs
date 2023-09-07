@@ -28,20 +28,20 @@ impl Mirror {
     pub fn new(cfg: SourceConfig) -> Result<Mirror, FactoryError> {
         let period = time::Duration::from_secs(cfg.period);
         let pathmaker = PathMaker::new(&cfg.pathmaker);
-        if pathmaker.is_err() {
-            return Err(InvalidPathMaker(pathmaker.unwrap_err()));
+        if let Err(e) = pathmaker {
+            return Err(InvalidPathMaker(e));
         }
         let pathmaker = pathmaker.unwrap();
 
         let remote = Url::parse(&cfg.remote);
-        if remote.is_err() {
-            return Err(InvalidURL(remote.unwrap_err()));
+        if let Err(e) = remote {
+            return Err(InvalidURL(e));
         }
         let remote = remote.unwrap();
 
         let local = FileStore::new(&cfg.local, &pathmaker);
-        if local.is_err() {
-            return Err(InvalidStore(local.unwrap_err()));
+        if let Err(e) = local {
+            return Err(InvalidStore(e));
         }
         let local = local.unwrap();
 

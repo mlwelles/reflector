@@ -22,9 +22,9 @@ impl PathMaker {
 
     // FIXME: surely there is a macro for this
     pub fn dup(&self) -> PathMaker {
-        match self {
-            &GOES => GOES,
-            &SDO => SDO,
+        match *self {
+            GOES => GOES,
+            SDO => SDO,
         }
     }
 }
