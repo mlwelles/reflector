@@ -10,3 +10,4 @@ pub mod pathmaker;
 pub use pathmaker::{PathMaker, PathMakerError};
 pub mod store;
 pub use store::{FileStore, StoreError};
+pub mod remote;

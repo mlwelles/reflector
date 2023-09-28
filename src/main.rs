@@ -7,7 +7,7 @@ fn main() {
         println!("{:#?}", src);
         match Mirror::new(src) {
             Ok(r) => {
-                println!("ok, {:#?}", r)
+                println!("ok, {}", r.summarize())
             }
             Err(e) => eprintln!("error: {:#?}", e),
         }

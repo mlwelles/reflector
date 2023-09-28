@@ -1,4 +1,4 @@
 pub mod file;
-pub use file::FileStore;
+pub use file::{FileList, FileStore};
 pub mod error;
 pub use error::StoreError;
