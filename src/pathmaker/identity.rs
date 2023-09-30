@@ -9,10 +9,6 @@ impl Identity {
     pub fn new() -> Identity {
         Identity {}
     }
-
-    fn timefmt(&self) -> &'static str {
-        "%Y-%m-%d %H:%M:%S"
-    }
 }
 
 impl Default for Identity {
@@ -23,12 +19,13 @@ impl Default for Identity {
 
 impl PathMaker for Identity {
     fn time_to_filename(&self, time: &DateTime<Utc>) -> OsString {
-        OsString::from(format!("{}", time.format(self.timefmt())))
+        let s = time.to_rfc3339();
+        OsString::from(s)
     }
 
     fn filename_to_time(&self, filename: &OsStr) -> Result<DateTime<Utc>, PathMakerError> {
         match filename.to_str() {
-            Some(f) => match DateTime::parse_from_str(f, self.timefmt()) {
+            Some(f) => match DateTime::parse_from_rfc3339(f) {
                 Ok(d) => Ok(d.into()),
                 Err(e) => Err(TimeParseError(f.to_string(), e)),
             },
