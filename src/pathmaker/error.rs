@@ -3,6 +3,7 @@ use chrono::format::ParseError;
 #[derive(Debug, PartialEq, Eq)]
 pub enum PathMakerError {
     UnknownName(String),
+    Unimplemented,
     NoNameErr,
     NoFileNameErr,
     TimeParseError(String, ParseError),

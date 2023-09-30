@@ -8,6 +8,7 @@ pub use sdo::SDO;
 pub mod identity;
 pub use identity::Identity;
 
+use crate::time_range::TimeRange;
 use chrono::{DateTime, Utc};
 use std::ffi::{OsStr, OsString};
 use std::path;
@@ -34,5 +35,13 @@ pub trait PathMaker {
 
     fn time_to_path(&self, time: &DateTime<Utc>) -> path::PathBuf {
         path::PathBuf::from(self.time_to_filename(time))
+    }
+
+    fn from_range(
+        &self,
+        _range: &TimeRange,
+        _period: &Duration,
+    ) -> Result<Vec<path::PathBuf>, PathMakerError> {
+        Err(Unimplemented)
     }
 }
