@@ -8,9 +8,9 @@ use std::{
 };
 use url::Url;
 
-pub struct FileStore<'a> {
+pub struct FileStore {
     pub path: path::PathBuf,
-    pub pathmaker: Box<&'a dyn PathMaker>,
+    pub pathmaker: Box<dyn PathMaker>,
     // remote URL if any
     pub url: Option<Url>,
 }
@@ -41,11 +41,12 @@ pub enum GetError {
 }
 use GetError::*;
 
-impl FileStore<'_> {
-    pub fn new(path: &str, pathmaker: &dyn PathMaker) -> Result<Self, StoreError> {
+impl FileStore {
+    pub fn new(path: &str, pathmaker: Box<dyn PathMaker>) -> Result<Self, StoreError> {
+        let path = path::PathBuf::from(path);
         Ok(FileStore {
-            path: path::PathBuf::from(path),
-            pathmaker: Box::new(pathmaker),
+            path,
+            pathmaker,
             url: None,
         })
     }
@@ -78,14 +79,14 @@ impl FileStore<'_> {
                     path: fetched,
                     url: None,
                 }),
-                Err(e) => Err(IncomprehensibleFilename(f.to_os_string())),
+                Err(_) => Err(IncomprehensibleFilename(f.to_os_string())),
             },
             None => Err(NoSuchFile(fetched)),
         }
     }
 
     pub fn captures_in_list(&self, ll: FileList) -> CaptureList {
-        let cl = CaptureList::empty();
+        let mut cl = CaptureList::empty();
         for l in ll {
             match self.get(&l) {
                 Ok(c) => cl.list.push(c),
@@ -96,13 +97,13 @@ impl FileStore<'_> {
     }
 }
 
-pub struct FileStoreConfig<'a> {
+pub struct FileStoreConfig {
     pub path: String,
-    pub pathmaker: Box<&'a dyn PathMaker>,
+    pub pathmaker: Box<dyn PathMaker>,
 }
 
-impl From<FileStoreConfig<'_>> for FileStore<'_> {
-    fn from(cfg: FileStoreConfig<'_>) -> FileStore<'static> {
+impl From<FileStoreConfig> for FileStore {
+    fn from(cfg: FileStoreConfig) -> FileStore {
         let path = path::PathBuf::from(cfg.path);
         let pathmaker = cfg.pathmaker;
         let url = None;
@@ -114,7 +115,7 @@ impl From<FileStoreConfig<'_>> for FileStore<'_> {
     }
 }
 
-impl fmt::Display for FileStore<'_> {
+impl fmt::Display for FileStore {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "file storage in dir {}", self.path.to_str().unwrap())
     }
@@ -123,6 +124,7 @@ impl fmt::Display for FileStore<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::pathmaker;
 
     fn mock_file_store() -> FileStore {
         let path = "/tmp/reflector_file_store_test";
@@ -130,10 +132,11 @@ mod tests {
         if !pbuf.is_dir() {
             panic!("please make path {}", path);
         }
-        let pathmaker = PathMaker::Identity;
+        let pathmaker = Box::new(pathmaker::Identity::new());
         FileStore {
             path: pbuf,
             pathmaker,
+            url: None,
         }
     }
 

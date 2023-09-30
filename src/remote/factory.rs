@@ -7,7 +7,7 @@ pub enum RCFactoryError {
     Unimplemented,
 }
 
-pub fn from_url(url: &Url) -> Result<Box<dyn RemoteClient>, RCFactoryError> {
+pub fn from_url(_url: &Url) -> Result<Box<dyn RemoteClient>, RCFactoryError> {
     Err(RCFactoryError::Unimplemented)
 }
 

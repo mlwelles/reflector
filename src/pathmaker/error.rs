@@ -4,6 +4,7 @@ use chrono::format::ParseError;
 pub enum PathMakerError {
     UnknownName(String),
     NoNameErr,
+    NoFileNameErr,
     TimeParseError(String, ParseError),
     FilenameTooShort(String),
     UnparsableYear(String),

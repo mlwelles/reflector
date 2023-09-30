@@ -12,3 +12,18 @@ impl RemoteClient for Mock {
         Ok()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn mock() -> Mock {
+        Mock {}
+    }
+
+    #[test]
+    fn ping() {
+        let m = mock();
+        assert_ok!(m.ping())
+    }
+}

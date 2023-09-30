@@ -6,18 +6,18 @@ use crate::remote::{
 };
 use crate::store::{FileList, FileStore};
 use crate::{PathMaker, PathMakerError, StoreError, TimeRange};
-use std::time;
+use std::{fmt, time};
 use url::Url;
 
-pub struct Mirror<'a> {
+pub struct Mirror {
     pub name: String,
     pub period: time::Duration,
     // TODO: generalize this as a trait
-    pub local: FileStore<'a>,
+    pub local: FileStore,
     pub remote: Url,
     remote_client: Box<dyn RemoteClient>,
     pub flatten: bool,
-    pub pathmaker: Box<&'a dyn PathMaker>,
+    pub pathmaker: Box<dyn PathMaker>,
 }
 
 #[derive(Debug)]
@@ -29,10 +29,10 @@ pub enum FactoryError {
 }
 use FactoryError::*;
 
-impl Mirror<'_> {
-    pub fn new(cfg: SourceConfig) -> Result<Mirror<'static>, FactoryError> {
+impl Mirror {
+    pub fn new(cfg: SourceConfig) -> Result<Mirror, FactoryError> {
         let period = time::Duration::from_secs(cfg.period);
-        let pathmaker = pathmaker::new(cfg.pathmaker);
+        let pathmaker = pathmaker::new(&cfg.pathmaker);
         if let Err(e) = pathmaker {
             return Err(InvalidPathMaker(e));
         }
@@ -49,7 +49,8 @@ impl Mirror<'_> {
         }
         let remote_client = remote_client.unwrap();
 
-        let local = FileStore::new(&cfg.local, pathmaker);
+        let p2 = pathmaker::new(&cfg.pathmaker).unwrap();
+        let local = FileStore::new(&cfg.local, p2);
         if let Err(e) = local {
             return Err(InvalidStore(e));
         }
@@ -66,7 +67,7 @@ impl Mirror<'_> {
             local,
             remote,
             remote_client,
-            pathmaker: Box::new(pathmaker),
+            pathmaker,
             flatten,
         };
         Ok(m)
@@ -80,7 +81,7 @@ impl Mirror<'_> {
         self.remote_client.ping()
     }
 
-    pub fn range_to_filelist(&self, range: &TimeRange) -> FileList {
+    pub fn range_to_filelist(&self, _range: &TimeRange) -> FileList {
         // TODO
         FileList::empty()
     }
@@ -92,6 +93,12 @@ impl Mirror<'_> {
 
     pub fn latest_capture(&self) -> Option<Capture> {
         None
+    }
+}
+
+impl fmt::Display for Mirror {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        write!(f, "<mirror {})", self.name)
     }
 }
 

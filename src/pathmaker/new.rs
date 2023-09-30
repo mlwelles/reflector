@@ -1,15 +1,10 @@
-use super::SDO;
+use super::{Identity, SDO}; // trait objects
 use super::{NoNameErr, PathMaker, PathMakerError, UnknownName};
 
-pub fn new(s: String) -> Result<&dyn PathMaker, PathMakerError> {
+pub fn new(s: &str) -> Result<Box<dyn PathMaker>, PathMakerError> {
     match s {
-        "SDO" => {
-            // FIXME: use default trait
-            let sdo = SDO {
-                suffix: "".to_string(),
-            };
-            Ok(&sdo)
-        }
+        "SDO" => Ok(Box::new(SDO::default())),
+        "identity" => Ok(Box::new(Identity::default())),
         "" => Err(NoNameErr),
         _ => Err(UnknownName(s.to_string())),
     }

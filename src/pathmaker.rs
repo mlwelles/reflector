@@ -5,14 +5,16 @@ pub mod new;
 pub use new::new;
 pub mod sdo;
 pub use sdo::SDO;
+pub mod identity;
+pub use identity::Identity;
 
 use chrono::{DateTime, Utc};
-use std::ffi::OsStr;
+use std::ffi::{OsStr, OsString};
 use std::path;
 use std::time::{Duration, SystemTime};
 
 pub trait PathMaker {
-    fn time_to_filename(&self, time: &DateTime<Utc>) -> String;
+    fn time_to_filename(&self, time: &DateTime<Utc>) -> OsString;
     fn filename_to_time(&self, filename: &OsStr) -> Result<DateTime<Utc>, PathMakerError>;
 
     fn filename_to_systime(&self, filename: &OsStr) -> Result<SystemTime, PathMakerError> {
