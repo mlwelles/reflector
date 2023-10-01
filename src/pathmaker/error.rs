@@ -7,6 +7,8 @@ pub enum PathMakerError {
     NoNameErr,
     NoFileNameErr,
     TimeParseError(String, ParseError),
+    AmbiguousTimeError(String),
+    WithTimeError(String, i32, u32, u32),
     FilenameTooShort(String),
     UnparsableYear(String),
     UnparsableMonth(String),

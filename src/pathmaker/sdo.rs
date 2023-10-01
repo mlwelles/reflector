@@ -1,4 +1,5 @@
 use super::*;
+use chrono::offset::LocalResult;
 use chrono::{DateTime, TimeZone, Utc};
 use std::ffi::OsStr;
 
@@ -33,18 +34,36 @@ impl PathMaker for SDO {
         if base.len() != 8 {
             return Err(FilenameTooShort(base.to_string()));
         }
-        let year: i32 = match base[0..3].parse() {
+        let year: i32 = match base[0..4].parse() {
             Ok(x) => x,
             Err(_) => return Err(UnparsableYear(base[0..3].to_string())),
         };
-        let mon: u32 = match base[4..5].parse() {
+        let mon: u32 = match base[4..6].parse() {
             Ok(x) => x,
             Err(_) => return Err(UnparsableMonth(base[4..5].to_string())),
         };
-        let day: u32 = match base[6..7].parse() {
+        let day: u32 = match base[6..8].parse() {
             Ok(x) => x,
             Err(_) => return Err(UnparsableMonth(base[4..5].to_string())),
         };
-        Ok(Utc.with_ymd_and_hms(year, mon, day, 0, 0, 0).unwrap())
+        match Utc.with_ymd_and_hms(year, mon, day, 0, 0, 0) {
+            LocalResult::Single(t) => Ok(t),
+            LocalResult::Ambiguous(..) => Err(AmbiguousTimeError(filename.to_string())),
+            LocalResult::None => Err(WithTimeError(filename.to_string(), year, mon, day)),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn dogfood() {
+        let p = SDO::default();
+        let t = Utc::now();
+        let tday = Utc::now().date_naive();
+        let tday = Utc.from_utc_date(tday);
+        assert_eq!(t, p.filename_to_time(&p.time_to_filename(&t)).unwrap());
     }
 }
