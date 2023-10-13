@@ -57,13 +57,22 @@ impl PathMaker for SDO {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use chrono::NaiveDate;
+
+    #[test]
+    fn time_to_filename() {
+        let p = SDO::default();
+        let t = Utc.with_ymd_and_hms(2020, 11, 10, 0, 1, 32).unwrap();
+        let expect = format!("{}", t.format("%Y%m%d"));
+        assert_eq!(OsString::from(expect), p.time_to_filename(&t));
+    }
 
     #[test]
     fn dogfood() {
         let p = SDO::default();
         let t = Utc::now();
-        let tday = Utc::now().date_naive();
-        let tday = Utc.from_utc_date(tday);
-        assert_eq!(t, p.filename_to_time(&p.time_to_filename(&t)).unwrap());
+        let f = p.time_to_filename(&t);
+        let tt = p.filename_to_time(&f).unwrap();
+        assert_eq!(f, p.time_to_filename(&tt));
     }
 }
