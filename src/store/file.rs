@@ -131,8 +131,7 @@ mod tests {
     fn mock_file_store() -> FileStore {
         let pbuf = path::PathBuf::from(mock_path);
         if !pbuf.is_dir() {
-            // FIXME: we should try to mkdir
-            panic!("please make path {}", mock_path);
+            fs::create_dir(&pbuf).unwrap()
         }
         let pathmaker = Box::new(pathmaker::Identity::new());
         FileStore {
