@@ -1,36 +1,33 @@
 use super::*;
 
 // https://en.wikipedia.org/wiki/Geostationary_Operational_Environmental_Satellite
+// https://www.goes-r.gov/downloads/resources/documents/GOES-RSeriesDataBook.pdf
 // example URLs:
 //   ftp://ftp.nnvl.noaa.gov/GOES/ABI_TrueColor/ABI_TrueColor_20231014_1500z.png
 //   ftp://ftp.nnvl.noaa.gov/GOES/MERGED_TrueColor/MERGED_TrueColor_20231014_1510z.png
 //   ftp://ftp.nnvl.noaa.gov/GOES/WST_TrueColor/WST_TrueColor_20231014_1510z.png
-// these don't work:
-//   ftp://ftp.nnvl.noaa.gov/GOES/HIMAWARI/simplecontrast/HIMDAILY2023-10-14-112524.JPG
 
-// FIXME: this name is too general -- there are tons of GOES satellites which work in
-// different ways
 #[derive(Clone)]
-pub struct GOES {
+pub struct GoesR {
     pub prefix: String,
 }
 
 const SUFFIX: &str = "z.png";
 
-impl GOES {
-    fn new(prefix: &str) -> GOES {
+impl GoesR {
+    fn new(prefix: &str) -> GoesR {
         let prefix = String::from(prefix);
-        GOES { prefix }
+        GoesR { prefix }
     }
 }
 
-impl Default for GOES {
-    fn default() -> GOES {
-        GOES::new("")
+impl Default for GoesR {
+    fn default() -> GoesR {
+        GoesR::new("")
     }
 }
 
-impl PathMaker for GOES {
+impl PathMaker for GoesR {
     fn time_to_filename(&self, time: &DateTime<Utc>) -> OsString {
         format!("{}{}{}", self.prefix, time.format("%Y%m%d_%h%m"), SUFFIX).into()
     }
@@ -45,8 +42,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn goes_dogfood() {
-        let p = GOES::new("testing_");
+    fn goes16_dogfood() {
+        let p = GoesR::new("testing_");
         let t = Utc::now();
         let f = p.time_to_filename(&t);
         let tt = p.filename_to_time(&f).unwrap();
