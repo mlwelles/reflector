@@ -1,9 +1,11 @@
-// a class representing a file store on local disk
+// a class representing a file store on local disk, geared towards
+// storing and retreiving captures and dealing in CaptureLists
+
 use crate::store::StoreError::*;
 use crate::{Capture, CaptureList, PathMaker, StoreError};
 use std::{
     ffi::OsString,
-    fmt, fs,
+    fmt, fs, io,
     path::{self, PathBuf},
 };
 use url::Url;
@@ -67,7 +69,11 @@ impl FileStore {
         Ok(())
     }
 
-    fn get(&self, p: &str) -> Result<Capture, GetError> {
+    pub fn get_str(&self, p: &str) -> Result<Capture, GetError> {
+        self.get(&PathBuf::from(p))
+    }
+
+    pub fn get(&self, p: &PathBuf) -> Result<Capture, GetError> {
         let fetched = self.path.join(p);
         if !fetched.is_file() {
             return Err(NoSuchFile(fetched));
@@ -85,10 +91,14 @@ impl FileStore {
         }
     }
 
+    pub fn put(&self, path: &PathBuf, contents: &[u8]) -> io::Result<()> {
+        fs::write(self.path.join(path), contents)
+    }
+
     pub fn captures_in_list(&self, ll: FileList) -> CaptureList {
         let mut cl = CaptureList::empty();
         for l in ll {
-            match self.get(&l) {
+            match self.get_str(&l) {
                 Ok(c) => cl.list.push(c),
                 Err(e) => eprintln!("error on getting capture '{l}': {:?}", e),
             }
@@ -125,11 +135,12 @@ impl fmt::Display for FileStore {
 mod tests {
     use super::*;
     use crate::pathmaker;
+    use chrono::Utc;
 
-    const mock_path: &str = "/tmp/reflector_file_store_test";
+    const MOCK_PATH: &str = "/tmp/reflector_file_store_test";
 
     fn mock_file_store() -> FileStore {
-        let pbuf = path::PathBuf::from(mock_path);
+        let pbuf = path::PathBuf::from(MOCK_PATH);
         if !pbuf.is_dir() {
             fs::create_dir(&pbuf).unwrap()
         }
@@ -144,7 +155,8 @@ mod tests {
     #[test]
     fn check_mock() {
         let m = mock_file_store();
-        assert_eq!(m.path, PathBuf::from(mock_path));
+        assert_eq!(m.path, PathBuf::from(MOCK_PATH));
+        assert_eq!((), m.validate().unwrap());
     }
 
     #[test]
@@ -154,5 +166,16 @@ mod tests {
             format!("{m}"),
             "file storage in dir /tmp/reflector_file_store_test"
         );
+    }
+
+    #[test]
+    fn get_put() {
+        let m = mock_file_store();
+        let f = m.pathmaker.time_to_filename(&Utc::now());
+        let p = PathBuf::from(&f);
+
+        m.put(&p, f.into_string().unwrap().as_bytes()).unwrap();
+        let c = m.get(&p).unwrap();
+        assert!(c.valid());
     }
 }

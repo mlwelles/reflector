@@ -8,6 +8,12 @@ pub struct Capture {
     pub url: Option<Url>,
 }
 
+impl Capture {
+    pub fn valid(&self) -> bool {
+        self.path.is_file()
+    }
+}
+
 #[derive(Debug)]
 pub struct CaptureList {
     pub list: Vec<Capture>,
