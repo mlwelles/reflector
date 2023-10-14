@@ -10,6 +10,7 @@ pub enum PathMakerError {
     AmbiguousTimeError(String),
     WithTimeError(String, i32, u32, u32),
     FilenameTooShort(String),
+    FilenameTooLong(String),
     UnparsableYear(String),
     UnparsableMonth(String),
     UnparsableDay(String),
