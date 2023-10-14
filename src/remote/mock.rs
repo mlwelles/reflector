@@ -11,6 +11,9 @@ impl RemoteClient for Mock {
     fn ping(&self) -> Result<Duration, PingError> {
         Ok()
     }
+    fn get(&self, path: &str) -> Result<Gotten, GetError> {
+        Ok()
+    }
 }
 
 #[cfg(test)]
@@ -25,5 +28,11 @@ mod tests {
     fn ping() {
         let m = mock();
         assert_ok!(m.ping())
+    }
+
+    #[test]
+    fn connect() {
+        let m = mock();
+        assert_ok!(m.connect())
     }
 }

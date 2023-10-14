@@ -126,11 +126,13 @@ mod tests {
     use super::*;
     use crate::pathmaker;
 
+    const mock_path: &str = "/tmp/reflector_file_store_test";
+
     fn mock_file_store() -> FileStore {
-        let path = "/tmp/reflector_file_store_test";
-        let pbuf = path::PathBuf::from("/tmp/reflector_file_store_test");
+        let pbuf = path::PathBuf::from(mock_path);
         if !pbuf.is_dir() {
-            panic!("please make path {}", path);
+            // FIXME: we should try to mkdir
+            panic!("please make path {}", mock_path);
         }
         let pathmaker = Box::new(pathmaker::Identity::new());
         FileStore {
@@ -143,6 +145,15 @@ mod tests {
     #[test]
     fn check_mock() {
         let m = mock_file_store();
-        assert_eq!(format!("{m}"), "test file store");
+        assert_eq!(m.path, PathBuf::from(mock_path));
+    }
+
+    #[test]
+    fn format() {
+        let m = mock_file_store();
+        assert_eq!(
+            format!("{m}"),
+            "file storage in dir /tmp/reflector_file_store_test"
+        );
     }
 }
