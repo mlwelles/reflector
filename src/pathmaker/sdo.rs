@@ -20,6 +20,7 @@ impl SDO {
     }
 }
 
+// default here is pretty useless but helpful to have for testing/mocking
 impl Default for SDO {
     fn default() -> SDO {
         SDO::new("")
@@ -94,7 +95,7 @@ mod tests {
     }
 
     #[test]
-    fn dogfood() {
+    fn sdo_dogfood() {
         let p = SDO::new("_some_random.ogv");
         let t = Utc::now();
         let f = p.time_to_filename(&t);

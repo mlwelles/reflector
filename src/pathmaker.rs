@@ -4,6 +4,8 @@ pub mod new;
 pub use new::new;
 pub mod sdo;
 pub use sdo::SDO;
+pub mod goes;
+pub use goes::GOES;
 pub mod identity;
 pub use identity::Identity;
 
