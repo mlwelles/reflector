@@ -1,5 +1,4 @@
 pub mod error;
-mod util;
 pub use error::PathMakerError::{self, *};
 pub mod new;
 pub use new::new;
