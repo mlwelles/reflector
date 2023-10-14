@@ -1,18 +1,23 @@
-use super::client::{ConnectError, GetError, PingError};
+// barely implements RemoteClient
+
+use super::*;
+use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::time::Duration;
 
-// barely implements RemoteClient
 pub struct Mock();
 
 impl RemoteClient for Mock {
     fn connect(&self) -> Result<(), ConnectError> {
-        Ok()
+        Ok(())
     }
     fn ping(&self) -> Result<Duration, PingError> {
-        Ok()
+        Ok(Duration::new(0, 0))
     }
     fn get(&self, path: &str) -> Result<Gotten, GetError> {
-        Ok()
+        Ok(Gotten::new("x-raw/mock"))
+    }
+    fn remote_addr(&self) -> SocketAddr {
+        SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 6666)
     }
 }
 

@@ -4,3 +4,8 @@ pub mod factory;
 pub use factory::{from_url, RCFactoryError};
 pub mod gotten;
 pub use gotten::Gotten;
+pub mod http;
+pub use http::Http;
+
+// TODO: test only?
+pub mod mock;

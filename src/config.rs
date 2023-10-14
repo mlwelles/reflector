@@ -34,7 +34,7 @@ impl Default for Config {
                 name: "GOES ABI_TrueColor".to_string(),
                 remote: "ftp://ftp.nnvl.noaa.gov/GOES/ABI_TrueColor".to_string(),
                 local: "/home/adam/tmp/sat/abi_truecolor".to_string(),
-                pathmaker: "GOES".to_string(),
+                pathmaker: "GOES-R".to_string(),
                 flatten: None,
                 period: 5 * 60 * 10,
             },
