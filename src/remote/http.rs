@@ -13,7 +13,7 @@ pub struct Http {
 
 impl Http {
     pub fn new(base: Url) -> Http {
-        let mut builder = ureq::builder()
+        let builder = ureq::builder()
             .timeout_connect(Duration::from_secs(30))
             .timeout(Duration::from_secs(300));
         let agent = builder.build();
