@@ -1,11 +1,11 @@
-use super::*;
-
 // https://en.wikipedia.org/wiki/Geostationary_Operational_Environmental_Satellite
 // https://www.goes-r.gov/downloads/resources/documents/GOES-RSeriesDataBook.pdf
 // example URLs:
 //   ftp://ftp.nnvl.noaa.gov/GOES/ABI_TrueColor/ABI_TrueColor_20231014_1500z.png
 //   ftp://ftp.nnvl.noaa.gov/GOES/MERGED_TrueColor/MERGED_TrueColor_20231014_1510z.png
 //   ftp://ftp.nnvl.noaa.gov/GOES/WST_TrueColor/WST_TrueColor_20231014_1510z.png
+
+use super::*;
 
 #[derive(Clone)]
 pub struct GoesR {

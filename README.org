@@ -1,8 +1,17 @@
 * Overview
 
-A period script, possibly run by timer, which mirrors upstream data as needed.
+Tools to facilitate the production of visualizations based on upstream
+data sources, where new material appears on a periodic basis.
 
-Optional argument specifies how far back to go, default is 24 hours.
+The following tools are planned:
+
+A period script, possibly run by timer, which captures upstream data
+as needed.  Optional argument specifies how far back to go, default is
+24 hours.
+
+Various media producers which generate visualizations based on
+captured data.
+
 
 * Application Design
 

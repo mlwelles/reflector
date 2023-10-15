@@ -1,13 +1,14 @@
+// SDO are 24 hour captures; example URLs
+// https://sdo.gsfc.nasa.gov/assets/img/dailymov/2023/09/23/20230923_1024_0094.ogv
+// https://sdo.gsfc.nasa.gov/assets/img/dailymov/2023/09/23/20230923_1024_0131.ogv
+// https://sdo.gsfc.nasa.gov/assets/img/dailymov/2023/10/13/20231013_588_SDO_VO2.mp4
+
 use super::*;
 use chrono::offset::LocalResult;
 use chrono::{DateTime, TimeZone, Utc};
 use regex::Regex;
 use std::ffi::OsStr;
 
-// SDO are 24 hour captures; example URLs
-// https://sdo.gsfc.nasa.gov/assets/img/dailymov/2023/09/23/20230923_1024_0094.ogv
-// https://sdo.gsfc.nasa.gov/assets/img/dailymov/2023/09/23/20230923_1024_0131.ogv
-// https://sdo.gsfc.nasa.gov/assets/img/dailymov/2023/10/13/20231013_588_SDO_VO2.mp4
 #[derive(Clone)]
 pub struct Sdo {
     pub suffix: String,
