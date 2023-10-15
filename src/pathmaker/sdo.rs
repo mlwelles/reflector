@@ -9,25 +9,25 @@ use std::ffi::OsStr;
 // https://sdo.gsfc.nasa.gov/assets/img/dailymov/2023/09/23/20230923_1024_0131.ogv
 // https://sdo.gsfc.nasa.gov/assets/img/dailymov/2023/10/13/20231013_588_SDO_VO2.mp4
 #[derive(Clone)]
-pub struct SDO {
+pub struct Sdo {
     pub suffix: String,
 }
 
-impl SDO {
-    fn new(suffix: &str) -> SDO {
+impl Sdo {
+    fn new(suffix: &str) -> Sdo {
         let suffix = String::from(suffix);
-        SDO { suffix }
+        Sdo { suffix }
     }
 }
 
 // default here is pretty useless but helpful to have for testing/mocking
-impl Default for SDO {
-    fn default() -> SDO {
-        SDO::new("")
+impl Default for Sdo {
+    fn default() -> Sdo {
+        Sdo::new("")
     }
 }
 
-impl PathMaker for SDO {
+impl PathMaker for Sdo {
     fn time_to_filename(&self, time: &DateTime<Utc>) -> OsString {
         format!("{}{}", time.format("%Y/%m/%d/%Y%m%d"), self.suffix).into()
     }
@@ -75,12 +75,12 @@ mod tests {
 
     #[test]
     fn time_to_filename() {
-        let p = SDO::default();
+        let p = Sdo::default();
         let t = Utc.with_ymd_and_hms(2023, 09, 23, 0, 1, 32).unwrap();
         let expect = "2023/09/23/20230923";
         assert_eq!(OsString::from(expect), p.time_to_filename(&t));
 
-        let p = SDO::new("_588_SDO_VO2.mp4");
+        let p = Sdo::new("_588_SDO_VO2.mp4");
         let expect = "2023/10/13/20231013_588_SDO_VO2.mp4";
         let t = Utc.with_ymd_and_hms(2023, 10, 13, 0, 0, 0).unwrap();
         assert_eq!(OsString::from(expect), p.time_to_filename(&t));
@@ -88,7 +88,7 @@ mod tests {
 
     #[test]
     fn filename_to_time() {
-        let p = SDO::new("_suffix");
+        let p = Sdo::new("_suffix");
         let f = OsString::from("2023/12/31/20231231_suffix");
         let expect = Utc.with_ymd_and_hms(2023, 12, 31, 0, 0, 0).unwrap();
         assert_eq!(expect, p.filename_to_time(&f).unwrap());
@@ -96,7 +96,7 @@ mod tests {
 
     #[test]
     fn sdo_dogfood() {
-        let p = SDO::new("_some_random.ogv");
+        let p = Sdo::new("_some_random.ogv");
         let t = Utc::now();
         let f = p.time_to_filename(&t);
         let tt = p.filename_to_time(&f).unwrap();

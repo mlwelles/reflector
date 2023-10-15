@@ -3,7 +3,7 @@ pub use error::PathMakerError::{self, *};
 pub mod new;
 pub use new::new;
 pub mod sdo;
-pub use sdo::SDO;
+pub use sdo::Sdo;
 pub mod goes_r;
 pub use goes_r::GoesR;
 pub mod identity;
