@@ -1,20 +1,25 @@
 use super::Gotten;
 use std::net::SocketAddr;
 use std::time::Duration;
+use ureq;
+use url;
 
-#[derive(PartialEq, Eq, Debug)]
+#[derive(Debug)]
 pub enum ConnectError {
-    Erm,
+    RequestErr(ureq::Error),
+    UnknownErr,
 }
 
-#[derive(PartialEq, Eq, Debug)]
+#[derive(Debug)]
 pub enum PingError {
-    Erm,
+    RequestErr(ureq::Error),
 }
 
-#[derive(PartialEq, Eq, Debug)]
+#[derive(Debug)]
 pub enum GetError {
-    Erm,
+    Unimplemented,
+    UnparsableURL(url::ParseError),
+    RequestErr(ureq::Error),
 }
 
 pub trait RemoteClient {

@@ -8,6 +8,7 @@ use url::Url;
 
 pub struct Http {
     base: Url,
+    agent: ureq::Agent,
 }
 
 impl Http {
@@ -15,20 +16,37 @@ impl Http {
         let mut builder = ureq::builder()
             .timeout_connect(Duration::from_secs(30))
             .timeout(Duration::from_secs(300));
-        Http { base }
+        let agent = builder.build();
+        Http { base, agent }
     }
 }
 
 impl RemoteClient for Http {
-    fn connect(&self) -> Result<(), ConnectError> {
-        Ok(())
-    }
     fn ping(&self) -> Result<Duration, PingError> {
-        Ok(Duration::new(0, 0))
+        match self.agent.request_url("HEAD", &self.base).call() {
+            Ok(_) => Ok(Duration::new(0, 0)),
+            Err(e) => Err(PingError::RequestErr(e)),
+        }
     }
+
+    fn connect(&self) -> Result<(), ConnectError> {
+        match self.ping() {
+            Ok(_) => Ok(()),
+            Err(PingError::RequestErr(e)) => Err(ConnectError::RequestErr(e)),
+        }
+    }
+
     fn get(&self, path: &str) -> Result<Gotten, GetError> {
-        Ok(Gotten::new("mumble-mime-type"))
+        let u = match self.base.join(path) {
+            Ok(u) => u,
+            Err(e) => return Err(GetError::UnparsableURL(e)),
+        };
+        match self.agent.request_url("GET", &u).call() {
+            Ok(resp) => Ok(Gotten::new(resp.content_type())),
+            Err(e) => Err(GetError::RequestErr(e)),
+        }
     }
+
     fn remote_addr(&self) -> SocketAddr {
         let host = self.base.host_str().unwrap();
         let port = self.base.port_or_known_default().unwrap();
@@ -40,7 +58,28 @@ impl RemoteClient for Http {
 mod tests {
     use super::*;
 
-    fn mock() -> Mock {
-        Mock {}
+    fn mock() -> Http {
+        let u = Url::parse("http://deb.debian.org/debian/").unwrap();
+        Http::new(u)
+    }
+
+    #[test]
+    fn ping() {
+        let m = mock();
+        m.ping().unwrap();
+    }
+
+    #[test]
+    fn connect() {
+        let m = mock();
+        m.connect().unwrap();
+    }
+
+    #[test]
+    fn get() {
+        let m = mock();
+        m.get("README.html").unwrap();
+        let fail = m.get("asdfasfdasfd");
+        assert!(fail.is_err())
     }
 }

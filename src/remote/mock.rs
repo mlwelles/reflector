@@ -32,12 +32,12 @@ mod tests {
     #[test]
     fn ping() {
         let m = mock();
-        assert_ok!(m.ping())
+        m.ping().unwrap();
     }
 
     #[test]
     fn connect() {
         let m = mock();
-        assert_ok!(m.connect())
+        m.connect().unwrap();
     }
 }
