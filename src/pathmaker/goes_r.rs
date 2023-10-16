@@ -66,6 +66,13 @@ mod tests {
     }
 
     #[test]
+    fn time_fmt_parsing() {
+        let dt = Utc.with_ymd_and_hms(2014, 11, 28, 12, 0, 9).unwrap();
+        let s = "20141128_1200";
+        assert_eq!(dt, DateTime::parse_from_str(s, TIME_FMT).unwrap());
+    }
+
+    #[test]
     fn filename_to_time() {
         let p = GoesR::new("ABI_TrueColor_");
         let f = OsString::from("ABI_TrueColor_20231014_1500z.png");
