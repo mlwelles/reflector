@@ -36,10 +36,8 @@ impl PathMaker for Sdo {
     fn filename_to_time(&self, filename: &OsStr) -> Result<DateTime<Utc>, PathMakerError> {
         let filename = filename.to_str().unwrap();
         // remove suffix, if any
-        let base = match filename.strip_suffix(&self.suffix) {
-            Some(base) => base,
-            None => filename,
-        };
+        let base = filename.strip_suffix(&self.suffix).unwrap_or(filename);
+
         // remove everything before the last slash
         let pre = Regex::new(r".*/(?<rem>[^/]+)$").unwrap();
         let base = pre.replace(base, "$rem");
