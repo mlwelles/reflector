@@ -41,14 +41,41 @@ impl PathMaker for GoesR {
         // ditto suffix
         let filename = filename.strip_suffix(SUFFIX).unwrap_or(filename);
 
-        // we should have something like: 20220930_0220
-        match DateTime::parse_from_str(filename, TIME_FMT) {
-            Ok(dt) => Ok(dt.into()),
-            Err(e) => {
-                eprintln!("error parsing using {filename} and {TIME_FMT}");
-                Err(TimeParseError(filename.to_string(), e))
-            }
+        match filename.len() {
+            l if l < 8 => return Err(FilenameTooShort(filename.to_string())),
+            l if l > 8 => return Err(FilenameTooLong(filename.to_string())),
+            _ => (),
         }
+
+        // FIXME: the following is god-awful
+
+        let year: i32 = match filename[0..4].parse() {
+            Ok(x) => x,
+            Err(_) => return Err(UnparsableYear(filename[0..3].to_string())),
+        };
+        let mon: u32 = match filename[4..6].parse() {
+            Ok(x) => x,
+            Err(_) => return Err(UnparsableMonth(filename[4..5].to_string())),
+        };
+        let day: u32 = match filename[6..8].parse() {
+            Ok(x) => x,
+            Err(_) => return Err(UnparsableMonth(filename[4..5].to_string())),
+        };
+        match filename.chars().nth(8) {
+            Some('_') => (),
+            None => return Err(MissingSeparator('_', filename.to_string())),
+            _ => return Err(MysteryError("".to_string())),
+        }
+        let hour: u32 = match filename[9..11].parse() {
+            Ok(x) => x,
+            Err(_) => return Err(UnparsableHour(filename[9..11].to_string())),
+        };
+        let min: u32 = match filename[11..13].parse() {
+            Ok(x) => x,
+            Err(_) => return Err(UnparsableMinute(filename[11..13].to_string())),
+        };
+
+        Err(Unimplemented)
     }
 }
 

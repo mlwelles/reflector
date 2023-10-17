@@ -8,6 +8,8 @@ pub mod goes_r;
 pub use goes_r::GoesR;
 pub mod identity;
 pub use identity::Identity;
+pub mod time;
+pub use time::make_utc;
 
 use crate::time_range::TimeRange;
 use chrono::{DateTime, Utc};

@@ -60,11 +60,7 @@ impl PathMaker for Sdo {
             Ok(x) => x,
             Err(_) => return Err(UnparsableMonth(base[4..5].to_string())),
         };
-        match Utc.with_ymd_and_hms(year, mon, day, 0, 0, 0) {
-            LocalResult::Single(t) => Ok(t),
-            LocalResult::Ambiguous(..) => Err(AmbiguousTimeError(filename.to_string())),
-            LocalResult::None => Err(WithTimeError(filename.to_string(), year, mon, day)),
-        }
+        make_utc(year, mon, day, 0, 0, 0)
     }
 }
 
