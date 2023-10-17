@@ -17,6 +17,7 @@ impl Default for FtpCredentials {
     }
 }
 
+#[derive(Debug)]
 pub enum FtpConnectError {
     SocketError(io::Error),
     LoginError(FtpError),
@@ -69,5 +70,37 @@ impl RemoteClient for Ftp {
 
     fn remote_addr(&self) -> SocketAddr {
         self.remote
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn mock() -> Ftp {
+        let u = Url::parse("ftp://ftp.debian.org/").unwrap();
+        Ftp::new(u, None).unwrap()
+    }
+
+    #[test]
+    fn ping() {
+        let m = mock();
+        m.ping().unwrap();
+    }
+
+    #[test]
+    fn connect() {
+        let m = mock();
+        m.connect().unwrap();
+    }
+
+    #[test]
+    fn get() {
+        let m = mock();
+        let rsrc = "README.html";
+        let got = m.get(rsrc).unwrap();
+        assert_eq!(rsrc, got.resource);
+        let fail = m.get("asdfasfdasfd");
+        assert!(fail.is_err())
     }
 }
