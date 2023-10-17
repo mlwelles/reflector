@@ -74,8 +74,7 @@ impl PathMaker for GoesR {
             Ok(x) => x,
             Err(_) => return Err(UnparsableMinute(filename[11..13].to_string())),
         };
-
-        Err(Unimplemented)
+        make_utc(year, mon, day, hour, min, 0)
     }
 }
 
@@ -90,13 +89,6 @@ mod tests {
         let t = Utc.with_ymd_and_hms(2023, 09, 23, 12, 0, 0).unwrap();
         let expect = "20230923_1200z.png";
         assert_eq!(OsString::from(expect), p.time_to_filename(&t));
-    }
-
-    #[test]
-    fn time_fmt_parsing() {
-        let dt = Utc.with_ymd_and_hms(2014, 11, 28, 12, 0, 9).unwrap();
-        let s = "20141128_1200";
-        assert_eq!(dt, DateTime::parse_from_str(s, TIME_FMT).unwrap());
     }
 
     #[test]

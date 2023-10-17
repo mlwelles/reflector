@@ -4,7 +4,7 @@
 // https://sdo.gsfc.nasa.gov/assets/img/dailymov/2023/10/13/20231013_588_SDO_VO2.mp4
 
 use super::*;
-use chrono::offset::LocalResult;
+#[allow(unused_imports)]
 use chrono::{DateTime, TimeZone, Utc};
 use regex::Regex;
 use std::ffi::OsStr;

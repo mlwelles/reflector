@@ -36,13 +36,13 @@ impl RemoteClient for Http {
         }
     }
 
-    fn get(&self, path: &str) -> Result<Gotten, GetError> {
-        let u = match self.base.join(path) {
+    fn get(&self, resource: &str) -> Result<Gotten, GetError> {
+        let u = match self.base.join(resource) {
             Ok(u) => u,
             Err(e) => return Err(GetError::UnparsableURL(e)),
         };
         match self.agent.request_url("GET", &u).call() {
-            Ok(resp) => Ok(Gotten::new(resp.content_type())),
+            Ok(resp) => Ok(Gotten::new(resp.content_type(), resource)),
             Err(e) => Err(GetError::RequestErr(e)),
         }
     }

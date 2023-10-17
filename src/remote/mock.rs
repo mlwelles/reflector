@@ -13,8 +13,8 @@ impl RemoteClient for Mock {
     fn ping(&self) -> Result<Duration, PingError> {
         Ok(Duration::new(0, 0))
     }
-    fn get(&self, path: &str) -> Result<Gotten, GetError> {
-        Ok(Gotten::new("x-raw/mock"))
+    fn get(&self, resource: &str) -> Result<Gotten, GetError> {
+        Ok(Gotten::new("x-raw/mock", resource))
     }
     fn remote_addr(&self) -> SocketAddr {
         SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 6666)
