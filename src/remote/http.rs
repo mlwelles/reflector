@@ -42,7 +42,7 @@ impl RemoteClient for Http {
             Err(e) => return Err(GetError::UnparsableURL(e)),
         };
         match self.agent.request_url("GET", &u).call() {
-            Ok(resp) => Ok(Gotten::new(resp.content_type(), resource)),
+            Ok(resp) => Ok(Gotten::new(resp.content_type(), resource, u)),
             Err(e) => Err(GetError::RequestErr(e)),
         }
     }

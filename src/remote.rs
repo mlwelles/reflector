@@ -6,6 +6,8 @@ pub mod gotten;
 pub use gotten::Gotten;
 pub mod http;
 pub use http::Http;
+pub mod ftp;
+pub use ftp::Ftp;
 
 // TODO: test only?
 pub mod mock;

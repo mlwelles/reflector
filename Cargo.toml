@@ -9,6 +9,7 @@ edition = "2021"
 chrono = "0.4.31"
 regex = "1.10.0"
 serde = { version = "1.0.188", features = ["derive", "serde_derive"] }
+suppaftp = "5.2.1"
 toml = "0.7.6"
 ureq = "2.8.0"
 url = "2.4.1"
