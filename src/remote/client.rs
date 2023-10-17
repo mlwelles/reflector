@@ -8,7 +8,7 @@ use url;
 #[derive(Debug)]
 pub enum ConnectError {
     Unimplemented,
-    RequestErr(ureq::Error),
+    RequestErr(Box<ureq::Error>),
     UnknownErr,
     FtpLoginErr(FtpError),
 }
@@ -16,7 +16,7 @@ pub enum ConnectError {
 #[derive(Debug)]
 pub enum PingError {
     Unimplemented,
-    RequestErr(ureq::Error),
+    RequestErr(Box<ureq::Error>),
 }
 
 #[derive(Debug)]

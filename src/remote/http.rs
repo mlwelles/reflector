@@ -25,7 +25,7 @@ impl RemoteClient for Http {
     fn ping(&self) -> Result<Duration, PingError> {
         match self.agent.request_url("HEAD", &self.base).call() {
             Ok(_) => Ok(Duration::new(0, 0)),
-            Err(e) => Err(PingError::RequestErr(e)),
+            Err(e) => Err(PingError::RequestErr(Box::new(e))),
         }
     }
 
