@@ -74,6 +74,7 @@ impl PathMaker for GoesR {
             Ok(x) => x,
             Err(_) => return Err(UnparsableMinute(filename[11..13].to_string())),
         };
+
         make_utc(year, mon, day, hour, min, 0)
     }
 }
