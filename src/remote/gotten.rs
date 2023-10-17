@@ -4,11 +4,13 @@
 
 #[allow(dead_code)]
 pub struct Gotten {
-    mimetype: String,
-    resource: String,
-    // payload: Bytes,
+    pub mimetype: String,
+    pub resource: String,
+    // support: ureq
     // reader: BufReader<Box<Self>>,
     // path: Option<PathBuf>,
+    // payload: Bytes,
+    // remote: SocketAddr,
 }
 
 impl Gotten {

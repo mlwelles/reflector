@@ -78,7 +78,9 @@ mod tests {
     #[test]
     fn get() {
         let m = mock();
-        m.get("README.html").unwrap();
+        let rsrc = "README.html";
+        let got = m.get(rsrc).unwrap();
+        assert_eq!(rsrc, got.resource);
         let fail = m.get("asdfasfdasfd");
         assert!(fail.is_err())
     }
