@@ -1,17 +1,21 @@
 use super::Gotten;
 use std::net::SocketAddr;
 use std::time::Duration;
+use suppaftp::FtpError;
 use ureq;
 use url;
 
 #[derive(Debug)]
 pub enum ConnectError {
+    Unimplemented,
     RequestErr(ureq::Error),
     UnknownErr,
+    FtpLoginErr(FtpError),
 }
 
 #[derive(Debug)]
 pub enum PingError {
+    Unimplemented,
     RequestErr(ureq::Error),
 }
 

@@ -33,6 +33,7 @@ impl RemoteClient for Http {
         match self.ping() {
             Ok(_) => Ok(()),
             Err(PingError::RequestErr(e)) => Err(ConnectError::RequestErr(e)),
+            _ => Err(ConnectError::UnknownErr),
         }
     }
 
