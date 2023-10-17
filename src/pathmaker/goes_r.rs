@@ -42,8 +42,8 @@ impl PathMaker for GoesR {
         let filename = filename.strip_suffix(SUFFIX).unwrap_or(filename);
 
         match filename.len() {
-            l if l < 8 => return Err(FilenameTooShort(filename.to_string())),
-            l if l > 8 => return Err(FilenameTooLong(filename.to_string())),
+            l if l < 13 => return Err(FilenameTooShort(filename.to_string())),
+            l if l > 13 => return Err(FilenameTooLong(filename.to_string())),
             _ => (),
         }
 
