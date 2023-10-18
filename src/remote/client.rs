@@ -1,5 +1,7 @@
 use super::Gotten;
+use std::io;
 use std::net::SocketAddr;
+use std::path::PathBuf;
 use std::time::Duration;
 use suppaftp::FtpError;
 use ureq;
@@ -24,11 +26,14 @@ pub enum GetError {
     Unimplemented,
     UnparsableURL(url::ParseError),
     RequestErr(ureq::Error),
+    OutputExistsAsDir(PathBuf),
+    OutputFileExists(PathBuf),
+    OutputCreateFile(io::Error),
 }
 
 pub trait RemoteClient {
     fn connect(&self) -> Result<(), ConnectError>;
     fn ping(&self) -> Result<Duration, PingError>;
-    fn get(&self, path: &str) -> Result<Gotten, GetError>;
+    fn get(&self, resource: &str, output: &PathBuf) -> Result<Gotten, GetError>;
     fn remote_addr(&self) -> SocketAddr;
 }

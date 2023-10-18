@@ -1,7 +1,10 @@
 // HTTP and HTTPS remote client
 
 use super::*;
+use std::fs::File;
+use std::io::{BufWriter, Write};
 use std::net::{SocketAddr, ToSocketAddrs};
+use std::path::PathBuf;
 use std::time::Duration;
 use ureq;
 use url::Url;
@@ -37,15 +40,56 @@ impl RemoteClient for Http {
         }
     }
 
-    fn get(&self, resource: &str) -> Result<Gotten, GetError> {
+    fn get(&self, resource: &str, output: &PathBuf) -> Result<Gotten, GetError> {
         let u = match self.base.join(resource) {
             Ok(u) => u,
             Err(e) => return Err(GetError::UnparsableURL(e)),
         };
-        match self.agent.request_url("GET", &u).call() {
-            Ok(resp) => Ok(Gotten::new(resp.content_type(), resource, u)),
-            Err(e) => Err(GetError::RequestErr(e)),
+        let resp = match self.agent.request_url("GET", &u).call() {
+            Ok(resp) => resp,
+            Err(e) => return Err(GetError::RequestErr(e)),
+        };
+        let mimetype = String::from(resp.content_type());
+        if output.is_dir() {
+            return Err(GetError::OutputExistsAsDir(output.to_path_buf()));
         }
+        if output.is_file() {
+            return Err(GetError::OutputFileExists(output.to_path_buf()));
+        }
+        let file = match File::create(&output) {
+            Err(why) => return Err(GetError::OutputCreateFile(why)),
+            Ok(file) => file,
+        };
+        const BUFSIZE: usize = 8192;
+        let mut buf: [u8; BUFSIZE] = [0; BUFSIZE];
+        let mut bw = BufWriter::new(file);
+        let mut r = resp.into_reader();
+        while match r.read(&mut buf) {
+            // we're ignoring size read here
+            Ok(size) => match bw.write_all(&buf) {
+                Ok(_) => {
+                    if size < BUFSIZE {
+                        eprintln!("short read");
+                        false
+                    } else {
+                        true
+                    }
+                }
+                Err(e) => {
+                    eprintln!("error from write: {:?}", e);
+                    false
+                }
+            },
+            Err(e) => {
+                eprintln!("error from read: {:?}", e);
+                false
+            }
+        } {
+            ()
+        }
+
+        let g = Gotten::new(&mimetype, resource, u, output.to_path_buf());
+        Ok(g)
     }
 
     fn remote_addr(&self) -> SocketAddr {
@@ -80,9 +124,16 @@ mod tests {
     fn get() {
         let m = mock();
         let rsrc = "README.html";
-        let got = m.get(rsrc).unwrap();
+        let path = PathBuf::from("/dev/null");
+        let got = m.get(rsrc, &path).unwrap();
         assert_eq!(rsrc, got.resource);
-        let fail = m.get("asdfasfdasfd");
+        assert_eq!(path, got.output);
+    }
+
+    #[test]
+    fn not_found() {
+        let path = PathBuf::from("/dev/null");
+        let fail = mock().get("asdfasfdasfd", &path);
         assert!(fail.is_err())
     }
 }

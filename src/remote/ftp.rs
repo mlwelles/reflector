@@ -1,4 +1,5 @@
 use super::*;
+use std::path::PathBuf;
 use std::time::Duration;
 use std::{io, net::SocketAddr};
 use suppaftp::{FtpError, FtpStream};
@@ -64,7 +65,7 @@ impl RemoteClient for Ftp {
         }
     }
 
-    fn get(&self, resource: &str) -> Result<Gotten, GetError> {
+    fn get(&self, _resource: &str, _output: &PathBuf) -> Result<Gotten, GetError> {
         Err(GetError::Unimplemented)
     }
 
@@ -98,9 +99,10 @@ mod tests {
     fn get() {
         let m = mock();
         let rsrc = "README.html";
-        let got = m.get(rsrc).unwrap();
+        let path = PathBuf::from("/dev/null");
+        let got = m.get(rsrc, &path).unwrap();
         assert_eq!(rsrc, got.resource);
-        let fail = m.get("asdfasfdasfd");
+        let fail = m.get("asdfasfdasfd", &path);
         assert!(fail.is_err())
     }
 }
