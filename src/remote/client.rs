@@ -14,6 +14,7 @@ pub enum ConnectError {
     UnknownErr,
     FtpConnectErr(FtpError),
     FtpLoginErr(FtpError),
+    SocketError(io::Error),
 }
 
 #[derive(Debug)]
@@ -35,7 +36,6 @@ pub enum GetError {
 }
 
 pub trait RemoteClient {
-    fn connect(&mut self) -> Result<(), ConnectError>;
     fn ping(&self) -> Result<Duration, PingError>;
     fn get(&self, resource: &str, output: &PathBuf) -> Result<Gotten, GetError>;
     fn remote_addr(&self) -> SocketAddr;

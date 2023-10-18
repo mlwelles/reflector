@@ -1,9 +1,7 @@
 use crate::capture::{Capture, CaptureList};
 use crate::config::SourceConfig;
 use crate::pathmaker;
-use crate::remote::{
-    from_url as remote_from_url, ConnectError, PingError, RCFactoryError, RemoteClient,
-};
+use crate::remote::{from_url as remote_from_url, PingError, RCFactoryError, RemoteClient};
 use crate::store::{FileList, FileStore};
 use crate::{PathMaker, PathMakerError, StoreError, TimeRange};
 use std::{fmt, time};
@@ -71,10 +69,6 @@ impl Mirror {
             flatten,
         };
         Ok(m)
-    }
-
-    pub fn connect(&mut self) -> Result<(), ConnectError> {
-        self.remote_client.connect()
     }
 
     pub fn ping(&self) -> Result<time::Duration, PingError> {

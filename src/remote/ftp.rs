@@ -1,7 +1,7 @@
 use super::*;
+use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::time::Duration;
-use std::{io, net::SocketAddr};
 use suppaftp::{FtpError, FtpStream};
 use url::Url;
 
@@ -18,13 +18,6 @@ impl Default for FtpCredentials {
     }
 }
 
-#[derive(Debug)]
-pub enum FtpConnectError {
-    SocketError(io::Error),
-    LoginError(FtpError),
-}
-use FtpConnectError::*;
-
 pub struct Ftp {
     pub base: Url,
     pub stream: Option<FtpStream>,
@@ -33,53 +26,51 @@ pub struct Ftp {
 }
 
 impl Ftp {
-    pub fn new(base: Url, creds: Option<FtpCredentials>) -> Result<Ftp, FtpConnectError> {
+    fn connect(&mut self) -> Result<(), ConnectError> {
+        eprintln!("connecting to remote...");
+        let mut stream = match FtpStream::connect_timeout(self.remote, Duration::new(10, 0)) {
+            Ok(s) => s,
+            Err(e) => return Err(ConnectError::FtpConnectErr(e)),
+        };
+        eprintln!("logging in...");
+        match stream.login(&self.creds.user, &self.creds.password) {
+            Err(e) => Err(ConnectError::FtpLoginErr(e)),
+            _ => {
+                self.stream = Some(stream);
+                Ok(())
+            }
+        }
+    }
+
+    pub fn new(base: Url, creds: Option<FtpCredentials>) -> Result<Ftp, ConnectError> {
         let remote = match base.socket_addrs(|| None) {
             Ok(a) => a[0],
-            Err(e) => return Err(SocketError(e)),
+            Err(e) => return Err(ConnectError::SocketError(e)),
         };
         let creds = match creds {
             Some(c) => c,
             None => FtpCredentials::default(),
         };
         let stream = None;
-        Ok(Ftp {
+        let mut ftp = Ftp {
             base,
             stream,
             creds,
             remote,
-        })
+        };
+        match ftp.connect() {
+            Ok(_) => Ok(ftp),
+            Err(e) => Err(e),
+        }
     }
 }
 
 impl RemoteClient for Ftp {
     fn ping(&self) -> Result<Duration, PingError> {
-        if self.stream.is_none() {
-            return Err(PingError::NotConnected);
-        }
         Err(PingError::Unimplemented)
     }
 
-    fn connect(&mut self) -> Result<(), ConnectError> {
-        if self.stream.is_none() {
-            eprintln!("connecting to remote...");
-            let mut stream = match FtpStream::connect_timeout(self.remote, Duration::new(10, 0)) {
-                Ok(s) => s,
-                Err(e) => return Err(ConnectError::FtpConnectErr(e)),
-            };
-            eprintln!("logging in...");
-            match stream.login(&self.creds.user, &self.creds.password) {
-                Err(e) => return Err(ConnectError::FtpLoginErr(e)),
-                _ => self.stream = Some(stream),
-            }
-        }
-        Ok(())
-    }
-
     fn get(&self, _resource: &str, _output: &PathBuf) -> Result<Gotten, GetError> {
-        if self.stream.is_none() {
-            return Err(GetError::NotConnected);
-        }
         Err(GetError::Unimplemented)
     }
 

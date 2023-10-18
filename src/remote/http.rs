@@ -32,11 +32,6 @@ impl RemoteClient for Http {
         }
     }
 
-    // we handled in the new
-    fn connect(&mut self) -> Result<(), ConnectError> {
-        Ok(())
-    }
-
     fn get(&self, resource: &str, output: &PathBuf) -> Result<Gotten, GetError> {
         let u = match self.base.join(resource) {
             Ok(u) => u,
@@ -109,12 +104,6 @@ mod tests {
     fn ping() {
         let m = mock();
         m.ping().unwrap();
-    }
-
-    #[test]
-    fn connect() {
-        let mut m = mock();
-        m.connect().unwrap();
     }
 
     #[test]
