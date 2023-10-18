@@ -57,12 +57,15 @@ impl RemoteClient for Ftp {
         Err(PingError::Unimplemented)
     }
 
-    fn connect(&self) -> Result<(), ConnectError> {
-        let mut stream = FtpStream::connect(&self.remote).unwrap();
-        match stream.login(&self.creds.user, &self.creds.password) {
-            Err(e) => return Err(ConnectError::FtpLoginErr(e)),
-            _ => Ok(()),
+    fn connect(&mut self) -> Result<(), ConnectError> {
+        if self.stream.is_none() {
+            let mut stream = FtpStream::connect(&self.remote).unwrap();
+            match stream.login(&self.creds.user, &self.creds.password) {
+                Err(e) => return Err(ConnectError::FtpLoginErr(e)),
+                _ => self.stream = Some(stream),
+            }
         }
+        Ok(())
     }
 
     fn get(&self, _resource: &str, _output: &PathBuf) -> Result<Gotten, GetError> {
@@ -91,7 +94,7 @@ mod tests {
 
     #[test]
     fn connect() {
-        let m = mock();
+        let mut m = mock();
         m.connect().unwrap();
     }
 

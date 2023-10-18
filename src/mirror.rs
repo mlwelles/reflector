@@ -73,7 +73,7 @@ impl Mirror {
         Ok(m)
     }
 
-    pub fn connect(&self) -> Result<(), ConnectError> {
+    pub fn connect(&mut self) -> Result<(), ConnectError> {
         self.remote_client.connect()
     }
 

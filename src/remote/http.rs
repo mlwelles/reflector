@@ -32,7 +32,7 @@ impl RemoteClient for Http {
         }
     }
 
-    fn connect(&self) -> Result<(), ConnectError> {
+    fn connect(&mut self) -> Result<(), ConnectError> {
         match self.ping() {
             Ok(_) => Ok(()),
             Err(PingError::RequestErr(e)) => Err(ConnectError::RequestErr(e)),
@@ -116,7 +116,7 @@ mod tests {
 
     #[test]
     fn connect() {
-        let m = mock();
+        let mut m = mock();
         m.connect().unwrap();
     }
 

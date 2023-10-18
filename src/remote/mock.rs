@@ -9,7 +9,7 @@ use url::Url;
 pub struct Mock();
 
 impl RemoteClient for Mock {
-    fn connect(&self) -> Result<(), ConnectError> {
+    fn connect(&mut self) -> Result<(), ConnectError> {
         Ok(())
     }
     fn ping(&self) -> Result<Duration, PingError> {
@@ -45,7 +45,7 @@ mod tests {
 
     #[test]
     fn connect() {
-        let m = mock();
+        let mut m = mock();
         m.connect().unwrap();
     }
 }

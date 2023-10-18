@@ -32,7 +32,7 @@ pub enum GetError {
 }
 
 pub trait RemoteClient {
-    fn connect(&self) -> Result<(), ConnectError>;
+    fn connect(&mut self) -> Result<(), ConnectError>;
     fn ping(&self) -> Result<Duration, PingError>;
     fn get(&self, resource: &str, output: &PathBuf) -> Result<Gotten, GetError>;
     fn remote_addr(&self) -> SocketAddr;
