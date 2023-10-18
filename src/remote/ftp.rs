@@ -54,12 +54,20 @@ impl Ftp {
 
 impl RemoteClient for Ftp {
     fn ping(&self) -> Result<Duration, PingError> {
+        if self.stream.is_none() {
+            return Err(PingError::NotConnected);
+        }
         Err(PingError::Unimplemented)
     }
 
     fn connect(&mut self) -> Result<(), ConnectError> {
         if self.stream.is_none() {
-            let mut stream = FtpStream::connect(&self.remote).unwrap();
+            eprintln!("connecting to remote...");
+            let mut stream = match FtpStream::connect_timeout(self.remote, Duration::new(10, 0)) {
+                Ok(s) => s,
+                Err(e) => return Err(ConnectError::FtpConnectErr(e)),
+            };
+            eprintln!("logging in...");
             match stream.login(&self.creds.user, &self.creds.password) {
                 Err(e) => return Err(ConnectError::FtpLoginErr(e)),
                 _ => self.stream = Some(stream),
@@ -69,6 +77,9 @@ impl RemoteClient for Ftp {
     }
 
     fn get(&self, _resource: &str, _output: &PathBuf) -> Result<Gotten, GetError> {
+        if self.stream.is_none() {
+            return Err(GetError::NotConnected);
+        }
         Err(GetError::Unimplemented)
     }
 

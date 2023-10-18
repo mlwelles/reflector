@@ -32,12 +32,9 @@ impl RemoteClient for Http {
         }
     }
 
+    // we handled in the new
     fn connect(&mut self) -> Result<(), ConnectError> {
-        match self.ping() {
-            Ok(_) => Ok(()),
-            Err(PingError::RequestErr(e)) => Err(ConnectError::RequestErr(e)),
-            _ => Err(ConnectError::UnknownErr),
-        }
+        Ok(())
     }
 
     fn get(&self, resource: &str, output: &PathBuf) -> Result<Gotten, GetError> {

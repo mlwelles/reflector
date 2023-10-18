@@ -12,12 +12,14 @@ pub enum ConnectError {
     Unimplemented,
     RequestErr(Box<ureq::Error>),
     UnknownErr,
+    FtpConnectErr(FtpError),
     FtpLoginErr(FtpError),
 }
 
 #[derive(Debug)]
 pub enum PingError {
     Unimplemented,
+    NotConnected,
     RequestErr(Box<ureq::Error>),
 }
 
@@ -25,6 +27,7 @@ pub enum PingError {
 pub enum GetError {
     Unimplemented,
     UnparsableURL(url::ParseError),
+    NotConnected,
     RequestErr(ureq::Error),
     OutputExistsAsDir(PathBuf),
     OutputFileExists(PathBuf),
