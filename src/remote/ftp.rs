@@ -92,15 +92,18 @@ impl RemoteClient for Ftp {
 mod tests {
     use super::*;
 
+    const FTPSERVER: &str = "209.51.188.20";
+
     fn mock() -> Ftp {
-        let u = Url::parse("ftp://ftp.us.debian.org/").unwrap();
+        let u = format!("ftp://{}/", FTPSERVER);
+        let u = Url::parse(&u).unwrap();
         Ftp::new(u, None).unwrap()
     }
 
-    #[test]
-    fn ping() {
-        let m = mock();
-        m.ping().unwrap();
+    fn connected_mock() -> Ftp {
+        let mut m = mock();
+        m.connect().unwrap();
+        m
     }
 
     #[test]
@@ -110,9 +113,23 @@ mod tests {
     }
 
     #[test]
-    fn get() {
+    fn ping() {
+        let m = connected_mock();
+        m.ping().unwrap();
+    }
+
+    #[test]
+    fn remote_addr() {
         let m = mock();
-        let rsrc = "README.html";
+        let server = format!("{}:21", FTPSERVER);
+        let sa: SocketAddr = server.parse().unwrap();
+        assert_eq!(sa, m.remote_addr())
+    }
+
+    #[test]
+    fn get() {
+        let m = connected_mock();
+        let rsrc = "README";
         let path = PathBuf::from("/dev/null");
         let got = m.get(rsrc, &path).unwrap();
         assert_eq!(rsrc, got.resource);
