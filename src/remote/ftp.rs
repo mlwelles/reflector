@@ -93,7 +93,7 @@ mod tests {
     use super::*;
 
     fn mock() -> Ftp {
-        let u = Url::parse("ftp://ftp.debian.org/").unwrap();
+        let u = Url::parse("ftp://ftp.us.debian.org/").unwrap();
         Ftp::new(u, None).unwrap()
     }
 
