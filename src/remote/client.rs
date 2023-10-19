@@ -1,4 +1,5 @@
 use super::Gotten;
+use std::fs::File;
 use std::io;
 use std::net::SocketAddr;
 use std::path::PathBuf;
@@ -34,10 +35,24 @@ pub enum GetError {
     OutputExistsAsDir(PathBuf),
     OutputFileExists(PathBuf),
     OutputCreateFile(io::Error),
+    RetrieveError(FtpError),
 }
 
 pub trait RemoteClient {
     fn ping(&self) -> Result<Duration, PingError>;
-    fn get(&self, resource: &str, output: &PathBuf) -> Result<Gotten, GetError>;
+    fn get(&mut self, resource: &str, output: &PathBuf) -> Result<Gotten, GetError>;
     fn remote_addr(&self) -> SocketAddr;
+
+    fn create_output(&self, output: &PathBuf) -> Result<File, GetError> {
+        if output.is_dir() {
+            return Err(GetError::OutputExistsAsDir(output.to_path_buf()));
+        }
+        if output.is_file() {
+            return Err(GetError::OutputFileExists(output.to_path_buf()));
+        }
+        match File::create(output) {
+            Err(why) => Err(GetError::OutputCreateFile(why)),
+            Ok(file) => Ok(file),
+        }
+    }
 }

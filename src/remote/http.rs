@@ -1,7 +1,6 @@
 // HTTP and HTTPS remote client
 
 use super::*;
-use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::net::{SocketAddr, ToSocketAddrs};
 use std::path::PathBuf;
@@ -32,7 +31,7 @@ impl RemoteClient for Http {
         }
     }
 
-    fn get(&self, resource: &str, output: &PathBuf) -> Result<Gotten, GetError> {
+    fn get(&mut self, resource: &str, output: &PathBuf) -> Result<Gotten, GetError> {
         let u = match self.base.join(resource) {
             Ok(u) => u,
             Err(e) => return Err(GetError::UnparsableURL(e)),
@@ -42,24 +41,24 @@ impl RemoteClient for Http {
             Err(e) => return Err(GetError::RequestErr(e)),
         };
         let mimetype = String::from(resp.content_type());
-        if output.is_dir() {
-            return Err(GetError::OutputExistsAsDir(output.to_path_buf()));
-        }
-        if output.is_file() {
-            return Err(GetError::OutputFileExists(output.to_path_buf()));
-        }
-        let file = match File::create(&output) {
-            Err(why) => return Err(GetError::OutputCreateFile(why)),
-            Ok(file) => file,
+        let file = match self.create_output(&output) {
+            Ok(f) => f,
+            Err(e) => {
+                eprintln!("error on create: {:?}", e);
+                return Err(e);
+            }
         };
+
         const BUFSIZE: usize = 8192;
         let mut buf: [u8; BUFSIZE] = [0; BUFSIZE];
         let mut bw = BufWriter::new(file);
         let mut r = resp.into_reader();
+        let mut tot = 0;
         while match r.read(&mut buf) {
             // we're ignoring size read here
             Ok(size) => match bw.write_all(&buf) {
                 Ok(_) => {
+                    tot += size;
                     if size < BUFSIZE {
                         eprintln!("short read");
                         false
@@ -73,11 +72,11 @@ impl RemoteClient for Http {
                 }
             },
             Err(e) => {
-                eprintln!("error from read: {:?}", e);
+                eprintln!("error from read after {} bytes: {:?}", tot, e);
                 false
             }
         } {
-            ()
+            eprintln!("read {tot} bytes");
         }
 
         let g = Gotten::new(&mimetype, resource, u, output.to_path_buf());

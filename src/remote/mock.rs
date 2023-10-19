@@ -12,7 +12,8 @@ impl RemoteClient for Mock {
     fn ping(&self) -> Result<Duration, PingError> {
         Ok(Duration::new(0, 0))
     }
-    fn get(&self, resource: &str, output: &PathBuf) -> Result<Gotten, GetError> {
+
+    fn get(&mut self, resource: &str, output: &PathBuf) -> Result<Gotten, GetError> {
         let source = Url::parse("http://127.0.0.1/").unwrap();
         Ok(Gotten::new(
             "x-raw/mock",
@@ -21,6 +22,7 @@ impl RemoteClient for Mock {
             output.to_path_buf(),
         ))
     }
+
     fn remote_addr(&self) -> SocketAddr {
         SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 6666)
     }
