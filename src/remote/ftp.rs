@@ -33,13 +33,19 @@ impl Ftp {
             Err(e) => return Err(ConnectError::FtpConnectErr(e)),
         };
         eprintln!("logging in...");
-        match stream.login(&self.creds.user, &self.creds.password) {
-            Err(e) => Err(ConnectError::FtpLoginErr(e)),
-            _ => {
-                self.stream = Some(stream);
-                Ok(())
+        if let Err(e) = stream.login(&self.creds.user, &self.creds.password) {
+            return Err(ConnectError::FtpLoginErr(e));
+        }
+        let dir = self.base.path();
+        if dir.len() > 1 {
+            eprintln!("changing dir to {}...", dir);
+            if let Err(e) = stream.cwd(dir) {
+                return Err(ConnectError::FtpCwdErr(e));
             }
         }
+        eprintln!("all done, server to {} setup", self.base.as_str());
+        self.stream = Some(stream);
+        Ok(())
     }
 
     pub fn new(base: Url, creds: Option<FtpCredentials>) -> Result<Ftp, ConnectError> {
@@ -101,6 +107,15 @@ mod tests {
     fn connect() {
         let mut m = mock();
         m.connect().unwrap();
+    }
+
+    #[test]
+    fn cwd() {
+        let dir = "/gnu";
+        let base = format!("ftp://{}{}", FTPSERVER, dir);
+        let base = Url::parse(&base).unwrap();
+        let ftp = Ftp::new(base, None).unwrap();
+        assert_eq!(dir, ftp.stream.unwrap().pwd().unwrap());
     }
 
     #[test]

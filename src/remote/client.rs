@@ -14,6 +14,7 @@ pub enum ConnectError {
     UnknownErr,
     FtpConnectErr(FtpError),
     FtpLoginErr(FtpError),
+    FtpCwdErr(FtpError),
     SocketError(io::Error),
 }
 
