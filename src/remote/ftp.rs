@@ -1,8 +1,9 @@
 use super::*;
+use std::io::{BufWriter, Write};
 use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::time::Duration;
-use suppaftp::{FtpError, FtpStream};
+use suppaftp::FtpStream;
 use url::Url;
 
 pub struct FtpCredentials {
@@ -20,52 +21,50 @@ impl Default for FtpCredentials {
 
 pub struct Ftp {
     pub base: Url,
-    pub stream: Option<FtpStream>,
+    pub stream: FtpStream,
     pub creds: FtpCredentials,
     remote: SocketAddr,
 }
 
-impl Ftp {
-    fn connect(&mut self) -> Result<(), ConnectError> {
-        eprintln!("connecting to remote...");
-        let mut stream = match FtpStream::connect_timeout(self.remote, Duration::new(10, 0)) {
-            Ok(s) => s,
-            Err(e) => return Err(ConnectError::FtpConnectErr(e)),
-        };
-        eprintln!("logging in...");
-        if let Err(e) = stream.login(&self.creds.user, &self.creds.password) {
-            return Err(ConnectError::FtpLoginErr(e));
-        }
-        let dir = self.base.path();
-        if dir.len() > 1 {
-            eprintln!("changing dir to {}...", dir);
-            if let Err(e) = stream.cwd(dir) {
-                return Err(ConnectError::FtpCwdErr(e));
-            }
-        }
-        eprintln!("all done, server to {} setup", self.base.as_str());
-        self.stream = Some(stream);
-        Ok(())
+fn connect(
+    remote: SocketAddr,
+    base: &Url,
+    creds: &FtpCredentials,
+) -> Result<FtpStream, ConnectError> {
+    eprintln!("connecting to remote...");
+    let mut stream = match FtpStream::connect_timeout(remote, Duration::new(10, 0)) {
+        Ok(s) => s,
+        Err(e) => return Err(ConnectError::FtpConnectErr(e)),
+    };
+    eprintln!("logging in...");
+    if let Err(e) = stream.login(&creds.user, &creds.password) {
+        return Err(ConnectError::FtpLoginErr(e));
     }
+    let dir = base.path();
+    if dir.len() > 1 {
+        eprintln!("changing dir to {}...", dir);
+        if let Err(e) = stream.cwd(dir) {
+            return Err(ConnectError::FtpCwdErr(e));
+        }
+    }
+    eprintln!("all done, server to {} setup", base.as_str());
+    Ok(stream)
+}
 
+impl Ftp {
     pub fn new(base: Url, creds: Option<FtpCredentials>) -> Result<Ftp, ConnectError> {
         let remote = match base.socket_addrs(|| None) {
             Ok(a) => a[0],
             Err(e) => return Err(ConnectError::SocketError(e)),
         };
-        let creds = match creds {
-            Some(c) => c,
-            None => FtpCredentials::default(),
-        };
-        let stream = None;
-        let mut ftp = Ftp {
-            base,
-            stream,
-            creds,
-            remote,
-        };
-        match ftp.connect() {
-            Ok(_) => Ok(ftp),
+        let creds = creds.unwrap_or(FtpCredentials::default());
+        match connect(remote.clone(), &base, &creds) {
+            Ok(stream) => Ok(Ftp {
+                base,
+                stream,
+                creds,
+                remote,
+            }),
             Err(e) => Err(e),
         }
     }
@@ -76,7 +75,49 @@ impl RemoteClient for Ftp {
         Err(PingError::Unimplemented)
     }
 
-    fn get(&self, _resource: &str, _output: &PathBuf) -> Result<Gotten, GetError> {
+    fn get(&mut self, resource: &str, output: &PathBuf) -> Result<Gotten, GetError> {
+        let file = match self.create_output(&output) {
+            Ok(f) => f,
+            Err(e) => {
+                eprintln!("error on create: {:?}", e);
+                return Err(e);
+            }
+        };
+        const BUFSIZE: usize = 8192;
+        let mut buf: [u8; BUFSIZE] = [0; BUFSIZE];
+        let mut bw = BufWriter::new(file);
+        let mut tot = 0;
+        let s = self.stream.retr(resource, |r| {
+            while match r.read(&mut buf) {
+                Ok(size) => match bw.write_all(&buf) {
+                    Ok(_) => {
+                        tot += size;
+                        if size < BUFSIZE {
+                            eprintln!("short read");
+                            false
+                        } else {
+                            true
+                        }
+                    }
+                    Err(e) => {
+                        eprintln!("error from write at {} bytes: {:?}", tot, e);
+                        false
+                    }
+                },
+                Err(e) => {
+                    eprintln!("error from read after {} bytes: {:?}", tot, e);
+                    false
+                }
+            } {
+                eprintln!("read and wrote {tot} bytes");
+            }
+            Ok(())
+        });
+        if s.is_err() {
+            let e = s.unwrap_err();
+            eprintln!("error {:?}", e);
+            return Err(GetError::RetrieveError(e));
+        }
         Err(GetError::Unimplemented)
     }
 
