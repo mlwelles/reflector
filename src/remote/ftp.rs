@@ -76,6 +76,11 @@ impl RemoteClient for Ftp {
     }
 
     fn get(&mut self, resource: &str, output: &PathBuf) -> Result<Gotten, GetError> {
+        let mimetype = "application/octet-stream";
+        let source = match self.base.join(resource) {
+            Ok(s) => s,
+            Err(e) => return Err(GetError::UnparsableURL(e)),
+        };
         let file = match self.create_output(&output) {
             Ok(f) => f,
             Err(e) => {
@@ -94,10 +99,8 @@ impl RemoteClient for Ftp {
                         tot += size;
                         if size < BUFSIZE {
                             eprintln!("short read");
-                            false
-                        } else {
-                            true
                         }
+                        true
                     }
                     Err(e) => {
                         eprintln!("error from write at {} bytes: {:?}", tot, e);
@@ -118,7 +121,13 @@ impl RemoteClient for Ftp {
             eprintln!("error {:?}", e);
             return Err(GetError::RetrieveError(e));
         }
-        Err(GetError::Unimplemented)
+
+        Ok(Gotten::new(
+            mimetype,
+            resource,
+            source,
+            output.to_path_buf(),
+        ))
     }
 
     fn remote_addr(&self) -> SocketAddr {

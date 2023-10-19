@@ -61,7 +61,7 @@ impl RemoteClient for Http {
                     tot += size;
                     if size < BUFSIZE {
                         eprintln!("short read");
-                        false
+                        true
                     } else {
                         true
                     }
