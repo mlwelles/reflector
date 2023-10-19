@@ -71,8 +71,11 @@ impl Ftp {
 }
 
 impl RemoteClient for Ftp {
-    fn ping(&self) -> Result<Duration, PingError> {
-        Err(PingError::Unimplemented)
+    fn ping(&mut self) -> Result<Duration, PingError> {
+        match self.stream.noop() {
+            Ok(_) => Ok(Duration::new(0, 0)), // FIXME: duration
+            Err(e) => Err(PingError::FtpNoopError(e)),
+        }
     }
 
     fn get(&mut self, resource: &str, output: &PathBuf) -> Result<Gotten, GetError> {
@@ -147,16 +150,10 @@ mod tests {
         Ftp::new(u, None).unwrap()
     }
 
-    fn connected_mock() -> Ftp {
-        let mut m = mock();
-        m.connect().unwrap();
-        m
-    }
-
     #[test]
-    fn connect() {
-        let mut m = mock();
-        m.connect().unwrap();
+    fn test_connect() {
+        let m = mock();
+        connect(m.remote, &m.base, &m.creds).unwrap();
     }
 
     #[test]
@@ -164,13 +161,13 @@ mod tests {
         let dir = "/gnu";
         let base = format!("ftp://{}{}", FTPSERVER, dir);
         let base = Url::parse(&base).unwrap();
-        let ftp = Ftp::new(base, None).unwrap();
-        assert_eq!(dir, ftp.stream.unwrap().pwd().unwrap());
+        let mut ftp = Ftp::new(base, None).unwrap();
+        assert_eq!(dir, ftp.stream.pwd().unwrap());
     }
 
     #[test]
     fn ping() {
-        let m = connected_mock();
+        let mut m = mock();
         m.ping().unwrap();
     }
 
@@ -184,7 +181,7 @@ mod tests {
 
     #[test]
     fn get() {
-        let m = connected_mock();
+        let mut m = mock();
         let rsrc = "README";
         let path = PathBuf::from("/dev/null");
         let got = m.get(rsrc, &path).unwrap();

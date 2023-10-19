@@ -9,7 +9,7 @@ use url::Url;
 pub struct Mock();
 
 impl RemoteClient for Mock {
-    fn ping(&self) -> Result<Duration, PingError> {
+    fn ping(&mut self) -> Result<Duration, PingError> {
         Ok(Duration::new(0, 0))
     }
 
@@ -38,13 +38,14 @@ mod tests {
 
     #[test]
     fn ping() {
-        let m = mock();
+        let mut m = mock();
         m.ping().unwrap();
     }
 
-    // #[test]
-    // fn get() {
-    //     let m = mock();
-    //     m.get("mumble").unwrap();
-    // }
+    #[test]
+    fn get() {
+        let mut m = mock();
+        let path = PathBuf::from("/dev/null");
+        m.get("mumble", &path).unwrap();
+    }
 }

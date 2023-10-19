@@ -24,7 +24,7 @@ impl Http {
 }
 
 impl RemoteClient for Http {
-    fn ping(&self) -> Result<Duration, PingError> {
+    fn ping(&mut self) -> Result<Duration, PingError> {
         match self.agent.request_url("HEAD", &self.base).call() {
             Ok(_) => Ok(Duration::new(0, 0)),
             Err(e) => Err(PingError::RequestErr(Box::new(e))),
@@ -101,13 +101,13 @@ mod tests {
 
     #[test]
     fn ping() {
-        let m = mock();
+        let mut m = mock();
         m.ping().unwrap();
     }
 
     #[test]
     fn get() {
-        let m = mock();
+        let mut m = mock();
         let rsrc = "README.html";
         let path = PathBuf::from("/dev/null");
         let got = m.get(rsrc, &path).unwrap();

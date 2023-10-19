@@ -71,7 +71,7 @@ impl Mirror {
         Ok(m)
     }
 
-    pub fn ping(&self) -> Result<time::Duration, PingError> {
+    pub fn ping(&mut self) -> Result<time::Duration, PingError> {
         self.remote_client.ping()
     }
 

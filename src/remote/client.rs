@@ -24,6 +24,7 @@ pub enum PingError {
     Unimplemented,
     NotConnected,
     RequestErr(Box<ureq::Error>),
+    FtpNoopError(FtpError),
 }
 
 #[derive(Debug)]
@@ -39,7 +40,7 @@ pub enum GetError {
 }
 
 pub trait RemoteClient {
-    fn ping(&self) -> Result<Duration, PingError>;
+    fn ping(&mut self) -> Result<Duration, PingError>;
     fn get(&mut self, resource: &str, output: &PathBuf) -> Result<Gotten, GetError>;
     fn remote_addr(&self) -> SocketAddr;
 
