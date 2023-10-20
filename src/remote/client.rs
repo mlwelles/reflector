@@ -39,10 +39,19 @@ pub enum GetError {
     RetrieveError(FtpError),
 }
 
+#[derive(Debug)]
+pub enum ListError {
+    Unimplemented,
+    FtpNlstError(FtpError),
+}
+
 pub trait RemoteClient {
     fn ping(&mut self) -> Result<Duration, PingError>;
     fn get(&mut self, resource: &str, output: &PathBuf) -> Result<Gotten, GetError>;
     fn remote_addr(&self) -> SocketAddr;
+
+    // make a default implementation for this
+    // fn latest_matching(&mut self, impl Fn(&str) -> bool) -> Result<String, ListingError>;
 
     fn create_output(&self, output: &PathBuf) -> Result<File, GetError> {
         if output.is_dir() {

@@ -68,6 +68,13 @@ impl Ftp {
             Err(e) => Err(e),
         }
     }
+
+    pub fn listing(&mut self) -> Result<Vec<String>, ListError> {
+        match self.stream.nlst(None) {
+            Ok(s) => Ok(s),
+            Err(e) => Err(ListError::FtpNlstError(e)),
+        }
+    }
 }
 
 impl RemoteClient for Ftp {
@@ -207,5 +214,13 @@ mod tests {
         let path = t.path().join("test.bin");
         let got = m.get(MOCK_RESOURCE, &path).unwrap();
         got.validate().unwrap();
+    }
+
+    #[test]
+    fn list() {
+        let mut m = mock();
+        let l = m.listing().unwrap();
+        assert!(l.len() > 2, "something in the listing");
+        assert!(l[0].len() > 2, "first listing");
     }
 }

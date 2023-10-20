@@ -1,5 +1,5 @@
 pub mod client;
-pub use client::{ConnectError, GetError, PingError, RemoteClient};
+pub use client::{ConnectError, GetError, ListError, PingError, RemoteClient};
 pub mod factory;
 pub use factory::{from_url, RCFactoryError};
 pub mod gotten;
