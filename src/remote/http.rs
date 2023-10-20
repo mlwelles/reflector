@@ -59,9 +59,12 @@ impl RemoteClient for Http {
             Ok(size) => match bw.write_all(&buf[0..size]) {
                 Ok(_) => {
                     tot += size as u64;
-                    if size < BUFSIZE {
-                        eprintln!("short read after {tot} bytes");
+                    if size == 0 {
+                        eprintln!("zero read after {tot} bytes");
                         false
+                    } else if size < BUFSIZE {
+                        eprintln!("short read after {tot} bytes");
+                        true
                     } else {
                         true
                     }
