@@ -97,7 +97,7 @@ impl RemoteClient for Ftp {
         let mut tot: u64 = 0;
         let s = self.stream.retr(resource, |r| {
             while match r.read(&mut buf) {
-                Ok(size) => match bw.write_all(&buf) {
+                Ok(size) => match bw.write_all(&buf[0..size]) {
                     Ok(_) => {
                         tot += size as u64;
                         if size < BUFSIZE {
@@ -144,8 +144,10 @@ impl RemoteClient for Ftp {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tempfile::TempDir;
 
     const FTPSERVER: &str = "209.51.188.20";
+    const MOCK_RESOURCE: &str = "README";
 
     fn mock() -> Ftp {
         let u = format!("ftp://{}/", FTPSERVER);
@@ -185,10 +187,9 @@ mod tests {
     #[test]
     fn get() {
         let mut m = mock();
-        let rsrc = "README";
         let path = PathBuf::from("/dev/null");
-        let got = m.get(rsrc, &path).unwrap();
-        assert_eq!(rsrc, got.resource);
+        let got = m.get(MOCK_RESOURCE, &path).unwrap();
+        assert_eq!(MOCK_RESOURCE, got.resource);
     }
 
     #[test]
@@ -197,5 +198,14 @@ mod tests {
         let path = PathBuf::from("/dev/null");
         let fail = m.get("asdfasfdasfd", &path);
         assert!(fail.is_err())
+    }
+
+    #[test]
+    fn validation() {
+        let mut m = mock();
+        let t = TempDir::new().unwrap();
+        let path = t.path().join("test.bin");
+        let got = m.get(MOCK_RESOURCE, &path).unwrap();
+        got.validate().unwrap();
     }
 }

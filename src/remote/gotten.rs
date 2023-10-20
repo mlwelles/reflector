@@ -15,7 +15,10 @@ pub struct Gotten {
 pub enum GottenValidation {
     AllIsWell,
     OutputDoesNotExist,
-    Tempdir(Box<io::Error>),
+    OutputMetadata(io::Error),
+    Tempdir(io::Error),
+    OutputLargerThanExpected(u64, u64),
+    OutputSmallerThanExpected(u64, u64),
 }
 use GottenValidation::*;
 
@@ -34,10 +37,20 @@ impl Gotten {
 
     pub fn validate(&self) -> Result<(), GottenValidation> {
         if !self.output.is_file() {
-            Err(OutputDoesNotExist)
-        } else {
-            Ok(())
+            return Err(OutputDoesNotExist);
         }
+        let m = match self.output.metadata() {
+            Ok(m) => m,
+            Err(e) => return Err(OutputMetadata(e)),
+        };
+        let gs = m.len();
+        let es = self.size;
+        if gs > es {
+            return Err(OutputLargerThanExpected(gs, es));
+        } else if es > gs {
+            return Err(OutputSmallerThanExpected(gs, es));
+        }
+        Ok(())
     }
 
     pub fn valid(&self) -> bool {

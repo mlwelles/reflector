@@ -56,7 +56,7 @@ impl RemoteClient for Http {
         let mut tot: u64 = 0;
         // keep looping while true
         while match r.read(&mut buf) {
-            Ok(size) => match bw.write_all(&buf) {
+            Ok(size) => match bw.write_all(&buf[0..size]) {
                 Ok(_) => {
                     tot += size as u64;
                     if size < BUFSIZE {
