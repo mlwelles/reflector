@@ -59,7 +59,7 @@ impl PathMaker for GoesR {
         };
         let day: u32 = match filename[6..8].parse() {
             Ok(x) => x,
-            Err(_) => return Err(UnparsableMonth(filename[4..5].to_string())),
+            Err(_) => return Err(UnparsableDay(filename[4..5].to_string())),
         };
         match filename.chars().nth(8) {
             Some('_') => (),
