@@ -47,7 +47,7 @@ fn connect(
             return Err(ConnectError::FtpCwdErr(e));
         }
     }
-    eprintln!("all done, server to {} setup", base.as_str());
+    eprintln!("setup FTP connection to {}", base.as_str());
     Ok(stream)
 }
 
@@ -101,9 +101,11 @@ impl RemoteClient for Ftp {
                     Ok(_) => {
                         tot += size;
                         if size < BUFSIZE {
-                            eprintln!("short read");
+                            eprintln!("short read after {tot} bytes");
+                            false
+                        } else {
+                            true
                         }
-                        true
                     }
                     Err(e) => {
                         eprintln!("error from write at {} bytes: {:?}", tot, e);
@@ -186,6 +188,12 @@ mod tests {
         let path = PathBuf::from("/dev/null");
         let got = m.get(rsrc, &path).unwrap();
         assert_eq!(rsrc, got.resource);
+    }
+
+    #[test]
+    fn not_found() {
+        let mut m = mock();
+        let path = PathBuf::from("/dev/null");
         let fail = m.get("asdfasfdasfd", &path);
         assert!(fail.is_err())
     }

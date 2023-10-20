@@ -54,14 +54,14 @@ impl RemoteClient for Http {
         let mut bw = BufWriter::new(file);
         let mut r = resp.into_reader();
         let mut tot = 0;
+        // keep looping while true
         while match r.read(&mut buf) {
-            // we're ignoring size read here
             Ok(size) => match bw.write_all(&buf) {
                 Ok(_) => {
                     tot += size;
                     if size < BUFSIZE {
-                        eprintln!("short read");
-                        true
+                        eprintln!("short read after {tot} bytes");
+                        false
                     } else {
                         true
                     }
