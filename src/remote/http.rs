@@ -53,12 +53,12 @@ impl RemoteClient for Http {
         let mut buf: [u8; BUFSIZE] = [0; BUFSIZE];
         let mut bw = BufWriter::new(file);
         let mut r = resp.into_reader();
-        let mut tot = 0;
+        let mut tot: u64 = 0;
         // keep looping while true
         while match r.read(&mut buf) {
             Ok(size) => match bw.write_all(&buf) {
                 Ok(_) => {
-                    tot += size;
+                    tot += size as u64;
                     if size < BUFSIZE {
                         eprintln!("short read after {tot} bytes");
                         false
@@ -79,7 +79,7 @@ impl RemoteClient for Http {
             eprintln!("read {tot} bytes");
         }
 
-        let g = Gotten::new(&mimetype, resource, u, output.to_path_buf());
+        let g = Gotten::new(&mimetype, resource, u, output.to_path_buf(), tot);
         Ok(g)
     }
 
@@ -93,6 +93,9 @@ impl RemoteClient for Http {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tempfile::TempDir;
+
+    const MOCK_RESOURCE: &str = "README.html";
 
     fn mock() -> Http {
         let u = Url::parse("http://deb.debian.org/debian/").unwrap();
@@ -108,11 +111,19 @@ mod tests {
     #[test]
     fn get() {
         let mut m = mock();
-        let rsrc = "README.html";
         let path = PathBuf::from("/dev/null");
-        let got = m.get(rsrc, &path).unwrap();
-        assert_eq!(rsrc, got.resource);
+        let got = m.get(MOCK_RESOURCE, &path).unwrap();
+        assert_eq!(MOCK_RESOURCE, got.resource);
         assert_eq!(path, got.output);
+    }
+
+    #[test]
+    fn validation() {
+        let mut m = mock();
+        let t = TempDir::new().unwrap();
+        let path = t.path().join("test.bin");
+        let got = m.get(MOCK_RESOURCE, &path).unwrap();
+        got.validate().unwrap();
     }
 
     #[test]

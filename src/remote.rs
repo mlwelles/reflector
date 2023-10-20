@@ -3,7 +3,7 @@ pub use client::{ConnectError, GetError, PingError, RemoteClient};
 pub mod factory;
 pub use factory::{from_url, RCFactoryError};
 pub mod gotten;
-pub use gotten::Gotten;
+pub use gotten::{Gotten, GottenValidation};
 pub mod http;
 pub use http::Http;
 pub mod ftp;

@@ -20,6 +20,7 @@ impl RemoteClient for Mock {
             resource,
             source,
             output.to_path_buf(),
+            0,
         ))
     }
 

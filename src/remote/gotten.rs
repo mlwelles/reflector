@@ -1,3 +1,4 @@
+use std::io;
 use std::path::PathBuf;
 use url::Url;
 
@@ -7,17 +8,19 @@ pub struct Gotten {
     pub resource: String,
     pub source: Url,
     pub output: PathBuf,
-    // remote: SocketAddr,
+    pub size: u64,
 }
 
-#[derive(Debug, PartialEq)]
-pub enum Validation {
+#[derive(Debug)]
+pub enum GottenValidation {
     AllIsWell,
     OutputDoesNotExist,
+    Tempdir(Box<io::Error>),
 }
+use GottenValidation::*;
 
 impl Gotten {
-    pub fn new(mimetype: &str, resource: &str, source: Url, output: PathBuf) -> Gotten {
+    pub fn new(mimetype: &str, resource: &str, source: Url, output: PathBuf, size: u64) -> Gotten {
         let mimetype = mimetype.to_string();
         let resource = resource.to_string();
         Gotten {
@@ -25,18 +28,19 @@ impl Gotten {
             resource,
             source,
             output,
+            size,
         }
     }
 
-    pub fn validation(&self) -> Validation {
+    pub fn validate(&self) -> Result<(), GottenValidation> {
         if !self.output.is_file() {
-            Validation::OutputDoesNotExist
+            Err(OutputDoesNotExist)
         } else {
-            Validation::AllIsWell
+            Ok(())
         }
     }
 
     pub fn valid(&self) -> bool {
-        self.validation() == Validation::AllIsWell
+        self.validate().is_ok()
     }
 }

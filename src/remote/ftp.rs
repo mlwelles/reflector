@@ -94,12 +94,12 @@ impl RemoteClient for Ftp {
         const BUFSIZE: usize = 8192;
         let mut buf: [u8; BUFSIZE] = [0; BUFSIZE];
         let mut bw = BufWriter::new(file);
-        let mut tot = 0;
+        let mut tot: u64 = 0;
         let s = self.stream.retr(resource, |r| {
             while match r.read(&mut buf) {
                 Ok(size) => match bw.write_all(&buf) {
                     Ok(_) => {
-                        tot += size;
+                        tot += size as u64;
                         if size < BUFSIZE {
                             eprintln!("short read after {tot} bytes");
                             false
@@ -132,6 +132,7 @@ impl RemoteClient for Ftp {
             resource,
             source,
             output.to_path_buf(),
+            tot,
         ))
     }
 
