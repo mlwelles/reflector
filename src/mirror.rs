@@ -10,7 +10,7 @@ use url::Url;
 pub struct Mirror {
     pub name: String,
     pub period: time::Duration,
-    // TODO: generalize this as a trait
+    // pub loop_period: time::Duration,
     pub local: FileStore,
     pub remote: Url,
     remote_client: Box<dyn RemoteClient>,
@@ -26,6 +26,32 @@ pub enum FactoryError {
     InvalidRemote(RCFactoryError),
 }
 use FactoryError::*;
+
+#[derive(Debug)]
+pub enum MirrorStatus {
+    Unimplemented,
+    Full(time::SystemTime),
+    Partial(time::SystemTime),
+    Empty,
+}
+
+impl fmt::Display for MirrorStatus {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let out = match self {
+            MirrorStatus::Unimplemented => "status not implemented".to_string(),
+            MirrorStatus::Full(t) => format!("mirror latest {:?}, fully reflected", t),
+            MirrorStatus::Partial(t) => format!("mirror latest {:?}, only partially reflected", t),
+            MirrorStatus::Empty => "mirror is empty, unpulled".to_string(),
+        };
+        write!(f, "{}", out)
+    }
+}
+
+#[derive(Debug)]
+pub enum StatusError {
+    Unimplemented,
+    CannotPing(PingError),
+}
 
 impl Mirror {
     pub fn new(cfg: SourceConfig) -> Result<Mirror, FactoryError> {
@@ -69,6 +95,14 @@ impl Mirror {
             flatten,
         };
         Ok(m)
+    }
+
+    pub fn status(&mut self) -> Result<MirrorStatus, StatusError> {
+        if let Err(e) = self.remote_client.ping() {
+            Err(StatusError::CannotPing(e))
+        } else {
+            Err(StatusError::Unimplemented)
+        }
     }
 
     pub fn ping(&mut self) -> Result<time::Duration, PingError> {
@@ -135,5 +169,12 @@ mod tests {
         let m = mock_mirror();
         let c = m.latest_capture();
         assert_eq!(None, c);
+    }
+
+    #[test]
+    fn status() {
+        let m = mock_mirror();
+        let s = m.status().unwrap();
+        assert_eq!("status: mumble", format!("status: {s}"));
     }
 }

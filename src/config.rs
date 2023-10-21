@@ -3,6 +3,7 @@
 
 use serde::Deserialize;
 use std::default::Default;
+use std::str::FromStr;
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
@@ -42,3 +43,34 @@ impl Default for Config {
         Config { sources: srcs }
     }
 }
+
+#[derive(Debug)]
+pub enum SourceSearchError {
+    NotImplemented,
+    NoMatchForName(String),
+    EmptyName,
+}
+
+impl FromStr for Config {
+    type Err = SourceSearchError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.len() < 1 {
+            return Err(SourceSearchError::EmptyName);
+        }
+
+        let mut mm: Vec<SourceConfig> = vec![];
+        for src in Config::default().sources {
+            if src.name == s {
+                mm.push(src);
+            }
+        }
+
+        match mm.len() {
+            0 => Err(SourceSearchError::NoMatchForName(s.to_string())),
+            _ => Ok(Config { sources: mm }),
+        }
+    }
+}
+
+// TODO: From<vec[str]> or some such
