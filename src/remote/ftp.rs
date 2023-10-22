@@ -151,9 +151,15 @@ impl RemoteClient for Ftp {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::net::ToSocketAddrs;
     use tempfile::TempDir;
 
-    const FTPSERVER: &str = "209.51.188.20";
+    // a public server which might be used, ftp.gnu.org
+    // const FTPSERVER: &str = "209.51.188.20";
+    // const MOCK_RESOURCE: &str = "README";
+
+    // a local server
+    const FTPSERVER: &str = "sopa.coo";
     const MOCK_RESOURCE: &str = "README";
 
     fn mock() -> Ftp {
@@ -186,9 +192,9 @@ mod tests {
     #[test]
     fn remote_addr() {
         let m = mock();
-        let server = format!("{}:21", FTPSERVER);
-        let sa: SocketAddr = server.parse().unwrap();
-        assert_eq!(sa, m.remote_addr())
+        let ss = format!("{}:21", FTPSERVER);
+        let sa = ss.to_socket_addrs().unwrap().next().unwrap();
+        assert_eq!(sa, m.remote_addr());
     }
 
     #[test]
