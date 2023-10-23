@@ -21,6 +21,14 @@ pub fn from_url(url: &Url) -> Result<Box<dyn RemoteClient>, RCFactoryError> {
     }
 }
 
+impl TryFrom<Url> for Box<dyn RemoteClient> {
+    type Error = RCFactoryError;
+
+    fn try_from(url: Url) -> Result<Self, Self::Error> {
+        from_url(&url)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -46,4 +54,11 @@ mod tests {
             _ => false,
         });
     }
+
+    // FIXME: not sure how to write this test
+    // #[test]
+    // fn try_from() {
+    //     let u = Url::parse("http://www.google.com/").unwrap();
+    //     let r  = Box<RemoteClient>::try_from(u);
+    // }
 }
