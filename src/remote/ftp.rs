@@ -52,12 +52,13 @@ fn connect(
 }
 
 impl Ftp {
-    pub fn new(base: Url, creds: Option<FtpCredentials>) -> Result<Ftp, ConnectError> {
+    pub fn new(base: &Url, creds: Option<FtpCredentials>) -> Result<Ftp, ConnectError> {
         let remote = match base.socket_addrs(|| None) {
             Ok(a) => a[0],
             Err(e) => return Err(ConnectError::SocketError(e)),
         };
         let creds = creds.unwrap_or(FtpCredentials::default());
+        let base = base.clone();
         match connect(remote.clone(), &base, &creds) {
             Ok(stream) => Ok(Ftp {
                 base,
@@ -165,7 +166,7 @@ mod tests {
     fn mock() -> Ftp {
         let u = format!("ftp://{}/", FTPSERVER);
         let u = Url::parse(&u).unwrap();
-        Ftp::new(u, None).unwrap()
+        Ftp::new(&u, None).unwrap()
     }
 
     #[test]
@@ -179,7 +180,7 @@ mod tests {
         let dir = "/gnu";
         let base = format!("ftp://{}{}", FTPSERVER, dir);
         let base = Url::parse(&base).unwrap();
-        let mut ftp = Ftp::new(base, None).unwrap();
+        let mut ftp = Ftp::new(&base, None).unwrap();
         assert_eq!(dir, ftp.stream.pwd().unwrap());
     }
 

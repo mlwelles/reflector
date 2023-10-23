@@ -14,7 +14,8 @@ pub struct Http {
 }
 
 impl Http {
-    pub fn new(base: Url) -> Http {
+    pub fn new(base: &Url) -> Http {
+        let base = base.clone();
         let builder = ureq::builder()
             .timeout_connect(Duration::from_secs(30))
             .timeout(Duration::from_secs(300));
@@ -99,7 +100,7 @@ mod tests {
 
     fn mock() -> Http {
         let u = Url::parse("http://deb.debian.org/debian/").unwrap();
-        Http::new(u)
+        Http::new(&u)
     }
 
     #[test]
