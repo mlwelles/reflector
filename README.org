@@ -15,15 +15,9 @@ captured data.
 
 * Application Design
 
-Config has SourceConfigs, described below.
+Config has SourceConfigs
 
 a SourceConfig can be used to construct a Mirror -- if all looks good!
-
-Does it make sense to make Mirror a typestate, e.g, Mirror<STATE> where STATE is:
- - untested
- - ok
- - failing
-?  I'm not sure it does, we don't really need to track state.
 
 Capture represents a single mirrored entity.
 
@@ -34,6 +28,12 @@ Mirror methods:
     ensure our local mirror is up to date, going back from now - Duration
 
 TimeRange is (StartSystemTime, EndSystemtime)
+
+Mirrors know how to convert from time ranges into file names on the
+remote site we're mirroring.  For that we need:
+ - a period, which defines the time between upstream files
+ - a PathMaker, which can go from time to filename and back
+ - a seed time -- often midnight
 
 We need a number of supporting fuctions.  Start by considering EnsureLatest,
 consider a naive implementation that going from more recent to least:

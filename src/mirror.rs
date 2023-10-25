@@ -10,6 +10,7 @@ use url::Url;
 pub struct Mirror {
     pub name: String,
     pub period: time::Duration,
+    // pub seed_past_midnight: time::Duration,
     // pub loop_period: time::Duration,
     pub local: FileStore,
     pub remote: Url,
@@ -151,6 +152,7 @@ mod tests {
             pathmaker: "identity".to_string(),
             flatten: None,
             period: 60,
+            seed_past_midnight: 0,
         }
     }
 
