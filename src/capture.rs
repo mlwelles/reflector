@@ -1,3 +1,4 @@
+use crate::TimeRange;
 use std::{path, time};
 use url::Url;
 
@@ -17,11 +18,15 @@ impl Capture {
 #[derive(Debug)]
 pub struct CaptureList {
     pub list: Vec<Capture>,
+    pub missing: Vec<TimeRange>,
 }
 
 impl CaptureList {
     pub fn empty() -> CaptureList {
-        CaptureList { list: vec![] }
+        CaptureList {
+            list: vec![],
+            missing: vec![],
+        }
     }
 }
 
@@ -35,4 +40,14 @@ impl Iterator for CaptureList {
 
 pub enum CaptureError {
     NoCaptures,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn empty() {
+        CaptureList::empty();
+    }
 }
