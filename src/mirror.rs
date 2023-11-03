@@ -122,10 +122,13 @@ impl Mirror {
 
     pub fn range_to_filelist(&self, range: &TimeRange) -> FileList {
         let mut files = FileList::empty();
-        let times = range.make_timelist(self.period, self.seed_past_midnight);
+        let times = range.make_timelist(&self.period, &self.seed_past_midnight);
         for t in times {
-            let f = self.pathmaker.time_to_filename(t);
-            files.app
+            if let Some(f) = self.pathmaker.systime_to_filename(&t).to_str() {
+                files.push(f);
+            } else {
+                eprintln!("unable to determine filename for time {:?}", t);
+            }
         }
         files
     }

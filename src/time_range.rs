@@ -12,11 +12,6 @@ pub enum FactoryError {
 }
 use FactoryError::*;
 
-#[derive(Debug, PartialEq, PartialOrd)]
-pub struct TimeList {
-    list: Vec<SystemTime>,
-}
-
 impl TimeRange {
     pub fn new(from: SystemTime, to: SystemTime) -> Result<Self, FactoryError> {
         if from > to {
@@ -28,7 +23,7 @@ impl TimeRange {
 
     pub fn make_timelist(&self, period: &Duration, offset: &Duration) -> TimeList {
         // start is the leading edge of the range, minus the offset (for now)
-        let start = self.from - offset;
+        let start = self.from - offset.to_owned();
         // make a duration between start and midnight
         // let start_after_midnight = ...
         // divide that by period to get x
@@ -36,6 +31,37 @@ impl TimeRange {
         // our initial time is (x * period) + offset
         // stack on one per period, accumulating the period
         // until our accum is larger than our end time
+        TimeList::from(start)
+    }
+}
+
+#[derive(Debug, PartialEq, PartialOrd)]
+pub struct TimeList {
+    list: Vec<SystemTime>,
+}
+
+impl Iterator for TimeList {
+    type Item = SystemTime;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.list.pop()
+    }
+}
+
+impl From<SystemTime> for TimeList {
+    fn from(start: SystemTime) -> Self {
+        let list = vec![start];
+        Self { list }
+    }
+}
+
+// impl From<(SystemTime, SystemTime)> for TimeList { }
+
+struct TimeListInput(TimeRange, Duration, Duration);
+
+impl From<TimeListInput> for TimeList {
+    fn from(input: TimeListInput) -> Self {
+        input.0.make_timelist(&input.1, &input.2)
     }
 }
 

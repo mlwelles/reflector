@@ -36,6 +36,11 @@ pub trait PathMaker {
         }
     }
 
+    fn systime_to_filename(&self, time: &SystemTime) -> OsString {
+        let utc: DateTime<Utc> = (*time).into();
+        self.time_to_filename(&utc)
+    }
+
     fn time_to_path(&self, time: &DateTime<Utc>) -> path::PathBuf {
         path::PathBuf::from(self.time_to_filename(time))
     }

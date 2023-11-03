@@ -28,7 +28,7 @@ impl FileList {
     }
 
     pub fn push(&mut self, s: &str) {
-        self.list.push(s)
+        self.list.push(s.to_string())
     }
 }
 
