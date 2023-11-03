@@ -1,4 +1,4 @@
-use std::time::SystemTime;
+use std::time::{Duration, SystemTime};
 
 #[derive(Debug, PartialEq, PartialOrd)]
 pub struct TimeRange {
@@ -12,6 +12,11 @@ pub enum FactoryError {
 }
 use FactoryError::*;
 
+#[derive(Debug, PartialEq, PartialOrd)]
+pub struct TimeList {
+    list: Vec<SystemTime>,
+}
+
 impl TimeRange {
     pub fn new(from: SystemTime, to: SystemTime) -> Result<Self, FactoryError> {
         if from > to {
@@ -19,6 +24,18 @@ impl TimeRange {
         } else {
             Ok(Self { from, to })
         }
+    }
+
+    pub fn make_timelist(&self, period: &Duration, offset: &Duration) -> TimeList {
+        // start is the leading edge of the range, minus the offset (for now)
+        let start = self.from - offset;
+        // make a duration between start and midnight
+        // let start_after_midnight = ...
+        // divide that by period to get x
+
+        // our initial time is (x * period) + offset
+        // stack on one per period, accumulating the period
+        // until our accum is larger than our end time
     }
 }
 

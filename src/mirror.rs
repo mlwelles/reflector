@@ -1,16 +1,16 @@
-use crate::capture::{Capture, CaptureList};
-use crate::config::SourceConfig;
 use crate::pathmaker;
 use crate::remote::{from_url as remote_from_url, PingError, RCFactoryError, RemoteClient};
 use crate::store::{FileList, FileStore};
-use crate::{PathMaker, PathMakerError, StoreError, TimeRange};
-use std::{fmt, time};
+use crate::time_range;
+use crate::{Capture, CaptureList, PathMaker, PathMakerError, SourceConfig, StoreError, TimeRange};
+use std::fmt;
+use std::time::{self, Duration, SystemTime};
 use url::Url;
 
 pub struct Mirror {
     pub name: String,
     pub period: time::Duration,
-    // pub seed_past_midnight: time::Duration,
+    pub seed_past_midnight: time::Duration,
     // pub loop_period: time::Duration,
     pub local: FileStore,
     pub remote: Url,
@@ -20,13 +20,13 @@ pub struct Mirror {
 }
 
 #[derive(Debug)]
-pub enum FactoryError {
+pub enum MirrorError {
     InvalidURL(url::ParseError),
     InvalidStore(StoreError),
     InvalidPathMaker(PathMakerError),
     InvalidRemote(RCFactoryError),
 }
-use FactoryError::*;
+use MirrorError::*;
 
 #[derive(Debug)]
 pub enum MirrorStatus {
@@ -55,7 +55,7 @@ pub enum StatusError {
 }
 
 impl Mirror {
-    pub fn new(cfg: SourceConfig) -> Result<Mirror, FactoryError> {
+    pub fn new(cfg: SourceConfig) -> Result<Mirror, MirrorError> {
         let period = time::Duration::from_secs(cfg.period);
         let pathmaker = pathmaker::new(&cfg.pathmaker);
         if let Err(e) = pathmaker {
@@ -85,10 +85,12 @@ impl Mirror {
         if cfg.flatten == Some(true) {
             flatten = true;
         }
+        let seed_past_midnight = Duration::new(0, 0);
 
         let m = Mirror {
             name: cfg.name,
             period,
+            seed_past_midnight,
             local,
             remote,
             remote_client,
@@ -98,11 +100,19 @@ impl Mirror {
         Ok(m)
     }
 
+    pub fn period_timerange(&self) -> Result<TimeRange, time_range::FactoryError> {
+        let now = SystemTime::now();
+        let then = now - self.period;
+        TimeRange::new(then, now)
+    }
+
     pub fn status(&mut self) -> Result<MirrorStatus, StatusError> {
         if let Err(e) = self.remote_client.ping() {
             Err(StatusError::CannotPing(e))
         } else {
-            Err(StatusError::Unimplemented)
+            // check the store for files within our period,
+            // and set the status accordingly
+            Ok(MirrorStatus::Unimplemented)
         }
     }
 
@@ -110,9 +120,14 @@ impl Mirror {
         self.remote_client.ping()
     }
 
-    pub fn range_to_filelist(&self, _range: &TimeRange) -> FileList {
-        // TODO
-        FileList::empty()
+    pub fn range_to_filelist(&self, range: &TimeRange) -> FileList {
+        let mut files = FileList::empty();
+        let times = range.make_timelist(self.period, self.seed_past_midnight);
+        for t in times {
+            let f = self.pathmaker.time_to_filename(t);
+            files.app
+        }
+        files
     }
 
     pub fn captures_in_range(&self, range: &TimeRange) -> CaptureList {

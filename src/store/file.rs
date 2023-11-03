@@ -26,6 +26,10 @@ impl FileList {
         let list = vec![];
         FileList { list }
     }
+
+    pub fn push(&mut self, s: &str) {
+        self.list.push(s)
+    }
 }
 
 impl Iterator for FileList {
