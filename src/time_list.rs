@@ -10,6 +10,7 @@ impl TimeList {
     pub fn len(&self) -> usize {
         self.list.len()
     }
+
     pub fn push(&mut self, time: SystemTime) {
         self.list.push(time)
     }
@@ -51,7 +52,7 @@ impl From<(TimeRange, Duration, Duration)> for TimeList {
         // our initial time is (x * period) + offset
         // stack on one per period, accumulating the period
         // until our accum is larger than our end time
-        let mut l = TimeList::from(tt.clone());
+        let mut l = Self::from(tt.clone());
         while let Some(next) = tt.checked_add(period) {
             if next > range.to {
                 return l;
