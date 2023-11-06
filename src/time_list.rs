@@ -68,6 +68,15 @@ mod tests {
     use super::*;
 
     #[test]
+    fn push() {
+        let to = SystemTime::now();
+        let mut l = TimeList::from(to);
+        assert_eq!(1, l.len());
+        l.push(SystemTime::now());
+        assert_eq!(2, l.len());
+    }
+
+    #[test]
     fn from_range() {
         let to = SystemTime::now();
         let frm = to.checked_sub(Duration::from_secs(300)).unwrap();
