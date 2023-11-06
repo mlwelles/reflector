@@ -10,6 +10,9 @@ impl TimeList {
     pub fn len(&self) -> usize {
         self.list.len()
     }
+    pub fn push(&mut self, time: SystemTime) {
+        self.list.push(time)
+    }
 }
 
 impl Iterator for TimeList {
@@ -35,8 +38,12 @@ impl From<SystemTime> for TimeList {
 
 impl From<(TimeRange, Duration, Duration)> for TimeList {
     fn from(input: (TimeRange, Duration, Duration)) -> Self {
+        let range = input.0;
+        let period = input.1;
+        let _offset = input.2; // FIXME: not implmneted yet
+
         // start is the leading edge of the range, minus the offset (for now)
-        let start = input.0.from - input.1.to_owned();
+        let mut tt = range.from - period.to_owned();
 
         // make a duration between start and midnight
         // divide that by period to get x
@@ -44,7 +51,15 @@ impl From<(TimeRange, Duration, Duration)> for TimeList {
         // our initial time is (x * period) + offset
         // stack on one per period, accumulating the period
         // until our accum is larger than our end time
-        let l = TimeList::from(start);
+        let mut l = TimeList::from(tt.clone());
+        while let Some(next) = tt.checked_add(period) {
+            if next > range.to {
+                return l;
+            }
+            l.push(next);
+            tt = next;
+        }
+        l
     }
 }
 
