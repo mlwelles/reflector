@@ -100,7 +100,7 @@ impl Mirror {
         Ok(m)
     }
 
-    pub fn period_timerange(&self) -> Result<TimeRange, time_range::FactoryError> {
+    pub fn period_timerange(&self) -> Result<TimeRange, time_range::TimeRangeError> {
         let now = SystemTime::now();
         let then = now - self.period;
         TimeRange::new(then, now)
@@ -120,9 +120,9 @@ impl Mirror {
         self.remote_client.ping()
     }
 
-    pub fn range_to_filelist(&self, range: &TimeRange) -> FileList {
+    pub fn range_to_filelist(&self, range: TimeRange) -> FileList {
         let mut files = FileList::empty();
-        let times = range.make_timelist(&self.period, &self.seed_past_midnight);
+        let times = range.make_timelist(self.period, self.seed_past_midnight);
         for t in times {
             if let Some(f) = self.pathmaker.systime_to_filename(&t).to_str() {
                 files.push(f);
@@ -133,7 +133,7 @@ impl Mirror {
         files
     }
 
-    pub fn captures_in_range(&self, range: &TimeRange) -> CaptureList {
+    pub fn captures_in_range(&self, range: TimeRange) -> CaptureList {
         let items = self.range_to_filelist(range);
         self.local.captures_in_list(items)
     }
