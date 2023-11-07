@@ -86,6 +86,7 @@ impl From<(TimeRange, Duration, Duration)> for TimeList {
 
         // shift back from Chrono to std
         let start = systime_from_naive(start);
+
         // stack on one per period, accumulating the period
         // until our accum is larger than our end time
         let mut l = Self::from(start);
