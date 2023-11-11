@@ -1,5 +1,6 @@
-use super::display_systime;
+use super::time_util::*;
 use super::TimeList;
+use chrono::NaiveDateTime;
 use std::fmt;
 use std::time::{Duration, SystemTime};
 
@@ -33,6 +34,36 @@ impl TimeRange {
     }
 }
 
+impl From<SystemTime> for TimeRange {
+    fn from(start: SystemTime) -> Self {
+        Self {
+            from: start,
+            to: start,
+        }
+    }
+}
+
+impl From<(SystemTime, SystemTime)> for TimeRange {
+    fn from(input: (SystemTime, SystemTime)) -> Self {
+        Self {
+            from: input.0,
+            to: input.1,
+        }
+    }
+}
+
+impl From<NaiveDateTime> for TimeRange {
+    fn from(start: NaiveDateTime) -> Self {
+        Self::from(systime_from_naive(start))
+    }
+}
+
+impl From<(NaiveDateTime, NaiveDateTime)> for TimeRange {
+    fn from(input: (NaiveDateTime, NaiveDateTime)) -> Self {
+        Self::from((systime_from_naive(input.0), systime_from_naive(input.1)))
+    }
+}
+
 impl fmt::Display for TimeRange {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
@@ -55,6 +86,24 @@ mod tests {
         assert!(
             TimeRange::new(now - five_seconds * 4, now - five_seconds * 3).unwrap()
                 < TimeRange::new(now - five_seconds, now).unwrap()
+        );
+    }
+
+    #[test]
+    fn from_single() {
+        let now = SystemTime::now();
+        let r = TimeRange::from(now);
+        assert!(r.empty())
+    }
+
+    #[test]
+    fn from_tuple() {
+        let five_seconds = Duration::new(5, 0);
+        let now = SystemTime::now();
+        let then = now - five_seconds;
+        assert_eq!(
+            TimeRange::new(then, now).unwrap(),
+            TimeRange::from((then, now)),
         );
     }
 
