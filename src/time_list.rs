@@ -1,5 +1,6 @@
+use super::time_util::*;
 use super::TimeRange;
-use chrono::{NaiveDateTime, Timelike};
+use chrono::NaiveDateTime;
 use std::fmt;
 use std::time::{Duration, SystemTime};
 
@@ -43,34 +44,6 @@ impl From<NaiveDateTime> for TimeList {
     fn from(start: NaiveDateTime) -> Self {
         Self::from(systime_from_naive(start))
     }
-}
-
-pub fn naive_from_systime(st: SystemTime) -> NaiveDateTime {
-    let epoch = st.duration_since(SystemTime::UNIX_EPOCH).unwrap();
-    let es = i64::try_from(epoch.as_secs()).unwrap();
-    NaiveDateTime::from_timestamp_opt(es, 0).unwrap()
-}
-
-pub fn systime_from_naive(ndt: NaiveDateTime) -> SystemTime {
-    let d = Duration::new(ndt.timestamp() as u64, 0);
-    SystemTime::UNIX_EPOCH + d
-}
-
-pub fn display_systime(st: SystemTime) -> String {
-    naive_from_systime(st)
-        .format("%Y-%m-%d %H:%M:%S")
-        .to_string()
-}
-
-fn naive_trunc_midnight(inb: &NaiveDateTime) -> NaiveDateTime {
-    let t = inb.time();
-    let d = Duration::new(t.num_seconds_from_midnight() as u64, 0);
-    let inb = inb.clone();
-    inb - d
-}
-
-fn naive_since_midnight(inb: &NaiveDateTime) -> Duration {
-    Duration::new(inb.time().num_seconds_from_midnight() as u64, 0)
 }
 
 impl From<(TimeRange, Duration, Duration)> for TimeList {

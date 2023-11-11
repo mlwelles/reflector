@@ -1,4 +1,4 @@
-use super::time_list::display_systime; // FIXME: move
+use super::display_systime;
 use super::TimeList;
 use std::fmt;
 use std::time::{Duration, SystemTime};
