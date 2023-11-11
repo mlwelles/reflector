@@ -93,6 +93,7 @@ mod tests {
     fn from_single() {
         let now = SystemTime::now();
         let r = TimeRange::from(now);
+        assert_eq!(TimeRange::new(now, now).unwrap(), r);
         assert!(r.empty())
     }
 
