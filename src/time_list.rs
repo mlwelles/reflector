@@ -1,8 +1,9 @@
 use super::TimeRange;
 use chrono::{NaiveDateTime, Timelike};
+use std::fmt;
 use std::time::{Duration, SystemTime};
 
-#[derive(Debug, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct TimeList {
     list: Vec<SystemTime>,
 }
@@ -44,15 +45,21 @@ impl From<NaiveDateTime> for TimeList {
     }
 }
 
-fn naive_from_systime(st: SystemTime) -> NaiveDateTime {
+pub fn naive_from_systime(st: SystemTime) -> NaiveDateTime {
     let epoch = st.duration_since(SystemTime::UNIX_EPOCH).unwrap();
     let es = i64::try_from(epoch.as_secs()).unwrap();
     NaiveDateTime::from_timestamp_opt(es, 0).unwrap()
 }
 
-fn systime_from_naive(ndt: NaiveDateTime) -> SystemTime {
+pub fn systime_from_naive(ndt: NaiveDateTime) -> SystemTime {
     let d = Duration::new(ndt.timestamp() as u64, 0);
     SystemTime::UNIX_EPOCH + d
+}
+
+pub fn display_systime(st: SystemTime) -> String {
+    naive_from_systime(st)
+        .format("%Y-%m-%d %H:%M:%S")
+        .to_string()
 }
 
 fn naive_trunc_midnight(inb: &NaiveDateTime) -> NaiveDateTime {
@@ -99,6 +106,17 @@ impl From<(TimeRange, Duration, Duration)> for TimeList {
     }
 }
 
+impl fmt::Display for TimeList {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let tt = self
+            .clone()
+            .map(|t| display_systime(t))
+            .collect::<Vec<String>>()
+            .join(", ");
+        write!(f, "[{}]", tt)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -115,12 +133,14 @@ mod tests {
     #[test]
     fn from_range() {
         let to = SystemTime::now();
-        let frm = to.checked_sub(Duration::from_secs(60 * 5 + 20)).unwrap();
+        let minutes: usize = 5;
+        let frm = to
+            .checked_sub(Duration::from_secs((60 * minutes as u64) + 20))
+            .unwrap();
         let range = TimeRange::new(frm, to).unwrap();
         let period = Duration::from_secs(60);
-        let offset = Duration::new(0, 0);
-        let l = TimeList::from((range, period, offset));
-        eprintln!("got timelist {:?}", l);
-        assert_eq!(5, l.len(), "length");
+        let offset = Duration::ZERO;
+        let l = TimeList::from((range.clone(), period, offset));
+        assert_eq!(minutes, l.len(), "timelist {l} from range {range}");
     }
 }

@@ -1,7 +1,9 @@
+use super::time_list::display_systime; // FIXME: move
 use super::TimeList;
+use std::fmt;
 use std::time::{Duration, SystemTime};
 
-#[derive(Debug, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct TimeRange {
     pub from: SystemTime,
     pub to: SystemTime,
@@ -26,8 +28,19 @@ impl TimeRange {
         self.from == self.to
     }
 
-    pub fn make_timelist(self, period: Duration, offset: Duration) -> TimeList {
-        TimeList::from((self, period, offset))
+    pub fn make_timelist(self, period: &Duration, offset: &Duration) -> TimeList {
+        TimeList::from((self, period.clone(), offset.clone()))
+    }
+}
+
+impl fmt::Display for TimeRange {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{}--{}",
+            display_systime(self.from),
+            display_systime(self.to)
+        )
     }
 }
 
