@@ -101,10 +101,9 @@ mod tests {
         let five_seconds = Duration::new(5, 0);
         let now = SystemTime::now();
         let then = now - five_seconds;
-        assert_eq!(
-            TimeRange::new(then, now).unwrap(),
-            TimeRange::from((then, now)),
-        );
+        let r = TimeRange::from((then, now));
+        assert_eq!(TimeRange::new(then, now).unwrap(), r);
+        assert!(!r.empty());
     }
 
     #[test]
