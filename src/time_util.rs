@@ -4,6 +4,20 @@
 use chrono::{NaiveDateTime, Timelike};
 use std::time::{Duration, SystemTime};
 
+/// convert a SystemTime into seconds since midnight, or else u64::MAX
+/// ```
+/// use reflector::time_util::*;
+/// use std::time::SystemTime;
+///
+/// assert_eq!(0, systime_as_secs(&SystemTime::UNIX_EPOCH));
+/// ```
+pub fn systime_as_secs(s: &SystemTime) -> u64 {
+    match s.duration_since(SystemTime::UNIX_EPOCH) {
+        Ok(d) => d.as_secs(),
+        Err(_) => u64::MAX,
+    }
+}
+
 /// convert a SystemTime into a NaiveDateTime, in a panicky way
 /// ```
 /// use reflector::time_util::*;
@@ -12,8 +26,7 @@ use std::time::{Duration, SystemTime};
 /// let nt = naive_from_systime(SystemTime::now());
 /// ```
 pub fn naive_from_systime(st: SystemTime) -> NaiveDateTime {
-    let epoch = st.duration_since(SystemTime::UNIX_EPOCH).unwrap();
-    let es = i64::try_from(epoch.as_secs()).unwrap();
+    let es = i64::try_from(systime_as_secs(&st)).unwrap();
     NaiveDateTime::from_timestamp_opt(es, 0).unwrap()
 }
 
@@ -68,11 +81,4 @@ pub fn naive_since_midnight(inb: &NaiveDateTime) -> Duration {
 /// ```
 pub fn naive_trunc_midnight(inb: &NaiveDateTime) -> NaiveDateTime {
     inb.clone() - naive_since_midnight(&inb)
-}
-
-pub fn systime_as_secs(s: &SystemTime) -> u64 {
-    match s.duration_since(SystemTime::UNIX_EPOCH) {
-        Ok(d) => d.as_secs(),
-        Err(_) => u64::MAX,
-    }
 }
