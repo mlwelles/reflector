@@ -67,9 +67,7 @@ pub fn naive_since_midnight(inb: &NaiveDateTime) -> Duration {
 /// assert_eq!(NaiveDateTime::UNIX_EPOCH, naive_trunc_midnight(&n));
 /// ```
 pub fn naive_trunc_midnight(inb: &NaiveDateTime) -> NaiveDateTime {
-    let d = naive_since_midnight(&inb);
-    let inb = inb.clone();
-    inb - d
+    inb.clone() - naive_since_midnight(&inb)
 }
 
 pub fn systime_as_secs(s: &SystemTime) -> u64 {
