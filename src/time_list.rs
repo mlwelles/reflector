@@ -46,11 +46,12 @@ impl From<NaiveDateTime> for TimeList {
     }
 }
 
+// range, period, offset
 impl From<(TimeRange, Duration, Duration)> for TimeList {
     fn from(input: (TimeRange, Duration, Duration)) -> Self {
         let range = input.0;
         let period = input.1;
-        let offset = input.2; // FIXME: not implmneted yet
+        let offset = input.2;
 
         // start is the leading edge of the range, minus the offset (for now)
         let from = naive_from_systime(range.from) - offset;
@@ -76,6 +77,13 @@ impl From<(TimeRange, Duration, Duration)> for TimeList {
             tt += period;
         }
         l
+    }
+}
+
+// range, period, with offset 0
+impl From<(TimeRange, Duration)> for TimeList {
+    fn from(input: (TimeRange, Duration)) -> Self {
+        Self::from((input.0, input.1, Duration::ZERO))
     }
 }
 
@@ -116,4 +124,7 @@ mod tests {
         let l = TimeList::from((range.clone(), period, offset));
         assert_eq!(minutes, l.len(), "timelist {l} from range {range}");
     }
+
+    #[test]
+    fn simple_range() {}
 }

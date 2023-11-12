@@ -1,17 +1,44 @@
+//! handy functions from wrangling time formats used in the reflector
+//! crate
+
 use chrono::{NaiveDateTime, Timelike};
 use std::time::{Duration, SystemTime};
 
+/// convert a SystemTime into a NaiveDateTime, in a panicky way
+/// ```
+/// use reflector::time_util::*;
+/// use std::time::SystemTime;
+///
+/// let nt = naive_from_systime(SystemTime::now());
+/// ```
 pub fn naive_from_systime(st: SystemTime) -> NaiveDateTime {
     let epoch = st.duration_since(SystemTime::UNIX_EPOCH).unwrap();
     let es = i64::try_from(epoch.as_secs()).unwrap();
     NaiveDateTime::from_timestamp_opt(es, 0).unwrap()
 }
 
+/// convert a NaiveDateTime into a SystemTime
+/// ```
+/// use reflector::time_util::*;
+/// use chrono::{NaiveDateTime, NaiveDate};
+/// use std::time::SystemTime;
+///
+/// let n = NaiveDate::from_ymd_opt(1970, 1, 1).unwrap().and_hms_opt(0, 0, 0).unwrap();
+/// assert_eq!(SystemTime::UNIX_EPOCH, systime_from_naive(n))
+/// ```
 pub fn systime_from_naive(ndt: NaiveDateTime) -> SystemTime {
     let d = Duration::new(ndt.timestamp() as u64, 0);
     SystemTime::UNIX_EPOCH + d
 }
 
+/// show the a given SystemTime ignoring resolutions below seconds
+/// ```
+/// use reflector::time_util::*;
+/// use std::time::SystemTime;
+///
+/// let now = SystemTime::UNIX_EPOCH;
+/// assert_eq!("1970-01-01 00:00:00", display_systime(now))
+/// ```
 pub fn display_systime(st: SystemTime) -> String {
     naive_from_systime(st)
         .format("%Y-%m-%d %H:%M:%S")
@@ -27,4 +54,11 @@ pub fn naive_trunc_midnight(inb: &NaiveDateTime) -> NaiveDateTime {
 
 pub fn naive_since_midnight(inb: &NaiveDateTime) -> Duration {
     Duration::new(inb.time().num_seconds_from_midnight() as u64, 0)
+}
+
+pub fn systime_as_secs(s: &SystemTime) -> u64 {
+    match s.duration_since(SystemTime::UNIX_EPOCH) {
+        Ok(d) => d.as_secs(),
+        Err(_) => u64::MAX,
+    }
 }

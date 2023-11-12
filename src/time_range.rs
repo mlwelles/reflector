@@ -13,6 +13,7 @@ pub struct TimeRange {
 #[derive(Debug)]
 pub enum TimeRangeError {
     FromAfterTo,
+    CannotRemovePeriod(SystemTime, Duration),
 }
 use TimeRangeError::*;
 
@@ -25,8 +26,26 @@ impl TimeRange {
         }
     }
 
+    pub fn from_now_to(dur: &Duration) -> Result<Self, TimeRangeError> {
+        let to = SystemTime::now();
+        let from = match to.checked_sub(dur.clone()) {
+            Some(f) => f,
+            None => return Err(TimeRangeError::CannotRemovePeriod(to, dur.clone())),
+        };
+        Self::new(from, to)
+    }
+
     pub fn empty(&self) -> bool {
         self.from == self.to
+    }
+
+    pub fn equal_by_seconds(&self, compare: &Self) -> bool {
+        (systime_as_secs(&self.from) == systime_as_secs(&compare.from))
+            && (systime_as_secs(&self.to) == systime_as_secs(&compare.to))
+    }
+
+    pub fn empty_by_secs(&self) -> bool {
+        systime_as_secs(&self.from) == systime_as_secs(&self.to)
     }
 
     pub fn make_timelist(self, period: &Duration, offset: &Duration) -> TimeList {
@@ -95,6 +114,15 @@ mod tests {
         let r = TimeRange::from(now);
         assert_eq!(TimeRange::new(now, now).unwrap(), r);
         assert!(r.empty())
+    }
+
+    #[test]
+    fn from_now_to() {
+        let dur = Duration::from_secs(60);
+        let to = SystemTime::now();
+        let from = to.checked_sub(dur).unwrap();
+        let got = TimeRange::from_now_to(&dur).unwrap();
+        assert!(got.equal_by_seconds(&TimeRange::new(from, to).unwrap()));
     }
 
     #[test]
