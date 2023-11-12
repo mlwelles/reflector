@@ -45,15 +45,31 @@ pub fn display_systime(st: SystemTime) -> String {
         .to_string()
 }
 
-pub fn naive_trunc_midnight(inb: &NaiveDateTime) -> NaiveDateTime {
-    let t = inb.time();
-    let d = Duration::new(t.num_seconds_from_midnight() as u64, 0);
-    let inb = inb.clone();
-    inb - d
-}
-
+/// how long since midnight happened?
+/// ```
+/// use reflector::time_util::*;
+/// use chrono::{NaiveDateTime, Datelike};
+///
+/// assert_eq!(0, naive_since_midnight(&NaiveDateTime::UNIX_EPOCH).as_secs());
+/// ```
 pub fn naive_since_midnight(inb: &NaiveDateTime) -> Duration {
     Duration::new(inb.time().num_seconds_from_midnight() as u64, 0)
+}
+
+/// return a new time representing the midnight (0:00) of the current
+/// day
+/// ```
+/// use reflector::time_util::*;
+/// use chrono::{NaiveDateTime, NaiveDate, Datelike};
+/// use std::time::SystemTime;
+///
+/// let n = NaiveDate::from_ymd_opt(1970, 1, 1).unwrap().and_hms_opt(1, 2, 3).unwrap();
+/// assert_eq!(NaiveDateTime::UNIX_EPOCH, naive_trunc_midnight(&n));
+/// ```
+pub fn naive_trunc_midnight(inb: &NaiveDateTime) -> NaiveDateTime {
+    let d = naive_since_midnight(&inb);
+    let inb = inb.clone();
+    inb - d
 }
 
 pub fn systime_as_secs(s: &SystemTime) -> u64 {
