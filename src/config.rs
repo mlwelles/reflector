@@ -31,7 +31,7 @@ impl Default for Config {
                 pathmaker: "SDO".to_string(),
                 flatten: Some(true),
                 period: 5 * 60 * 60 * 24,
-                seed_past_midnight: Some(0),
+                seed_past_midnight: None,
             },
             SourceConfig {
                 name: "GOES ABI_TrueColor".to_string(),
@@ -40,7 +40,7 @@ impl Default for Config {
                 pathmaker: "GOES-R".to_string(),
                 flatten: None,
                 period: 5 * 60 * 10,
-                seed_past_midnight: Some(0),
+                seed_past_midnight: None,
             },
         ];
         Config { sources: srcs }
