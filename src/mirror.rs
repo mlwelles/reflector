@@ -7,18 +7,6 @@ use std::fmt;
 use std::time::{self, Duration, SystemTime};
 use url::Url;
 
-pub struct Mirror {
-    pub name: String,
-    pub period: time::Duration,
-    pub seed_past_midnight: time::Duration,
-    // pub loop_period: time::Duration,
-    pub local: FileStore,
-    pub remote: Url,
-    remote_client: Box<dyn RemoteClient>,
-    pub flatten: bool,
-    pub pathmaker: Box<dyn PathMaker>,
-}
-
 #[derive(Debug)]
 pub enum MirrorError {
     InvalidURL(url::ParseError),
@@ -28,6 +16,8 @@ pub enum MirrorError {
 }
 use MirrorError::*;
 
+/// the current status of the mirror, specifically related to how
+/// completely upstream data is shadowed
 #[derive(Debug)]
 pub enum MirrorStatus {
     Unimplemented,
@@ -52,6 +42,19 @@ impl fmt::Display for MirrorStatus {
 pub enum StatusError {
     Unimplemented,
     CannotPing(PingError),
+}
+
+/// a remote site, kept in sync with a local file store
+pub struct Mirror {
+    pub name: String,
+    pub period: time::Duration,
+    pub seed_past_midnight: time::Duration,
+    // pub loop_period: time::Duration,
+    pub local: FileStore,
+    pub remote: Url,
+    remote_client: Box<dyn RemoteClient>,
+    pub flatten: bool,
+    pub pathmaker: Box<dyn PathMaker>,
 }
 
 impl Mirror {
@@ -85,7 +88,7 @@ impl Mirror {
         if cfg.flatten == Some(true) {
             flatten = true;
         }
-        let seed_past_midnight = Duration::new(0, 0);
+        let seed_past_midnight = Duration::new(cfg.seed_past_midnight.unwrap_or(0), 0);
 
         let m = Mirror {
             name: cfg.name,
@@ -171,7 +174,7 @@ mod tests {
             pathmaker: "identity".to_string(),
             flatten: None,
             period: 60,
-            seed_past_midnight: 0,
+            seed_past_midnight: None,
         }
     }
 
