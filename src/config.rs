@@ -1,5 +1,4 @@
-#![deny(warnings)]
-#![allow(dead_code)]
+//! Mirror configuration.
 
 use serde::Deserialize;
 use std::default::Default;

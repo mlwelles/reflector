@@ -1,3 +1,13 @@
+//! A simple representation of a series of times.
+//!
+//! These are generally used to glue between `TimeRange`s and
+//! `CaptureList`s.
+//!
+//! Some open questions:
+//!   - do we need a uniqueness constraint?
+//!   - do we need to guarantee order?
+//! None of that currently present.
+
 use super::time_util::*;
 use super::TimeRange;
 use chrono::NaiveDateTime;

@@ -1,5 +1,5 @@
-//! handy functions from wrangling time formats used in the reflector
-//! crate
+//! Handy functions for working with the time formats used in the
+//! reflector crate.
 
 use chrono::{NaiveDateTime, Timelike};
 use std::time::{Duration, SystemTime};

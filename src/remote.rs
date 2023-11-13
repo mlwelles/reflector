@@ -1,3 +1,5 @@
+//! Protocol engines, used to retrieve files from remote sites.
+
 pub mod client;
 pub use client::{ConnectError, GetError, ListError, PingError, RemoteClient};
 pub mod factory;

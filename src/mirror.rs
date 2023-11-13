@@ -1,3 +1,5 @@
+//! Shadow upstream data to local storage.
+
 use crate::pathmaker;
 use crate::remote::{from_url as remote_from_url, PingError, RCFactoryError, RemoteClient};
 use crate::store::{FileList, FileStore};
