@@ -7,6 +7,16 @@
 //!   - do we need a uniqueness constraint?
 //!   - do we need to guarantee order?
 //! None of that currently present.
+//!
+//! # Examples
+//! ```
+//! use reflector::TimeList;
+//! use std::time::SystemTime;
+//!
+//! let now = SystemTime::now();
+//! let tl = TimeList::from(now);
+//! assert_eq!(1, tl.len());
+//! ```
 
 #![allow(unused_imports)]
 use super::time_util::*;
@@ -92,6 +102,18 @@ impl From<(TimeRange, Duration, Duration)> for TimeList {
 }
 
 /// Convert from a range and a period, which uses a zero offset.
+/// # Example
+/// ```
+/// use std::time::{SystemTime, Duration};
+/// use reflector::{TimeList, TimeRange};
+///
+/// let now = SystemTime::now();
+/// let d = Duration::from_secs(60);
+/// let then = now - Duration::from_secs(125);
+/// let r = TimeRange::from((then, now));
+/// let tl = TimeList::from((r, d));
+/// assert_eq!(2, tl.len())
+/// ```
 impl From<(TimeRange, Duration)> for TimeList {
     fn from(input: (TimeRange, Duration)) -> Self {
         Self::from((input.0, input.1, Duration::ZERO))
