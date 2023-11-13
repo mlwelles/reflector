@@ -1,15 +1,16 @@
 //! A simple representation of a series of times.
 //!
-//! These are generally used to glue between `TimeRange`s and
-//! `CaptureList`s.
+//! These are generally used to glue between [TimeRange] and
+//! [CaptureList].
 //!
 //! Some open questions:
 //!   - do we need a uniqueness constraint?
 //!   - do we need to guarantee order?
 //! None of that currently present.
 
+#![allow(unused_imports)]
 use super::time_util::*;
-use super::TimeRange;
+use super::{CaptureList, TimeRange};
 use chrono::NaiveDateTime;
 use std::fmt;
 use std::time::{Duration, SystemTime};
@@ -56,7 +57,7 @@ impl From<NaiveDateTime> for TimeList {
     }
 }
 
-// range, period, offset
+/// Convert from a range, a period and an offset.
 impl From<(TimeRange, Duration, Duration)> for TimeList {
     fn from(input: (TimeRange, Duration, Duration)) -> Self {
         let range = input.0;
@@ -90,7 +91,7 @@ impl From<(TimeRange, Duration, Duration)> for TimeList {
     }
 }
 
-// range, period, with offset 0
+/// Convert from a range and a period, which uses a zero offset.
 impl From<(TimeRange, Duration)> for TimeList {
     fn from(input: (TimeRange, Duration)) -> Self {
         Self::from((input.0, input.1, Duration::ZERO))
