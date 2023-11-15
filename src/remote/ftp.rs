@@ -31,23 +31,19 @@ fn connect(
     base: &Url,
     creds: &FtpCredentials,
 ) -> Result<FtpStream, ConnectError> {
-    eprintln!("connecting to remote...");
     let mut stream = match FtpStream::connect_timeout(remote, Duration::new(10, 0)) {
         Ok(s) => s,
         Err(e) => return Err(ConnectError::FtpConnectErr(e)),
     };
-    eprintln!("logging in...");
     if let Err(e) = stream.login(&creds.user, &creds.password) {
         return Err(ConnectError::FtpLoginErr(e));
     }
     let dir = base.path();
     if dir.len() > 1 {
-        eprintln!("changing dir to {}...", dir);
         if let Err(e) = stream.cwd(dir) {
             return Err(ConnectError::FtpCwdErr(e));
         }
     }
-    eprintln!("setup FTP connection to {}", base.as_str());
     Ok(stream)
 }
 
