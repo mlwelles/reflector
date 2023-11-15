@@ -31,6 +31,10 @@ pub struct TimeList {
 }
 
 impl TimeList {
+    pub fn empty() -> Self {
+        TimeList { list: vec![] }
+    }
+
     pub fn len(&self) -> usize {
         self.list.len()
     }
@@ -91,10 +95,12 @@ impl From<(TimeRange, Duration, Duration)> for TimeList {
 
         // stack on one per period, accumulating the period
         // until our accum is larger than our end time
-        let mut l = Self::from(start);
+        let mut l = Self::empty();
         let mut tt = start.clone();
-        while tt < range.to {
-            l.push(tt);
+        while tt <= range.to {
+            if range.encloses(tt) {
+                l.push(tt);
+            }
             tt += period;
         }
         l
@@ -106,13 +112,19 @@ impl From<(TimeRange, Duration, Duration)> for TimeList {
 /// ```
 /// use std::time::{SystemTime, Duration};
 /// use reflector::{TimeList, TimeRange};
+/// use reflector::time_util::{display_systime,systime_round_to_min};
 ///
 /// let now = SystemTime::now();
+/// let now = systime_round_to_min(&now);
 /// let d = Duration::from_secs(60);
 /// let then = now - Duration::from_secs(125);
 /// let r = TimeRange::from((then, now));
+/// eprintln!("range: {r}");
 /// let tl = TimeList::from((r, d));
-/// assert_eq!(2, tl.len())
+/// assert_eq!(format!("[{}, {}, {}]", display_systime(now),
+///                     display_systime(now - d), display_systime(now - 2 * d)),
+///            format!("{tl}"));
+/// assert_eq!(3, tl.len())
 /// ```
 impl From<(TimeRange, Duration)> for TimeList {
     fn from(input: (TimeRange, Duration)) -> Self {
@@ -133,6 +145,7 @@ impl fmt::Display for TimeList {
 
 #[cfg(test)]
 mod tests {
+    use super::super::time_util::*;
     use super::*;
 
     #[test]
@@ -142,6 +155,13 @@ mod tests {
         assert_eq!(1, l.len());
         l.push(SystemTime::now());
         assert_eq!(2, l.len());
+    }
+
+    #[test]
+    fn display() {
+        let now = SystemTime::now();
+        let tl = TimeList::from(now);
+        assert_eq!(format!("[{}]", display_systime(now)), format!("{tl}"));
     }
 
     #[test]

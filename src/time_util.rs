@@ -18,6 +18,44 @@ pub fn systime_as_secs(s: &SystemTime) -> u64 {
     }
 }
 
+/// ```
+/// use reflector::time_util::*;
+/// use std::time::SystemTime;
+///
+/// let now = SystemTime::now();
+/// let rounded = systime_round_to_s(&now);
+/// assert_ne!(now, rounded, "almost always true");
+/// ```
+pub fn systime_round_to_s(s: &SystemTime) -> SystemTime {
+    let e = SystemTime::UNIX_EPOCH;
+    let d = s.duration_since(SystemTime::UNIX_EPOCH).unwrap();
+    let f = Duration::from_secs(d.as_secs());
+    match e.checked_add(f) {
+        Some(r) => r,
+        None => panic!("unable to calculate time"),
+    }
+}
+
+/// ```
+/// use reflector::time_util::*;
+/// use std::time::SystemTime;
+///
+/// let now = SystemTime::now();
+/// let rounded = systime_round_to_s(&now);
+/// assert_ne!(now, rounded);
+/// assert_eq!(SystemTime::UNIX_EPOCH, systime_round_to_min(&SystemTime::UNIX_EPOCH));
+/// ```
+pub fn systime_round_to_min(s: &SystemTime) -> SystemTime {
+    let e = SystemTime::UNIX_EPOCH;
+    let d = s.duration_since(SystemTime::UNIX_EPOCH).unwrap();
+    let secs = (d.as_secs() / 60) * 60;
+    let f = Duration::from_secs(secs);
+    match e.checked_add(f) {
+        Some(r) => r,
+        None => panic!("unable to calculate time"),
+    }
+}
+
 /// convert a SystemTime into a NaiveDateTime, in a panicky way
 /// ```
 /// use reflector::time_util::*;

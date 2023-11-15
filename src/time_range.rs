@@ -51,6 +51,10 @@ impl TimeRange {
     pub fn make_timelist(self, period: &Duration, offset: &Duration) -> TimeList {
         TimeList::from((self, period.clone(), offset.clone()))
     }
+
+    pub fn encloses(&self, s: SystemTime) -> bool {
+        self.from <= s && s <= self.to
+    }
 }
 
 impl From<SystemTime> for TimeRange {
