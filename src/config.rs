@@ -15,7 +15,9 @@ pub struct SourceConfig {
     pub remote: String,
     pub local: String,
     pub pathmaker: String,
+    /// period between captures
     pub period: u64,
+    /// seconds after midnight to offset all times
     pub seed_past_midnight: Option<u64>,
     pub flatten: Option<bool>,
 }
@@ -75,4 +77,4 @@ impl FromStr for Config {
     }
 }
 
-// TODO: From<vec[str]> or some such
+// TODO: From<Vec<String>> or some such

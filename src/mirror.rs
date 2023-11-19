@@ -44,6 +44,7 @@ impl fmt::Display for MirrorStatus {
 pub enum StatusError {
     Unimplemented,
     CannotPing(PingError),
+    RangeError(time_range::TimeRangeError),
 }
 
 /// a remote site, kept in sync with a local file store
@@ -116,12 +117,16 @@ impl Mirror {
 
     pub fn status(&mut self) -> Result<MirrorStatus, StatusError> {
         if let Err(e) = self.remote_client.ping() {
-            Err(StatusError::CannotPing(e))
-        } else {
-            // check the store for files within our period,
-            // and set the status accordingly
-            Ok(MirrorStatus::Unimplemented)
+            return Err(StatusError::CannotPing(e));
         }
+
+        let range = TimeRange::from_now_to(&self.loop_period)
+            .or_else(|e| return Err(StatusError::RangeError(e)));
+
+        // check the store for files within our range,
+        // and set the status accordingly
+
+        Ok(MirrorStatus::Unimplemented)
     }
 
     pub fn ping(&mut self) -> Result<time::Duration, PingError> {
