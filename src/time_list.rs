@@ -179,5 +179,12 @@ mod tests {
     }
 
     #[test]
-    fn simple_range() {}
+    fn clone() {
+        let now = SystemTime::now();
+        let then = now.checked_add(Duration::from_secs(60)).unwrap();
+        let tl = TimeList::from(vec![then, now]);
+        assert_eq!(2, tl.len(), "initial len");
+        let cl = tl.clone();
+        assert_eq!(tl.len(), cl.len(), "cloned len");
+    }
 }

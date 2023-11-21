@@ -1,5 +1,6 @@
 use std::ffi::{OsStr, OsString};
 
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct FileList {
     list: Vec<OsString>,
 }
@@ -11,6 +12,9 @@ impl FileList {
     }
 
     pub fn push(&mut self, s: &OsStr) {
+        self.list.push(OsString::from(s))
+    }
+    pub fn push_str(&mut self, s: &str) {
         self.list.push(OsString::from(s))
     }
 
@@ -55,7 +59,7 @@ mod tests {
     fn empty() {
         let mut l = FileList::empty();
         assert!(l.is_empty(), "is_empty()");
-        l.push("bar");
+        l.push_str("cargo test");
         assert!(!l.is_empty(), "no longer empty");
     }
 
@@ -63,5 +67,8 @@ mod tests {
     fn from_vec() {
         let l = FileList::from(vec!["item1".to_string(), "item2".to_string()]);
         assert_eq!(2, l.len(), "len()");
+
+        let cl = l.clone();
+        assert_eq!(l.len(), cl.len(), "cloned len()");
     }
 }

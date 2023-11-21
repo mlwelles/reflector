@@ -129,6 +129,7 @@ mod tests {
     use super::*;
     use crate::pathmaker;
     use chrono::Utc;
+    use std::ffi::OsString;
 
     const MOCK_PATH: &str = "/tmp/reflector_file_store_test";
     static MOCK_FILE: &str = "20231121";
@@ -156,6 +157,9 @@ mod tests {
         let m = mock_file_store();
         assert_eq!(m.path, PathBuf::from(MOCK_PATH));
         assert_eq!((), m.validate().unwrap());
+
+        let f = OsString::from(MOCK_FILE);
+        let _f = m.pathmaker.filename_to_systime(&f).unwrap();
     }
 
     #[test]
@@ -182,7 +186,7 @@ mod tests {
     fn captures_in_list() {
         let m = mock_file_store();
         let l = FileList::from(vec![MOCK_FILE.to_string(), "doesnotexist".to_string()]);
-        let c = m.captures_in_list(l);
+        let c = m.captures_in_list(l.clone());
         assert_eq!(l.len(), c.len_all(), "one capture per file in list");
         assert_eq!(1, c.list.len(), "found");
         assert_eq!(1, c.missing.len(), "missing");
