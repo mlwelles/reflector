@@ -120,11 +120,17 @@ impl Mirror {
             return Err(StatusError::CannotPing(e));
         }
 
-        let range = TimeRange::from_now_to(&self.loop_period)
-            .or_else(|e| return Err(StatusError::RangeError(e)));
+        let range = match TimeRange::from_now_to(&self.loop_period) {
+            Ok(r) => r,
+            Err(e) => return Err(StatusError::RangeError(e)),
+        };
+
+        let tt = range.make_timelist(&self.period, &self.seed_past_midnight);
+        let ff = self.pathmaker.timelist_to_filelist(&tt);
 
         // check the store for files within our range,
         // and set the status accordingly
+        let cc = self.local.captures_in_list(ff);
 
         Ok(MirrorStatus::Unimplemented)
     }
@@ -138,11 +144,8 @@ impl Mirror {
         let range: TimeRange = range.clone();
         let times = range.make_timelist(&self.period, &self.seed_past_midnight);
         for t in times {
-            if let Some(f) = self.pathmaker.systime_to_filename(&t).to_str() {
-                files.push(f);
-            } else {
-                eprintln!("unable to determine filename for time {:?}", t);
-            }
+            let f = self.pathmaker.systime_to_filename(&t);
+            files.push(&f);
         }
         files
     }
@@ -205,10 +208,10 @@ mod tests {
         assert_eq!(None, c);
     }
 
-    // #[test]
-    // fn status() {
-    //     let mut m = mock_mirror();
-    //     let s = m.status().unwrap();
-    //     assert_eq!("status: mumble", format!("status: {s}"));
-    // }
+    #[test]
+    fn status() {
+        let mut m = mock_mirror();
+        let s = m.status().unwrap();
+        assert_eq!("status: mumble", format!("status: {s}"));
+    }
 }

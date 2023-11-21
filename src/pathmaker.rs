@@ -11,7 +11,7 @@ pub use identity::Identity;
 pub mod time;
 pub use time::make_utc;
 
-use crate::time_range::TimeRange;
+use super::{FileList, TimeList, TimeRange};
 use chrono::{DateTime, Utc};
 use std::ffi::{OsStr, OsString};
 use std::path;
@@ -43,6 +43,21 @@ pub trait PathMaker {
 
     fn time_to_path(&self, time: &DateTime<Utc>) -> path::PathBuf {
         path::PathBuf::from(self.time_to_filename(time))
+    }
+
+    fn time_to_string(&self, time: &DateTime<Utc>) -> String {
+        let s = time.to_rfc3339();
+        String::from(s)
+    }
+
+    fn timelist_to_filelist(&self, tt: &TimeList) -> FileList {
+        let mut ff = FileList::empty();
+        let tt = tt.clone();
+        for t in tt {
+            let f = self.systime_to_filename(&t);
+            ff.push(&f);
+        }
+        ff
     }
 
     fn from_range(

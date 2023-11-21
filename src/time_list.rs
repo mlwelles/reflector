@@ -1,7 +1,7 @@
 //! A simple representation of a series of times.
 //!
 //! These are generally used to glue between [TimeRange] and
-//! [CaptureList].
+//! [CaptureList] or [FileList].
 //!
 //! Some open questions:
 //!   - do we need a uniqueness constraint?

@@ -1,7 +1,8 @@
+use std::ffi::OsString;
 use std::{path, time};
 use url::Url;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Capture {
     pub time: time::SystemTime,
     pub path: path::PathBuf,
@@ -14,18 +15,37 @@ impl Capture {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct CaptureList {
     pub list: Vec<Capture>,
-    pub missing: Vec<String>,
+    pub missing: Vec<OsString>,
 }
 
 impl CaptureList {
-    pub fn empty() -> CaptureList {
-        CaptureList {
-            list: vec![],
-            missing: vec![],
-        }
+    pub fn new(list: Vec<Capture>, missing: Vec<OsString>) -> Self {
+        CaptureList { list, missing }
+    }
+
+    pub fn empty() -> Self {
+        CaptureList::new(vec![], vec![])
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.list.is_empty() && self.missing.is_empty()
+    }
+
+    pub fn len(&self) -> usize {
+        self.list.len()
+    }
+
+    pub fn len_all(&self) -> usize {
+        self.list.len() + self.missing.len()
+    }
+}
+
+impl From<Capture> for CaptureList {
+    fn from(init: Capture) -> Self {
+        CaptureList::new(vec![init], vec![])
     }
 }
 
@@ -47,6 +67,8 @@ mod tests {
 
     #[test]
     fn empty() {
-        CaptureList::empty();
+        let l = CaptureList::empty();
+        assert!(l.is_empty(), "is empty");
+        assert_eq!(0, l.len(), "len");
     }
 }

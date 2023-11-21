@@ -1,6 +1,7 @@
 // a class representing a file store on local disk, geared towards
 // storing and retreiving captures and dealing in CaptureLists
 
+use crate::store::FileList;
 use crate::store::StoreError::*;
 use crate::{Capture, CaptureList, PathMaker, StoreError};
 use std::{
@@ -15,29 +16,6 @@ pub struct FileStore {
     pub pathmaker: Box<dyn PathMaker>,
     // remote URL if any
     pub url: Option<Url>,
-}
-
-pub struct FileList {
-    list: Vec<String>,
-}
-
-impl FileList {
-    pub fn empty() -> FileList {
-        let list = vec![];
-        FileList { list }
-    }
-
-    pub fn push(&mut self, s: &str) {
-        self.list.push(s.to_string())
-    }
-}
-
-impl Iterator for FileList {
-    type Item = String;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.list.pop()
-    }
 }
 
 #[derive(Debug)]
@@ -106,10 +84,14 @@ impl FileStore {
     pub fn captures_in_list(&self, ll: FileList) -> CaptureList {
         let mut cl = CaptureList::empty();
         for l in ll {
-            match self.get_str(&l) {
+            match self.get(&PathBuf::from(&l)) {
                 Ok(c) => cl.list.push(c),
                 Err(e) => {
-                    eprintln!("error on getting capture '{l}': {:?}", e);
+                    eprintln!(
+                        "error on getting capture '{}': {:?}",
+                        l.to_str().unwrap(),
+                        e
+                    );
                     cl.missing.push(l);
                 }
             }
@@ -124,7 +106,7 @@ pub struct FileStoreConfig {
 }
 
 impl From<FileStoreConfig> for FileStore {
-    fn from(cfg: FileStoreConfig) -> FileStore {
+    fn from(cfg: FileStoreConfig) -> Self {
         let path = path::PathBuf::from(cfg.path);
         let pathmaker = cfg.pathmaker;
         let url = None;
@@ -147,9 +129,9 @@ mod tests {
     use super::*;
     use crate::pathmaker;
     use chrono::Utc;
-    use std::time::Duration;
 
     const MOCK_PATH: &str = "/tmp/reflector_file_store_test";
+    static MOCK_FILE: &str = "20231121";
 
     fn mock_file_store() -> FileStore {
         let pbuf = path::PathBuf::from(MOCK_PATH);
@@ -159,9 +141,7 @@ mod tests {
         let pathmaker = Box::new(pathmaker::Identity::new());
 
         // create a file to be in our store
-        let prior = Utc::now() - Duration::from_secs(60);
-        let f = pathmaker.time_to_path(&prior);
-        fs::write(pbuf.join(f), "just testing")
+        fs::write(pbuf.join(PathBuf::from(MOCK_FILE)), "just testing")
             .unwrap_or_else(|e| eprintln!("error setting up file in mock store: {e}"));
 
         FileStore {
@@ -199,5 +179,12 @@ mod tests {
     }
 
     #[test]
-    fn captures_in_list() {}
+    fn captures_in_list() {
+        let m = mock_file_store();
+        let l = FileList::from(vec![MOCK_FILE.to_string(), "doesnotexist".to_string()]);
+        let c = m.captures_in_list(l);
+        assert_eq!(l.len(), c.len_all(), "one capture per file in list");
+        assert_eq!(1, c.list.len(), "found");
+        assert_eq!(1, c.missing.len(), "missing");
+    }
 }
