@@ -1,4 +1,3 @@
-use crate::TimeRange;
 use std::{path, time};
 use url::Url;
 
@@ -18,7 +17,7 @@ impl Capture {
 #[derive(Debug)]
 pub struct CaptureList {
     pub list: Vec<Capture>,
-    pub missing: Vec<TimeRange>,
+    pub missing: Vec<String>,
 }
 
 impl CaptureList {

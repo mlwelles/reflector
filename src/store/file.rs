@@ -50,11 +50,15 @@ use GetError::*;
 impl FileStore {
     pub fn new(path: &str, pathmaker: Box<dyn PathMaker>) -> Result<Self, StoreError> {
         let path = path::PathBuf::from(path);
-        Ok(FileStore {
+        let fs = FileStore {
             path,
             pathmaker,
             url: None,
-        })
+        };
+        match fs.validate() {
+            Ok(_) => Ok(fs),
+            Err(e) => Err(e),
+        }
     }
 
     pub fn validate(&self) -> Result<(), StoreError> {
@@ -71,10 +75,6 @@ impl FileStore {
             return Err(NotDirectory(local));
         }
         Ok(())
-    }
-
-    pub fn get_str(&self, p: &str) -> Result<Capture, GetError> {
-        self.get(&PathBuf::from(p))
     }
 
     pub fn get(&self, p: &PathBuf) -> Result<Capture, GetError> {
@@ -95,6 +95,10 @@ impl FileStore {
         }
     }
 
+    pub fn get_str(&self, p: &str) -> Result<Capture, GetError> {
+        self.get(&PathBuf::from(p))
+    }
+
     pub fn put(&self, path: &PathBuf, contents: &[u8]) -> io::Result<()> {
         fs::write(self.path.join(path), contents)
     }
@@ -104,7 +108,10 @@ impl FileStore {
         for l in ll {
             match self.get_str(&l) {
                 Ok(c) => cl.list.push(c),
-                Err(e) => eprintln!("error on getting capture '{l}': {:?}", e),
+                Err(e) => {
+                    eprintln!("error on getting capture '{l}': {:?}", e);
+                    cl.missing.push(l);
+                }
             }
         }
         cl
@@ -140,6 +147,7 @@ mod tests {
     use super::*;
     use crate::pathmaker;
     use chrono::Utc;
+    use std::time::Duration;
 
     const MOCK_PATH: &str = "/tmp/reflector_file_store_test";
 
@@ -149,6 +157,13 @@ mod tests {
             fs::create_dir(&pbuf).unwrap()
         }
         let pathmaker = Box::new(pathmaker::Identity::new());
+
+        // create a file to be in our store
+        let prior = Utc::now() - Duration::from_secs(60);
+        let f = pathmaker.time_to_path(&prior);
+        fs::write(pbuf.join(f), "just testing")
+            .unwrap_or_else(|e| eprintln!("error setting up file in mock store: {e}"));
+
         FileStore {
             path: pbuf,
             pathmaker,
@@ -182,4 +197,7 @@ mod tests {
         let c = m.get(&p).unwrap();
         assert!(c.valid());
     }
+
+    #[test]
+    fn captures_in_list() {}
 }
