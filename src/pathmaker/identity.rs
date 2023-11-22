@@ -37,12 +37,22 @@ impl PathMaker for Identity {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::Utc;
+    use chrono::{TimeZone, Utc};
 
     #[test]
     fn dogfood() {
         let p = Identity::new();
         let t = Utc::now();
         assert_eq!(t, p.filename_to_time(&p.time_to_filename(&t)).unwrap());
+    }
+
+    #[test]
+    fn time_to_filename() {
+        let p = Identity::new();
+        let d = Utc.with_ymd_and_hms(2020, 1, 1, 12, 1, 2).unwrap();
+        assert_eq!(
+            OsString::from("2020-01-01T12:01:02+00:00"),
+            p.time_to_filename(&d)
+        )
     }
 }
