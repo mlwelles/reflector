@@ -166,7 +166,7 @@ mod tests {
 
     #[test]
     fn from_range() {
-        let to = SystemTime::now();
+        let to = systime_round_to_min(&SystemTime::now());
         let minutes: usize = 5;
         let frm = to
             .checked_sub(Duration::from_secs((60 * minutes as u64) + 20))
@@ -175,7 +175,7 @@ mod tests {
         let period = Duration::from_secs(60);
         let offset = Duration::ZERO;
         let l = TimeList::from((range.clone(), period, offset));
-        assert_eq!(minutes, l.len(), "timelist {l} from range {range}");
+        assert_eq!(minutes + 1, l.len(), "timelist {l} from range {range}");
     }
 
     #[test]
