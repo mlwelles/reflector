@@ -132,7 +132,7 @@ mod tests {
     use std::ffi::OsString;
 
     const MOCK_PATH: &str = "/tmp/reflector_file_store_test";
-    static MOCK_FILE: &str = "20231121";
+    static MOCK_FILE: &str = "2023-11-21T14:40:00+00:00";
 
     fn mock_file_store() -> FileStore {
         let pbuf = path::PathBuf::from(MOCK_PATH);
