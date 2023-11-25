@@ -18,7 +18,7 @@ pub struct FileStore {
     pub url: Option<Url>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum GetError {
     NoSuchFile(PathBuf),
     IncomprehensibleFilename(OsString),
@@ -84,14 +84,17 @@ impl FileStore {
     pub fn captures_in_list(&self, ll: FileList) -> CaptureList {
         let mut cl = CaptureList::empty();
         for l in ll {
-            match self.get(&PathBuf::from(&l)) {
+            let p = PathBuf::from(&l);
+            match self.get(&p) {
                 Ok(c) => cl.list.push(c),
                 Err(e) => {
-                    eprintln!(
-                        "error on getting capture '{}': {:?}",
-                        l.to_str().unwrap(),
-                        e
-                    );
+                    if !matches!(e, NoSuchFile(_)) {
+                        eprintln!(
+                            "error on getting capture '{}': {:?}",
+                            l.to_str().unwrap(),
+                            e
+                        );
+                    }
                     cl.missing.push(l);
                 }
             }
