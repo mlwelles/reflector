@@ -162,7 +162,7 @@ impl Mirror {
 
 impl fmt::Display for Mirror {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        write!(f, "<mirror {})", self.name)
+        write!(f, "<mirror {}>", self.name)
     }
 }
 
