@@ -1,5 +1,7 @@
 //! A simple representation of a series of times.
 //!
+//! Whereas a [TimeRange] can be thought of as region of time, a
+//! TimeList is the result of filling a time series within a range.
 //! These are generally used to glue between [TimeRange] and
 //! [CaptureList] or [FileList].
 //!

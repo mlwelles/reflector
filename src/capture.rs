@@ -1,3 +1,9 @@
+//! A simple representation of a capture and list of the same.
+//!
+//! [Capture]s represent a captured resource from a [Remote] source.
+//! They are collected into a [CaptureList], which also includes information on
+//! any missing resources which cannot be made into [Capture]s.
+
 use std::ffi::OsString;
 use std::{fmt, path, time};
 use url::Url;
