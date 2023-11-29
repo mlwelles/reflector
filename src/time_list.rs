@@ -24,17 +24,20 @@
 use super::time_util::*;
 use super::{CaptureList, TimeRange};
 use chrono::NaiveDateTime;
+use std::collections::VecDeque;
 use std::fmt;
 use std::time::{Duration, SystemTime};
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct TimeList {
-    list: Vec<SystemTime>,
+    list: VecDeque<SystemTime>,
 }
 
 impl TimeList {
     pub fn empty() -> Self {
-        TimeList { list: vec![] }
+        TimeList {
+            list: VecDeque::new(),
+        }
     }
 
     pub fn len(&self) -> usize {
@@ -42,7 +45,7 @@ impl TimeList {
     }
 
     pub fn push(&mut self, time: SystemTime) {
-        self.list.push(time)
+        self.list.push_back(time)
     }
 }
 
@@ -50,19 +53,26 @@ impl Iterator for TimeList {
     type Item = SystemTime;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.list.pop()
+        self.list.pop_front()
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let l = self.len();
+        (l, Some(l))
     }
 }
 
 impl From<Vec<SystemTime>> for TimeList {
-    fn from(list: Vec<SystemTime>) -> Self {
+    fn from(v: Vec<SystemTime>) -> Self {
+        let list = VecDeque::from(v);
         Self { list }
     }
 }
 
 impl From<SystemTime> for TimeList {
     fn from(start: SystemTime) -> Self {
-        let list = vec![start];
+        let mut list = VecDeque::new();
+        list.push_back(start);
         Self { list }
     }
 }
@@ -170,9 +180,11 @@ mod tests {
     fn iter() {
         let now = SystemTime::now();
         let mut tl = TimeList::from(now);
+        assert_eq!(1, tl.len());
         let then = now + Duration::from_secs(60);
         tl.push(then);
         assert_eq!(2, tl.len());
+        assert_eq!((2, Some(2)), tl.size_hint());
         assert_eq!(Some(now), tl.next());
         assert_eq!(Some(then), tl.next());
         assert_eq!(None, tl.next());
