@@ -198,14 +198,8 @@ mod tests {
     #[test]
     fn check_mock() {
         let m = mock_mirror();
+        // FIXME -- our mock should have a mock capture
         assert_eq!(None, m.latest_capture());
-    }
-
-    #[test]
-    fn latest_capture() {
-        let m = mock_mirror();
-        let c = m.latest_capture();
-        assert_eq!(None, c);
     }
 
     #[test]
