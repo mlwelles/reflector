@@ -18,13 +18,19 @@ pub fn systime_as_secs(s: &SystemTime) -> u64 {
     }
 }
 
+/// round a systemtime to seconds, tossing out nanoseconds
 /// ```
 /// use reflector::time_util::*;
 /// use std::time::SystemTime;
 ///
 /// let now = SystemTime::now();
+/// let d = now.duration_since(SystemTime::UNIX_EPOCH).unwrap();
 /// let rounded = systime_round_to_s(&now);
-/// assert_ne!(now, rounded, "almost always true");
+/// if d.subsec_millis() > 0  {
+///   assert_ne!(now, rounded);
+/// } else {
+///   assert_eq!(now, rounded);
+/// }
 /// ```
 pub fn systime_round_to_s(s: &SystemTime) -> SystemTime {
     let e = SystemTime::UNIX_EPOCH;
