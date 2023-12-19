@@ -70,7 +70,7 @@ impl FromStr for Config {
     type Err = SourceSearchError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if s.len() < 1 {
+        if s.is_empty() {
             return Err(SourceSearchError::EmptyName);
         }
 
