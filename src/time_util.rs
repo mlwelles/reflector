@@ -124,5 +124,5 @@ pub fn naive_since_midnight(inb: &NaiveDateTime) -> Duration {
 /// assert_eq!(NaiveDateTime::UNIX_EPOCH, naive_trunc_midnight(&n));
 /// ```
 pub fn naive_trunc_midnight(inb: &NaiveDateTime) -> NaiveDateTime {
-    inb.clone() - naive_since_midnight(&inb)
+    *inb - naive_since_midnight(inb)
 }

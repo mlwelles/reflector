@@ -28,9 +28,9 @@ impl TimeRange {
 
     pub fn from_now_to(dur: &Duration) -> Result<Self, TimeRangeError> {
         let to = SystemTime::now();
-        let from = match to.checked_sub(dur.clone()) {
+        let from = match to.checked_sub(*dur) {
             Some(f) => f,
-            None => return Err(TimeRangeError::CannotRemovePeriod(to, dur.clone())),
+            None => return Err(TimeRangeError::CannotRemovePeriod(to, *dur)),
         };
         Self::new(from, to)
     }
@@ -49,7 +49,7 @@ impl TimeRange {
     }
 
     pub fn make_timelist(self, period: &Duration, offset: &Duration) -> TimeList {
-        TimeList::from((self, period.clone(), offset.clone()))
+        TimeList::from((self, *period, *offset))
     }
 
     pub fn encloses(&self, s: SystemTime) -> bool {

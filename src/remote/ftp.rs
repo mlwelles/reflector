@@ -55,7 +55,7 @@ impl Ftp {
         };
         let creds = creds.unwrap_or(FtpCredentials::default());
         let base = base.clone();
-        match connect(remote.clone(), &base, &creds) {
+        match connect(remote, &base, &creds) {
             Ok(stream) => Ok(Ftp {
                 base,
                 stream,
@@ -88,7 +88,7 @@ impl RemoteClient for Ftp {
             Ok(s) => s,
             Err(e) => return Err(GetError::UnparsableURL(e)),
         };
-        let file = match self.create_output(&output) {
+        let file = match self.create_output(output) {
             Ok(f) => f,
             Err(e) => {
                 eprintln!("error on create: {:?}", e);

@@ -108,7 +108,7 @@ impl From<(TimeRange, Duration, Duration)> for TimeList {
         // stack on one per period, accumulating the period
         // until our accum is larger than our end time
         let mut l = Self::empty();
-        let mut tt = start.clone();
+        let mut tt = start;
         while tt <= range.to {
             if range.encloses(tt) {
                 l.push(tt);
@@ -148,7 +148,7 @@ impl fmt::Display for TimeList {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let tt = self
             .clone()
-            .map(|t| display_systime(t))
+            .map(display_systime)
             .collect::<Vec<String>>()
             .join(", ");
         write!(f, "[{}]", tt)
