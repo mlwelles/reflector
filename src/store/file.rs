@@ -42,7 +42,7 @@ impl FileStore {
     pub fn validate(&self) -> Result<(), StoreError> {
         let localmd = fs::metadata(&self.path);
         if let Err(e) = localmd {
-            return Err(InvalidLocalMetadata(e));
+            return Err(InvalidLocalMetadata(e, path::PathBuf::from(&self.path)));
         }
         let local = path::PathBuf::from(&self.path);
         let permissions = localmd.unwrap().permissions();
