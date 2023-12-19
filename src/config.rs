@@ -2,6 +2,7 @@
 
 use serde::Deserialize;
 use std::default::Default;
+use std::fmt;
 use std::str::FromStr;
 
 #[derive(Debug, Deserialize)]
@@ -9,7 +10,7 @@ pub struct Config {
     pub sources: Vec<SourceConfig>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct SourceConfig {
     pub name: String,
     pub remote: String,
@@ -20,6 +21,16 @@ pub struct SourceConfig {
     /// seconds after midnight to offset all times
     pub seed_past_midnight: Option<u64>,
     pub flatten: Option<bool>,
+}
+
+impl fmt::Display for SourceConfig {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        write!(
+            f,
+            "<SourceConfig {} l: {} r: {}>",
+            self.name, self.local, self.remote
+        )
+    }
 }
 
 impl Default for Config {

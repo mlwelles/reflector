@@ -26,12 +26,12 @@ fn main() {
     };
 
     for src in cfg.sources {
-        match Mirror::new(src) {
+        match Mirror::new(src.clone()) {
             Ok(mut m) => match m.status() {
                 Ok(st) => println!("{} status: {}", m.name, st),
                 Err(e) => eprintln!("{} status error: {:?}", m.name, e),
             },
-            Err(e) => eprintln!("error: {:#?}", e),
+            Err(e) => eprintln!("error with {src}: {:#?}", e),
         }
     }
     println!("done");
