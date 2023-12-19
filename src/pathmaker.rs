@@ -46,8 +46,7 @@ pub trait PathMaker {
     }
 
     fn time_to_string(&self, time: &DateTime<Utc>) -> String {
-        let s = time.to_rfc3339();
-        String::from(s)
+        time.to_rfc3339()
     }
 
     fn timelist_to_filelist(&self, tt: &TimeList) -> FileList {
@@ -58,13 +57,5 @@ pub trait PathMaker {
             ff.push(&f);
         }
         ff
-    }
-
-    fn from_range(
-        &self,
-        _range: &TimeRange,
-        _period: &Duration,
-    ) -> Result<Vec<path::PathBuf>, PathMakerError> {
-        Err(Unimplemented)
     }
 }
