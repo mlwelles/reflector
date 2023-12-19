@@ -44,6 +44,10 @@ impl TimeList {
         self.list.len()
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.list.is_empty()
+    }
+
     pub fn push(&mut self, time: SystemTime) {
         self.list.push_back(time)
     }
