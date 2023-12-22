@@ -13,7 +13,7 @@ impl RemoteClient for Mock {
         Ok(Duration::new(0, 0))
     }
 
-    fn get(&mut self, resource: &str, output: &PathBuf) -> Result<Gotten, GetError> {
+    fn get(&mut self, resource: &str, output: PathBuf) -> Result<Gotten, GetError> {
         let source = Url::parse("http://127.0.0.1/").unwrap();
         Ok(Gotten::new(
             "x-raw/mock",
@@ -47,6 +47,6 @@ mod tests {
     fn get() {
         let mut m = mock();
         let path = PathBuf::from("/dev/null");
-        m.get("mumble", &path).unwrap();
+        m.get("mumble", path).unwrap();
     }
 }

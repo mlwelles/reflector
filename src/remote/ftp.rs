@@ -82,13 +82,13 @@ impl RemoteClient for Ftp {
         }
     }
 
-    fn get(&mut self, resource: &str, output: &PathBuf) -> Result<Gotten, GetError> {
+    fn get(&mut self, resource: &str, output: PathBuf) -> Result<Gotten, GetError> {
         let mimetype = "application/octet-stream";
         let source = match self.base.join(resource) {
             Ok(s) => s,
             Err(e) => return Err(GetError::UnparsableURL(e)),
         };
-        let file = match self.create_output(output) {
+        let file = match self.create_output(&output) {
             Ok(f) => f,
             Err(e) => {
                 eprintln!("error on create: {:?}", e);
@@ -198,7 +198,7 @@ mod tests {
     fn get() {
         let mut m = mock();
         let path = PathBuf::from("/dev/null");
-        let got = m.get(MOCK_RESOURCE, &path).unwrap();
+        let got = m.get(MOCK_RESOURCE, path).unwrap();
         assert_eq!(MOCK_RESOURCE, got.resource);
     }
 
@@ -206,7 +206,7 @@ mod tests {
     fn not_found() {
         let mut m = mock();
         let path = PathBuf::from("/dev/null");
-        let fail = m.get("asdfasfdasfd", &path);
+        let fail = m.get("asdfasfdasfd", path);
         assert!(fail.is_err())
     }
 
@@ -215,7 +215,7 @@ mod tests {
         let mut m = mock();
         let t = TempDir::new().unwrap();
         let path = t.path().join("test.bin");
-        let got = m.get(MOCK_RESOURCE, &path).unwrap();
+        let got = m.get(MOCK_RESOURCE, path).unwrap();
         got.validate().unwrap();
     }
 

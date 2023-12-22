@@ -32,7 +32,7 @@ impl RemoteClient for Http {
         }
     }
 
-    fn get(&mut self, resource: &str, output: &PathBuf) -> Result<Gotten, GetError> {
+    fn get(&mut self, resource: &str, output: PathBuf) -> Result<Gotten, GetError> {
         let u = match self.base.join(resource) {
             Ok(u) => u,
             Err(e) => return Err(GetError::UnparsableURL(e)),
@@ -80,7 +80,7 @@ impl RemoteClient for Http {
             eprintln!("read {tot} bytes");
         }
 
-        let g = Gotten::new(&mimetype, resource, u, output.to_path_buf(), tot);
+        let g = Gotten::new(&mimetype, resource, u, output, tot);
         Ok(g)
     }
 
@@ -113,7 +113,7 @@ mod tests {
     fn get() {
         let mut m = mock();
         let path = PathBuf::from("/dev/null");
-        let got = m.get(MOCK_RESOURCE, &path).unwrap();
+        let got = m.get(MOCK_RESOURCE, path.clone()).unwrap();
         assert_eq!(MOCK_RESOURCE, got.resource);
         assert_eq!(path, got.output);
     }
@@ -123,14 +123,14 @@ mod tests {
         let mut m = mock();
         let t = TempDir::new().unwrap();
         let path = t.path().join("test.bin");
-        let got = m.get(MOCK_RESOURCE, &path).unwrap();
+        let got = m.get(MOCK_RESOURCE, path).unwrap();
         got.validate().unwrap();
     }
 
     #[test]
     fn not_found() {
         let path = PathBuf::from("/dev/null");
-        let fail = mock().get("asdfasfdasfd", &path);
+        let fail = mock().get("asdfasfdasfd", path);
         assert!(fail.is_err())
     }
 }
