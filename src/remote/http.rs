@@ -39,7 +39,7 @@ impl RemoteClient for Http {
         };
         let resp = match self.agent.request_url("GET", &u).call() {
             Ok(resp) => resp,
-            Err(e) => return Err(GetError::RequestErr(e)),
+            Err(e) => return Err(GetError::RequestErr(Box::new(e))),
         };
         let mimetype = String::from(resp.content_type());
         let file = match self.create_output(&output) {

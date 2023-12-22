@@ -32,7 +32,7 @@ pub enum GetError {
     Unimplemented,
     UnparsableURL(url::ParseError),
     NotConnected,
-    RequestErr(ureq::Error),
+    RequestErr(Box<ureq::Error>),
     OutputExistsAsDir(PathBuf),
     OutputFileExists(PathBuf),
     OutputCreateFile(io::Error),

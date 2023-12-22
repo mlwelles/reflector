@@ -53,7 +53,7 @@ impl Ftp {
             Ok(a) => a[0],
             Err(e) => return Err(ConnectError::SocketError(e)),
         };
-        let creds = creds.unwrap_or(FtpCredentials::default());
+        let creds = creds.unwrap_or_default();
         let base = base.clone();
         match connect(remote, &base, &creds) {
             Ok(stream) => Ok(Ftp {
