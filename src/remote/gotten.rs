@@ -3,7 +3,6 @@ use std::io;
 use std::path::PathBuf;
 use url::Url;
 
-#[allow(dead_code)]
 pub struct Gotten {
     pub mimetype: String,
     pub resource: String,
