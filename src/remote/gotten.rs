@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::io;
 use std::path::PathBuf;
 use url::Url;
@@ -45,12 +46,11 @@ impl Gotten {
         };
         let gs = m.len();
         let es = self.size;
-        if gs > es {
-            return Err(OutputLargerThanExpected(gs, es));
-        } else if es > gs {
-            return Err(OutputSmallerThanExpected(gs, es));
+        match gs.cmp(&es) {
+            Ordering::Greater => Err(OutputLargerThanExpected(gs, es)),
+            Ordering::Less => Err(OutputSmallerThanExpected(gs, es)),
+            _ => Ok(()),
         }
-        Ok(())
     }
 
     pub fn valid(&self) -> bool {
