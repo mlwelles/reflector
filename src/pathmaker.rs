@@ -11,7 +11,7 @@ pub use identity::Identity;
 pub mod time;
 pub use time::make_utc;
 
-use super::{FileList, TimeList, TimeRange};
+use super::{FileList, TimeList};
 use chrono::{DateTime, Utc};
 use std::ffi::{OsStr, OsString};
 use std::path;

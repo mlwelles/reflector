@@ -46,7 +46,7 @@ impl From<String> for FileList {
 
 impl From<Vec<String>> for FileList {
     fn from(ss: Vec<String>) -> Self {
-        let list = ss.iter().map(|s| OsString::from(s)).collect();
+        let list = ss.iter().map(OsString::from).collect();
         Self { list }
     }
 }
