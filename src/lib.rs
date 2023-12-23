@@ -3,7 +3,7 @@ pub use config::{Config, SourceConfig, SourceSearchError};
 pub mod mirror;
 pub use mirror::Mirror;
 pub mod capture;
-pub use capture::{Capture, CaptureList};
+pub use capture::{Capture, CaptureError, CaptureList};
 pub mod time_util;
 pub use time_util::*;
 pub mod time_range;

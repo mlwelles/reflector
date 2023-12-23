@@ -4,7 +4,10 @@ use crate::pathmaker;
 use crate::remote::{from_url as remote_from_url, PingError, RCFactoryError, RemoteClient};
 use crate::store::{FileList, FileStore};
 use crate::time_range;
-use crate::{Capture, CaptureList, PathMaker, PathMakerError, SourceConfig, StoreError, TimeRange};
+use crate::{
+    Capture, CaptureError, CaptureList, PathMaker, PathMakerError, SourceConfig, StoreError,
+    TimeRange,
+};
 use std::fmt;
 use std::time::{self, Duration, SystemTime};
 use url::Url;
@@ -45,6 +48,7 @@ pub enum StatusError {
     Unimplemented,
     CannotPing(PingError),
     RangeError(time_range::TimeRangeError),
+    CaptureError(CaptureError),
 }
 
 /// a remote site, kept in sync with a local file store
@@ -131,8 +135,21 @@ impl Mirror {
         // check the store for files within our range,
         // and set the status accordingly
         let cc = self.local.captures_in_list(ff);
-
-        Ok(MirrorStatus::Unimplemented)
+        match cc.full_ratio() {
+            Err(e) => Err(StatusError::CaptureError(e)),
+            Ok(f) => {
+                if let Some(latest) = cc.last() {
+                    let lt = latest.time;
+                    if f < 1.0 {
+                        Ok(MirrorStatus::Partial(lt))
+                    } else {
+                        Ok(MirrorStatus::Full(lt))
+                    }
+                } else {
+                    Ok(MirrorStatus::Empty)
+                }
+            }
+        }
     }
 
     pub fn ping(&mut self) -> Result<time::Duration, PingError> {
