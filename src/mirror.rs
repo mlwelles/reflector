@@ -223,7 +223,6 @@ mod tests {
     fn status() {
         let mut m = mock_mirror();
         let s = m.status().unwrap();
-        // FIXME
-        assert_eq!("status not implemented", format!("{s}"));
+        assert_eq!("mirror is empty, unpulled", format!("{s}"));
     }
 }
