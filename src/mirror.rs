@@ -186,16 +186,23 @@ impl fmt::Display for Mirror {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::fs::DirBuilder;
+    use crate::time_util::*;
+    use std::fs::{DirBuilder, File};
     use std::path::Path;
 
     fn mock_src_config() -> SourceConfig {
         let fc = "/tmp/mock_mirror_store";
+        let fcp = Path::new(fc);
 
         // ensure our store dir exists
-        if !Path::new(fc).is_dir() {
+        if !fcp.is_dir() {
             DirBuilder::new().create(fc).unwrap();
         }
+
+        // setup a mock capture
+        let nt = naive_from_systime(SystemTime::now());
+        let ts: String = format!("{}", nt.format("%Y-%m-%d 00:00"));
+        let _file = File::create(fcp.join(&ts));
 
         SourceConfig {
             name: "mock mirror source".to_string(),
@@ -215,14 +222,14 @@ mod tests {
     #[test]
     fn check_mock() {
         let m = mock_mirror();
-        // FIXME -- our mock should have a mock capture
-        assert_eq!(None, m.latest_capture());
+        assert!(m.latest_capture().is_some());
     }
 
     #[test]
     fn status() {
         let mut m = mock_mirror();
         let s = m.status().unwrap();
+        // FIXME: bad assert, we should expect a single capture at least
         assert_eq!("mirror is empty, unpulled", format!("{s}"));
     }
 }

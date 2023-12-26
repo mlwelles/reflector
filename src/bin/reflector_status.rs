@@ -28,7 +28,10 @@ fn main() {
     for src in cfg.sources {
         match Mirror::new(src.clone()) {
             Ok(mut m) => match m.status() {
-                Ok(st) => println!("{} status: {}", m.name, st),
+                Ok(st) => {
+                    println!("{}\t{}", m.name, m.local);
+                    println!("{}\tstatus: {}", m.name, st);
+                }
                 Err(e) => eprintln!("{} status error: {:?}", m.name, e),
             },
             Err(e) => eprintln!("error with {src}: {:#?}", e),

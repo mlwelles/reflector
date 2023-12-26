@@ -20,6 +20,7 @@ pub struct SourceConfig {
     pub period: u64,
     /// seconds after midnight to offset all times
     pub seed_past_midnight: Option<u64>,
+    pub loop_period: Option<u64>,
     pub flatten: Option<bool>,
 }
 
@@ -42,8 +43,9 @@ impl Default for Config {
                 local: "/home/adam/tmp/sat/sdo".to_string(),
                 pathmaker: "SDO".to_string(),
                 flatten: Some(true),
-                period: 5 * 60 * 60 * 24,
+                period: 24 * 60 * 60, // 24 hours, expressed as seconds
                 seed_past_midnight: None,
+                loop_period: Some(24 * 60 * 60 * 28), // 28 days
             },
             SourceConfig {
                 name: "GOES ABI_TrueColor".to_string(),
@@ -53,6 +55,7 @@ impl Default for Config {
                 flatten: None,
                 period: 5 * 60 * 10,
                 seed_past_midnight: None,
+                loop_period: Some(24 * 60 * 60), // 24 hours
             },
         ];
         Config { sources: srcs }

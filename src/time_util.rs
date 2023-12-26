@@ -93,8 +93,8 @@ pub fn systime_from_naive(ndt: NaiveDateTime) -> SystemTime {
 /// use reflector::time_util::*;
 /// use std::time::SystemTime;
 ///
-/// let now = SystemTime::UNIX_EPOCH;
-/// assert_eq!("1970-01-01 00:00:00", display_systime(now))
+/// let epch = SystemTime::UNIX_EPOCH;
+/// assert_eq!("1970-01-01 00:00:00", display_systime(epch))
 /// ```
 pub fn display_systime(st: SystemTime) -> String {
     naive_from_systime(st)
