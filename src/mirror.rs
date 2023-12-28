@@ -211,7 +211,11 @@ mod tests {
 
         // setup a mock capture
         let nt = naive_from_systime(SystemTime::now());
-        let ts: String = format!("{}", nt.format("%Y-%m-%d 00:00"));
+        // 2023-12-28 00:00:00
+        // let ts: String = format!("{}", nt.format("%Y-%m-%d 00:00:00"));
+        // 2023-12-28T05:00:00+00:00
+        // xx let ts: String = format!("{}", nt.format("%Y-%m-%dT%z"));
+        let ts: String = format!("{}", nt.format("%Y-%m-%dT05:00:00+00:00"));
         eprintln!("creating file in store '{}'...", fcp.join(&ts).display());
         let _file = File::create(fcp.join(&ts));
 
@@ -232,7 +236,7 @@ mod tests {
     }
 
     #[test]
-    fn check_mock() {
+    fn latest_capture() {
         let m = mock_mirror();
         assert!(m.latest_capture().is_some());
     }
@@ -242,8 +246,7 @@ mod tests {
         let mut m = mock_mirror();
         let s = m.status().unwrap();
         assert!(matches!(s, MirrorStatus::Partial(_)));
-
-        // FIXME: bad assert, we should expect a single capture at least
-        assert_eq!("mirror is empty, unpulled", format!("{s}"));
+        let ss: String = format!("{s}");
+        assert!(ss.contains("only partially reflected"));
     }
 }
