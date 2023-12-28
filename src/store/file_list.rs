@@ -1,4 +1,5 @@
 use std::ffi::{OsStr, OsString};
+use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct FileList {
@@ -48,6 +49,12 @@ impl From<Vec<String>> for FileList {
     fn from(ss: Vec<String>) -> Self {
         let list = ss.iter().map(OsString::from).collect();
         Self { list }
+    }
+}
+
+impl fmt::Display for FileList {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "<FileList of {} files>", self.len())
     }
 }
 

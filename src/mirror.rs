@@ -49,6 +49,7 @@ pub enum StatusError {
     CannotPing(PingError),
     RangeError(time_range::TimeRangeError),
     CaptureError(CaptureError),
+    Inconsistent(),
 }
 
 /// a remote site, kept in sync with a local file store
@@ -130,7 +131,9 @@ impl Mirror {
         };
 
         let tt = range.make_timelist(&self.period, &self.seed_past_midnight);
+        // eprintln!("timelist {tt} len {}", tt.len());
         let ff = self.pathmaker.timelist_to_filelist(&tt);
+        // eprintln!("filelist {ff} len {}", ff.len());
 
         // check the store for files within our range,
         // and set the status accordingly
@@ -138,7 +141,9 @@ impl Mirror {
         match cc.full_ratio() {
             Err(e) => Err(StatusError::CaptureError(e)),
             Ok(f) => {
-                if let Some(latest) = cc.last() {
+                if cc.is_empty() {
+                    Ok(MirrorStatus::Empty)
+                } else if let Some(latest) = cc.last() {
                     let lt = latest.time;
                     if f < 1.0 {
                         Ok(MirrorStatus::Partial(lt))
@@ -146,7 +151,7 @@ impl Mirror {
                         Ok(MirrorStatus::Full(lt))
                     }
                 } else {
-                    Ok(MirrorStatus::Empty)
+                    Err(StatusError::Inconsistent())
                 }
             }
         }
