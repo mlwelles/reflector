@@ -20,6 +20,7 @@ pub struct FileStore {
 
 #[derive(Debug, PartialEq)]
 pub enum GetError {
+    NotAFile(PathBuf),
     NoSuchFile(PathBuf),
     IncomprehensibleFilename(OsString),
 }
@@ -58,7 +59,7 @@ impl FileStore {
     pub fn get(&self, p: &PathBuf) -> Result<Capture, GetError> {
         let fetched = self.path.join(p);
         if !fetched.is_file() {
-            return Err(NoSuchFile(fetched));
+            return Err(NotAFile(fetched));
         }
         match fetched.file_name() {
             Some(f) => match self.pathmaker.filename_to_systime(f) {
