@@ -114,7 +114,7 @@ impl From<(TimeRange, Duration, Duration)> for TimeList {
         let mut l = Self::empty();
         let mut tt = start;
         while tt <= range.to {
-            if range.encloses(tt) {
+            if range.contains(tt) {
                 l.push(tt);
             }
             tt += period;

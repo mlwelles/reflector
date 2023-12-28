@@ -52,7 +52,7 @@ impl TimeRange {
         TimeList::from((self, *period, *offset))
     }
 
-    pub fn encloses(&self, s: SystemTime) -> bool {
+    pub fn contains(&self, s: SystemTime) -> bool {
         self.from <= s && s <= self.to
     }
 }
