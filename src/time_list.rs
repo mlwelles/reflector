@@ -150,12 +150,14 @@ impl From<(TimeRange, Duration)> for TimeList {
 
 impl fmt::Display for TimeList {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let tt = self
-            .clone()
-            .map(display_systime)
-            .collect::<Vec<String>>()
-            .join(", ");
-        write!(f, "[{}]", tt)
+        write!(
+            f,
+            "[{}]",
+            self.clone()
+                .map(display_systime)
+                .collect::<Vec<String>>()
+                .join(", ")
+        )
     }
 }
 
