@@ -1,5 +1,7 @@
 use std::ffi::{OsStr, OsString};
 use std::fmt;
+use std::os::unix::ffi::OsStrExt;
+use std::str;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct FileList {
@@ -54,7 +56,11 @@ impl From<Vec<String>> for FileList {
 
 impl fmt::Display for FileList {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "<FileList of {} files>", self.len())
+        write!(f, "[")?;
+        for i in self.clone() {
+            write!(f, "{}, ", str::from_utf8(i.as_bytes()).unwrap())?;
+        }
+        write!(f, "]")
     }
 }
 
