@@ -211,6 +211,14 @@ impl fmt::Display for Mirror {
     }
 }
 
+impl TryFrom<SourceConfig> for Mirror {
+    type Error = MirrorError;
+
+    fn try_from(src: SourceConfig) -> Result<Self, Self::Error> {
+        Mirror::new(src)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
