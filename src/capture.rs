@@ -45,6 +45,10 @@ impl CaptureList {
         self.list.is_empty() && self.missing.is_empty()
     }
 
+    pub fn has_captures(&self) -> bool {
+        !self.list.is_empty()
+    }
+
     pub fn len(&self) -> usize {
         self.list.len()
     }

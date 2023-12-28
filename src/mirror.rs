@@ -23,7 +23,7 @@ use MirrorError::*;
 
 /// the current status of the mirror, specifically related to how
 /// completely upstream data is shadowed
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum MirrorStatus {
     Unimplemented,
     Full(time::SystemTime),
@@ -33,13 +33,17 @@ pub enum MirrorStatus {
 
 impl fmt::Display for MirrorStatus {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let out = match self {
-            MirrorStatus::Unimplemented => "status not implemented".to_string(),
-            MirrorStatus::Full(t) => format!("mirror latest {:?}, fully reflected", t),
-            MirrorStatus::Partial(t) => format!("mirror latest {:?}, only partially reflected", t),
-            MirrorStatus::Empty => "mirror is empty, unpulled".to_string(),
-        };
-        write!(f, "{}", out)
+        write!(
+            f,
+            "{}",
+            match self {
+                MirrorStatus::Unimplemented => "status not implemented".to_string(),
+                MirrorStatus::Full(t) => format!("mirror latest {:?}, fully reflected", t),
+                MirrorStatus::Partial(t) =>
+                    format!("mirror latest {:?}, only partially reflected", t),
+                MirrorStatus::Empty => "mirror is empty, unpulled".to_string(),
+            }
+        )
     }
 }
 
@@ -49,7 +53,7 @@ pub enum StatusError {
     CannotPing(PingError),
     RangeError(time_range::TimeRangeError),
     CaptureError(CaptureError),
-    Inconsistent(),
+    Inconsistent, // shouldn't normally happen
 }
 
 /// a remote site, kept in sync with a local file store
@@ -138,10 +142,11 @@ impl Mirror {
         // check the store for files within our range,
         // and set the status accordingly
         let cc = self.local.captures_in_list(ff);
+        // eprintln!("captures {cc} len {}", cc.len());
         match cc.full_ratio() {
             Err(e) => Err(StatusError::CaptureError(e)),
             Ok(f) => {
-                if cc.is_empty() {
+                if !cc.has_captures() {
                     Ok(MirrorStatus::Empty)
                 } else if let Some(latest) = cc.last() {
                     let lt = latest.time;
@@ -151,7 +156,7 @@ impl Mirror {
                         Ok(MirrorStatus::Full(lt))
                     }
                 } else {
-                    Err(StatusError::Inconsistent())
+                    Err(StatusError::Inconsistent)
                 }
             }
         }
@@ -207,6 +212,7 @@ mod tests {
         // setup a mock capture
         let nt = naive_from_systime(SystemTime::now());
         let ts: String = format!("{}", nt.format("%Y-%m-%d 00:00"));
+        eprintln!("creating file in store '{}'...", fcp.join(&ts).display());
         let _file = File::create(fcp.join(&ts));
 
         SourceConfig {
@@ -215,9 +221,9 @@ mod tests {
             local: fc.to_string(),
             pathmaker: "identity".to_string(),
             flatten: None,
-            period: 60,
+            period: 60 * 60, // once per hour
             seed_past_midnight: None,
-            loop_period: None,
+            loop_period: Some(60 * 60 * 24),
         }
     }
 
@@ -235,6 +241,8 @@ mod tests {
     fn status() {
         let mut m = mock_mirror();
         let s = m.status().unwrap();
+        assert!(matches!(s, MirrorStatus::Partial(_)));
+
         // FIXME: bad assert, we should expect a single capture at least
         assert_eq!("mirror is empty, unpulled", format!("{s}"));
     }
