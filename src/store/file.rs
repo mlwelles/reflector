@@ -58,6 +58,7 @@ impl FileStore {
 
     pub fn get(&self, p: &PathBuf) -> Result<Capture, GetError> {
         let fetched = self.path.join(p);
+        // eprintln!("{}", fetched.metadata().unwrap().file_type());
         if !fetched.is_file() {
             return Err(NotAFile(fetched));
         }

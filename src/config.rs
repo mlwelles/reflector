@@ -103,9 +103,17 @@ impl FromStr for Config {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::mirror::Mirror;
+    use crate::TimeRange;
+    use std::time::SystemTime;
 
     #[test]
     fn sdo() {
         let s = SourceConfig::sdo();
+        let sd = Mirror::try_from(s).unwrap();
+        let now = SystemTime::now();
+        let expect = TimeRange::new(now - sd.loop_period, now).unwrap();
+        assert!(sd.loop_range().equal_by_seconds(&expect));
+        let _cap = sd.loop_captures();
     }
 }
