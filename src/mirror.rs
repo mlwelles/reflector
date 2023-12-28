@@ -212,6 +212,7 @@ mod tests {
             flatten: None,
             period: 60,
             seed_past_midnight: None,
+            loop_period: None,
         }
     }
 
