@@ -6,7 +6,7 @@ use crate::store::{FileList, FileStore};
 use crate::time_range;
 use crate::{
     Capture, CaptureError, CaptureList, PathMaker, PathMakerError, SourceConfig, StoreError,
-    TimeRange,
+    TimeList, TimeRange,
 };
 use std::fmt;
 use std::time::{self, Duration, SystemTime};
@@ -166,15 +166,10 @@ impl Mirror {
         self.remote_client.ping()
     }
 
-    pub fn range_to_filelist(&self, range: &TimeRange) -> FileList {
-        let mut files = FileList::empty();
-        let range: TimeRange = range.clone();
-        let times = range.make_timelist(&self.period, &self.seed_past_midnight);
-        for t in times {
-            let f = self.pathmaker.systime_to_filename(&t);
-            files.push(&f);
-        }
-        files
+    pub fn timelist(&self, range: &TimeRange) -> TimeList {
+        range
+            .clone()
+            .make_timelist(&self.period, &self.seed_past_midnight)
     }
 
     pub fn captures_in_range(&self, range: &TimeRange) -> CaptureList {
@@ -182,8 +177,31 @@ impl Mirror {
         self.local.captures_in_list(items)
     }
 
+    fn filelist(&self, times: &TimeList) -> FileList {
+        let mut files = FileList::empty();
+        for t in times.clone() {
+            let f = self.pathmaker.systime_to_filename(&t);
+            files.push(&f);
+        }
+        files
+    }
+
+    pub fn range_to_filelist(&self, range: &TimeRange) -> FileList {
+        let range: TimeRange = range.clone();
+        let times = self.timelist(&range);
+        self.filelist(&times)
+    }
+
+    pub fn loop_range(&self) -> TimeRange {
+        TimeRange::from_now_to(&self.loop_period).unwrap()
+    }
+
+    pub fn loop_captures(&self) -> CaptureList {
+        self.captures_in_range(&self.loop_range())
+    }
+
     pub fn latest_capture(&self) -> Option<Capture> {
-        None
+        self.loop_captures().last()
     }
 }
 
