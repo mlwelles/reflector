@@ -24,6 +24,34 @@ pub struct SourceConfig {
     pub flatten: Option<bool>,
 }
 
+impl SourceConfig {
+    pub fn sdo() -> Self {
+        Self {
+            name: "Solar Data Observatory".to_string(),
+            remote: "https://sdo.gsfc.nasa.gov/assets/img/dailymov".to_string(),
+            local: "/home/adam/tmp/sat/sdo".to_string(),
+            pathmaker: "SDO".to_string(),
+            flatten: Some(true),
+            period: 24 * 60 * 60, // 24 hours, expressed as seconds
+            seed_past_midnight: None,
+            loop_period: Some(24 * 60 * 60 * 28), // 28 days
+        }
+    }
+
+    pub fn goes_abi() -> Self {
+        SourceConfig {
+            name: "GOES ABI_TrueColor".to_string(),
+            remote: "ftp://ftp.nnvl.noaa.gov/GOES/ABI_TrueColor".to_string(),
+            local: "/home/adam/tmp/sat/abi_truecolor".to_string(),
+            pathmaker: "GOES-R".to_string(),
+            flatten: None,
+            period: 5 * 60 * 10,
+            seed_past_midnight: None,
+            loop_period: Some(24 * 60 * 60), // 24 hours
+        }
+    }
+}
+
 impl fmt::Display for SourceConfig {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         write!(
@@ -36,28 +64,7 @@ impl fmt::Display for SourceConfig {
 
 impl Default for Config {
     fn default() -> Config {
-        let srcs = vec![
-            SourceConfig {
-                name: "Solar Data Observatory".to_string(),
-                remote: "https://sdo.gsfc.nasa.gov/assets/img/dailymov".to_string(),
-                local: "/home/adam/tmp/sat/sdo".to_string(),
-                pathmaker: "SDO".to_string(),
-                flatten: Some(true),
-                period: 24 * 60 * 60, // 24 hours, expressed as seconds
-                seed_past_midnight: None,
-                loop_period: Some(24 * 60 * 60 * 28), // 28 days
-            },
-            SourceConfig {
-                name: "GOES ABI_TrueColor".to_string(),
-                remote: "ftp://ftp.nnvl.noaa.gov/GOES/ABI_TrueColor".to_string(),
-                local: "/home/adam/tmp/sat/abi_truecolor".to_string(),
-                pathmaker: "GOES-R".to_string(),
-                flatten: None,
-                period: 5 * 60 * 10,
-                seed_past_midnight: None,
-                loop_period: Some(24 * 60 * 60), // 24 hours
-            },
-        ];
+        let srcs = vec![SourceConfig::sdo(), SourceConfig::goes_abi()];
         Config { sources: srcs }
     }
 }
@@ -92,3 +99,13 @@ impl FromStr for Config {
 }
 
 // TODO: From<Vec<String>> or some such
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn sdo() {
+        let s = SourceConfig::sdo();
+    }
+}
