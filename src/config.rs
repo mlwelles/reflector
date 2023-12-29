@@ -105,15 +105,26 @@ mod tests {
     use super::*;
     use crate::mirror::Mirror;
     use crate::TimeRange;
-    use std::time::SystemTime;
+    use std::time::{Duration, SystemTime};
 
     #[test]
     fn sdo() {
         let s = SourceConfig::sdo();
         let sd = Mirror::try_from(s).unwrap();
         let now = SystemTime::now();
+        let lr = sd.loop_range();
         let expect = TimeRange::new(now - sd.loop_period, now).unwrap();
-        assert!(sd.loop_range().equal_by_seconds(&expect));
-        let _cap = sd.loop_captures();
+        assert!(lr.equal_by_seconds(&expect));
+        // hardcoded sanity check
+        let expect = TimeRange::new(now - Duration::new(20 * 24 * 60 * 60, 0), now).unwrap();
+        assert!(lr.equal_by_seconds(&expect), "expect {} == {}", lr, expect);
+        let cap = sd.loop_captures();
+        assert!(!cap.is_empty());
+        assert!(!cap.has_captures());
+        assert!(
+            cap.len_all() > 20,
+            "lenth {} doesn't meet reasonable minimum captures",
+            cap.len_all()
+        )
     }
 }
