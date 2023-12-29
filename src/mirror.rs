@@ -129,20 +129,10 @@ impl Mirror {
             return Err(StatusError::CannotPing(e));
         }
 
-        let range = match TimeRange::from_now_to(&self.loop_period) {
-            Ok(r) => r,
-            Err(e) => return Err(StatusError::RangeError(e)),
-        };
-
-        let tt = range.make_timelist(&self.period, &self.seed_past_midnight);
-        // eprintln!("timelist {tt} len {}", tt.len());
-        let ff = self.pathmaker.timelist_to_filelist(&tt);
-        // eprintln!("filelist {ff} len {}", ff.len());
-
         // check the store for files within our range,
         // and set the status accordingly
-        let cc = self.local.captures_in_list(ff);
-        // eprintln!("captures {cc} len {}", cc.len());
+        let cc = self.loop_captures();
+        eprintln!("captures {cc} len {}", cc.len());
         match cc.full_ratio() {
             Err(e) => Err(StatusError::CaptureError(e)),
             Ok(f) => {
