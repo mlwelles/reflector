@@ -117,7 +117,9 @@ mod tests {
         let expect = TimeRange::new(now - sd.loop_period, now).unwrap();
         assert!(lr.equal_by_seconds(&expect));
         // hardcoded sanity check
-        let expect = TimeRange::new(now - Duration::new(20 * 24 * 60 * 60, 0), now).unwrap();
+        let lp = Duration::new(28 * 24 * 60 * 60, 0);
+        assert_eq!(sd.loop_period, lp);
+        let expect = TimeRange::new(now - lp, now).unwrap();
         assert!(lr.equal_by_seconds(&expect), "expect {} == {}", lr, expect);
 
         let cap = sd.loop_captures();

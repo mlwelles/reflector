@@ -101,8 +101,7 @@ impl Mirror {
             flatten = true;
         }
         let seed_past_midnight = Duration::new(cfg.seed_past_midnight.unwrap_or(0), 0);
-        // FIXME: fixed at 24 hours
-        let loop_period = Duration::new(24 * 60 * 60, 0);
+        let loop_period = Duration::new(cfg.loop_period.unwrap_or(24 * 60 * 60), 0);
 
         let m = Mirror {
             name: cfg.name,
