@@ -15,7 +15,7 @@ pub struct Sdo {
 }
 
 impl Sdo {
-    fn new(suffix: &str) -> Sdo {
+    pub fn new(suffix: &str) -> Sdo {
         let suffix = String::from(suffix);
         Sdo { suffix }
     }

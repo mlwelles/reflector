@@ -30,7 +30,7 @@ impl SourceConfig {
             name: "Solar Data Observatory".to_string(),
             remote: "https://sdo.gsfc.nasa.gov/assets/img/dailymov".to_string(),
             local: "/home/adam/tmp/sat/sdo".to_string(),
-            pathmaker: "SDO".to_string(),
+            pathmaker: "SDO _1024_0094.ogv".to_string(),
             flatten: Some(true),
             period: 24 * 60 * 60, // 24 hours, expressed as seconds
             seed_past_midnight: None,
@@ -112,12 +112,14 @@ mod tests {
         let s = SourceConfig::sdo();
         let sd = Mirror::try_from(s).unwrap();
         let now = SystemTime::now();
+
         let lr = sd.loop_range();
         let expect = TimeRange::new(now - sd.loop_period, now).unwrap();
         assert!(lr.equal_by_seconds(&expect));
         // hardcoded sanity check
         let expect = TimeRange::new(now - Duration::new(20 * 24 * 60 * 60, 0), now).unwrap();
         assert!(lr.equal_by_seconds(&expect), "expect {} == {}", lr, expect);
+
         let cap = sd.loop_captures();
         assert!(!cap.is_empty());
         assert!(!cap.has_captures());
