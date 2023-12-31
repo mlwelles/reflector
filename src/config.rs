@@ -122,13 +122,16 @@ mod tests {
         let expect = TimeRange::new(now - lp, now).unwrap();
         assert!(lr.equal_by_seconds(&expect), "expect {} == {}", lr, expect);
 
-        let cap = sd.loop_captures();
+        let mut cap = sd.loop_captures();
         assert!(!cap.is_empty());
         assert!(!cap.has_captures());
         assert!(
             cap.len_all() > 20,
             "lenth {} doesn't meet reasonable minimum captures",
             cap.len_all()
-        )
+        );
+
+        let fc = cap.next().unwrap(); // first capture
+        assert!(fc.valid())
     }
 }

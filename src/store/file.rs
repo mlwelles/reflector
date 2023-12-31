@@ -1,9 +1,8 @@
 // a class representing a file store on local disk, geared towards
 // storing and retreiving captures and dealing in CaptureLists
 
-use crate::store::FileList;
 use crate::store::StoreError::*;
-use crate::{Capture, CaptureList, PathMaker, StoreError};
+use crate::{Capture, CaptureList, FileList, PathMaker, StoreError};
 use std::{
     ffi::OsString,
     fmt, fs, io,
@@ -90,7 +89,7 @@ impl FileStore {
             match self.get(&p) {
                 Ok(c) => cl.list.push(c),
                 Err(e) => {
-                    if !matches!(e, NoSuchFile(_)) {
+                    if !matches!(e, NoSuchFile(_) | NotAFile(_)) {
                         eprintln!(
                             "error on getting capture '{}': {:?}",
                             l.to_str().unwrap(),
