@@ -54,7 +54,7 @@ pub trait PathMaker {
         let tt = tt.clone();
         for t in tt {
             let f = self.systime_to_filename(&t);
-            ff.push(&f);
+            ff.push_osstr(&f);
         }
         ff
     }

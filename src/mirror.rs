@@ -2,11 +2,10 @@
 
 use crate::pathmaker;
 use crate::remote::{from_url as remote_from_url, PingError, RCFactoryError, RemoteClient};
-use crate::store::{FileList, FileStore};
 use crate::time_range;
 use crate::{
-    Capture, CaptureError, CaptureList, PathMaker, PathMakerError, SourceConfig, StoreError,
-    TimeList, TimeRange,
+    flatten_filename, Capture, CaptureError, CaptureList, FileList, FileStore, PathMaker,
+    PathMakerError, SourceConfig, StoreError, TimeList, TimeRange,
 };
 use std::fmt;
 use std::time::{self, Duration, SystemTime};
@@ -96,10 +95,10 @@ impl Mirror {
         }
         let local = local.unwrap();
 
-        let mut flatten = false;
-        if cfg.flatten == Some(true) {
-            flatten = true;
-        }
+        let flatten = match cfg.flatten {
+            Some(true) => true,
+            _ => false,
+        };
         let seed_past_midnight = Duration::new(cfg.seed_past_midnight.unwrap_or(0), 0);
         let loop_period = Duration::new(cfg.loop_period.unwrap_or(24 * 60 * 60), 0);
 
@@ -162,15 +161,19 @@ impl Mirror {
     }
 
     pub fn captures_in_range(&self, range: &TimeRange) -> CaptureList {
-        let items = self.range_to_filelist(range);
-        self.local.captures_in_list(items)
+        let files = self.range_to_filelist(range);
+        self.local.captures_in_list(files)
     }
 
     fn filelist(&self, times: &TimeList) -> FileList {
         let mut files = FileList::empty();
         for t in times.clone() {
             let f = self.pathmaker.systime_to_filename(&t);
-            files.push(&f);
+            if self.flatten {
+                files.push(flatten_filename(&f));
+            } else {
+                files.push(f);
+            }
         }
         files
     }

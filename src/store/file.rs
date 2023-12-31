@@ -59,7 +59,7 @@ impl FileStore {
         let fetched = self.path.join(p);
         // eprintln!("{}", fetched.metadata().unwrap().file_type());
         if !fetched.is_file() {
-            return Err(NotAFile(fetched));
+            return Err(NoSuchFile(fetched));
         }
         match fetched.file_name() {
             Some(f) => match self.pathmaker.filename_to_systime(f) {
@@ -70,7 +70,7 @@ impl FileStore {
                 }),
                 Err(_) => Err(IncomprehensibleFilename(f.to_os_string())),
             },
-            None => Err(NoSuchFile(fetched)),
+            None => Err(NotAFile(fetched)),
         }
     }
 
@@ -89,13 +89,16 @@ impl FileStore {
             match self.get(&p) {
                 Ok(c) => cl.list.push(c),
                 Err(e) => {
-                    if !matches!(e, NoSuchFile(_) | NotAFile(_)) {
-                        eprintln!(
-                            "error on getting capture '{}': {:?}",
-                            l.to_str().unwrap(),
-                            e
-                        );
-                    }
+                    let cs = l.to_str().unwrap();
+                    match e {
+                        // FIXME: lower this case to debugging only
+                        NoSuchFile(_) => eprintln!(
+                            "capture {} not found in dir {}",
+                            cs,
+                            self.path.to_str().unwrap()
+                        ),
+                        _ => eprintln!("error on getting capture '{}': {:?}", cs, e),
+                    };
                     cl.missing.push(l);
                 }
             }
@@ -111,13 +114,10 @@ pub struct FileStoreConfig {
 
 impl From<FileStoreConfig> for FileStore {
     fn from(cfg: FileStoreConfig) -> Self {
-        let path = path::PathBuf::from(cfg.path);
-        let pathmaker = cfg.pathmaker;
-        let url = None;
         FileStore {
-            path,
-            pathmaker,
-            url,
+            path: PathBuf::from(cfg.path),
+            pathmaker: cfg.pathmaker,
+            url: None,
         }
     }
 }

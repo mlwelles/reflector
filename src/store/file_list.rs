@@ -14,7 +14,10 @@ impl FileList {
         FileList { list }
     }
 
-    pub fn push(&mut self, s: &OsStr) {
+    pub fn push(&mut self, s: OsString) {
+        self.list.push(s)
+    }
+    pub fn push_osstr(&mut self, s: &OsStr) {
         self.list.push(OsString::from(s))
     }
     pub fn push_str(&mut self, s: &str) {

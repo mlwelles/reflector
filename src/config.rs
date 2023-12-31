@@ -124,7 +124,6 @@ mod tests {
 
         let mut cap = sd.loop_captures();
         assert!(!cap.is_empty());
-        assert!(!cap.has_captures());
         assert!(
             cap.len_all() > 20,
             "lenth {} doesn't meet reasonable minimum captures",

@@ -6,6 +6,8 @@ pub mod capture;
 pub use capture::{Capture, CaptureError, CaptureList};
 pub mod time_util;
 pub use time_util::*;
+pub mod flatten;
+pub use flatten::*;
 pub mod time_range;
 pub use time_range::{TimeRange, TimeRangeError};
 pub mod time_list;
