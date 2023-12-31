@@ -239,6 +239,7 @@ mod tests {
 
         SourceConfig {
             name: "mock mirror source".to_string(),
+            abbrev: "mock".to_string(),
             remote: "http://sopa.coo/mock".to_string(),
             local: fc.to_string(),
             pathmaker: "identity".to_string(),

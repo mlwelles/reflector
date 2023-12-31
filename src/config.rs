@@ -13,6 +13,7 @@ pub struct Config {
 #[derive(Debug, Clone, Deserialize)]
 pub struct SourceConfig {
     pub name: String,
+    pub abbrev: String,
     pub remote: String,
     pub local: String,
     pub pathmaker: String,
@@ -28,6 +29,7 @@ impl SourceConfig {
     pub fn sdo() -> Self {
         Self {
             name: "Solar Data Observatory".to_string(),
+            abbrev: "sdo".to_string(),
             remote: "https://sdo.gsfc.nasa.gov/assets/img/dailymov".to_string(),
             local: "/home/adam/tmp/sat/sdo".to_string(),
             pathmaker: "SDO _1024_0094.ogv".to_string(),
@@ -41,6 +43,7 @@ impl SourceConfig {
     pub fn goes_abi() -> Self {
         SourceConfig {
             name: "GOES ABI_TrueColor".to_string(),
+            abbrev: "goesabi".to_string(),
             remote: "ftp://ftp.nnvl.noaa.gov/GOES/ABI_TrueColor".to_string(),
             local: "/home/adam/tmp/sat/abi_truecolor".to_string(),
             pathmaker: "GOES-R".to_string(),
@@ -86,7 +89,7 @@ impl FromStr for Config {
 
         let mut mm: Vec<SourceConfig> = vec![];
         for src in Config::default().sources {
-            if src.name == s {
+            if src.name == s || src.abbrev == s {
                 mm.push(src);
             }
         }
@@ -106,6 +109,13 @@ mod tests {
     use crate::mirror::Mirror;
     use crate::TimeRange;
     use std::time::{Duration, SystemTime};
+
+    #[test]
+    fn from_str() {
+        Config::from_str("Solar Data Observatory").unwrap();
+        Config::from_str("sdo").unwrap();
+        // Config::from_str("SDO").unwrap();
+    }
 
     #[test]
     fn sdo() {

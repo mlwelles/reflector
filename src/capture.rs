@@ -84,7 +84,7 @@ impl Iterator for CaptureList {
 impl fmt::Display for CaptureList {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         let rat = match self.full_ratio() {
-            Ok(r) => format!(", {}% full", r),
+            Ok(r) => format!(", {}% full", r * 100.0), // FIXME: rounding
             Err(_) => "".to_string(),
         };
         write!(
