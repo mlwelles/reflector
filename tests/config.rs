@@ -5,6 +5,7 @@ fn basic_toml() -> &'static str {
     r#"
 [[sources]]
 name      = "Solar Data Observatory"
+abbrev    = "sdo"
 remote	  = "https://sdo.gsfc.nasa.gov/assets/img/dailymov"
 pathmaker = "SDO"
 local     = "/tmp"
@@ -13,6 +14,7 @@ flatten   = true
 
 [[sources]]
 name      = "GOES ABI_TrueColor"
+abbrev    = "goesabi"
 remote    = "ftp://ftp.nnvl.noaa.gov/GOES/ABI_TrueColor"
 pathmaker = "GOES"
 local     = "/tmp"
