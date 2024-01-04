@@ -229,10 +229,7 @@ mod tests {
 
         // setup a mock capture
         let nt = naive_from_systime(SystemTime::now());
-        // 2023-12-28 00:00:00
-        // let ts: String = format!("{}", nt.format("%Y-%m-%d 00:00:00"));
-        // 2023-12-28T05:00:00+00:00
-        // xx let ts: String = format!("{}", nt.format("%Y-%m-%dT%z"));
+        let nt = naive_trunc_midnight(&nt) - Duration::new(2 * 60 * 60, 0);
         let ts: String = format!("{}", nt.format("%Y-%m-%dT05:00:00+00:00"));
         eprintln!("creating file in store '{}'...", fcp.join(&ts).display());
         let _file = File::create(fcp.join(&ts));
