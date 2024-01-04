@@ -117,30 +117,37 @@ mod tests {
         // Config::from_str("SDO").unwrap();
     }
 
+    fn assert_valid_mirror(m: &Mirror) {
+        let now = SystemTime::now();
+        let lr = m.loop_range();
+        let expect = TimeRange::new(now - m.loop_period, now).unwrap();
+        assert!(lr.equal_by_seconds(&expect), "expect {} == {}", lr, expect);
+        let cap = m.loop_captures();
+        assert!(
+            cap.len_all() > 20,
+            "length {} doesn't meet reasonable minimum captures",
+            cap.len_all()
+        );
+    }
+
     #[test]
     fn sdo() {
         let s = SourceConfig::sdo();
         let sd = Mirror::try_from(s).unwrap();
-        let now = SystemTime::now();
+        assert_valid_mirror(&sd);
 
-        let lr = sd.loop_range();
-        let expect = TimeRange::new(now - sd.loop_period, now).unwrap();
-        assert!(lr.equal_by_seconds(&expect));
         // hardcoded sanity check
         let lp = Duration::new(28 * 24 * 60 * 60, 0);
         assert_eq!(sd.loop_period, lp);
-        let expect = TimeRange::new(now - lp, now).unwrap();
-        assert!(lr.equal_by_seconds(&expect), "expect {} == {}", lr, expect);
 
         let mut cap = sd.loop_captures();
-        assert!(!cap.is_empty());
-        assert!(
-            cap.len_all() > 20,
-            "lenth {} doesn't meet reasonable minimum captures",
-            cap.len_all()
-        );
 
+        // unsafely assume *something* is in our repository
+        assert!(!cap.is_empty());
         let fc = cap.next().unwrap(); // first capture
         assert!(fc.valid())
     }
+
+    #[test]
+    fn abi_truecolor() {}
 }
