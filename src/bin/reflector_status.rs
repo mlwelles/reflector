@@ -1,30 +1,8 @@
 use reflector::{Config, Mirror};
-use std::str::FromStr;
+use std::env;
 
 fn main() {
-    let mut args = std::env::args();
-    let cfg = match args.len() {
-        1 => Config::default(),
-        2 => {
-            if let Some(first) = args.nth(1) {
-                match Config::from_str(&first) {
-                    Ok(c) => c,
-                    Err(e) => {
-                        eprintln!("no matches for {}: {:?}", first, e);
-                        return;
-                    }
-                }
-            } else {
-                eprintln!("arg counting logic fail");
-                return;
-            }
-        }
-        _ => {
-            eprintln!("unimplemented");
-            Config::default()
-        }
-    };
-
+    let cfg = Config::from(env::args());
     for src in cfg.sources {
         match Mirror::new(src.clone()) {
             Ok(mut m) => match m.status() {

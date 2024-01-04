@@ -2,6 +2,7 @@
 
 use serde::Deserialize;
 use std::default::Default;
+use std::env::Args;
 use std::fmt;
 use std::str::FromStr;
 
@@ -83,20 +84,51 @@ impl FromStr for Config {
     type Err = SourceSearchError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
+        // crate non_empty_string ?
         if s.is_empty() {
             return Err(SourceSearchError::EmptyName);
         }
 
         let mut mm: Vec<SourceConfig> = vec![];
         for src in Config::default().sources {
+            // FIXME: lowercase too?
             if src.name == s || src.abbrev == s {
                 mm.push(src);
             }
+            // FIXME: lowercase too?
         }
 
         match mm.len() {
             0 => Err(SourceSearchError::NoMatchForName(s.to_string())),
             _ => Ok(Config { sources: mm }),
+        }
+    }
+}
+
+// should this be a tryfrom?
+impl From<Args> for Config {
+    fn from(mut args: Args) -> Config {
+        let default = Config::default();
+        match args.len() {
+            1 => default,
+            2 => {
+                if let Some(first) = args.nth(1) {
+                    match Config::from_str(&first) {
+                        Ok(c) => c,
+                        Err(e) => {
+                            eprintln!("no matches for {}: {:?}", first, e);
+                            default
+                        }
+                    }
+                } else {
+                    eprintln!("arg counting logic fail");
+                    default
+                }
+            }
+            _ => {
+                eprintln!("unimplemented");
+                default
+            }
         }
     }
 }
