@@ -227,10 +227,9 @@ mod tests {
             DirBuilder::new().create(fc).unwrap();
         }
 
-        // setup a mock capture
+        // setup a mock capture, at midnight
         let nt = naive_from_systime(SystemTime::now());
-        let nt = naive_trunc_midnight(&nt) - Duration::new(2 * 60 * 60, 0);
-        let ts: String = format!("{}", nt.format("%Y-%m-%dT05:00:00+00:00"));
+        let ts: String = format!("{}", nt.format("%Y-%m-%dT00:00:00+00:00"));
         eprintln!("creating file in store '{}'...", fcp.join(&ts).display());
         let _file = File::create(fcp.join(&ts));
 
