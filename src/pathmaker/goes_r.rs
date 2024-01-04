@@ -25,7 +25,7 @@ impl GoesR {
 
 impl Default for GoesR {
     fn default() -> GoesR {
-        GoesR::new("")
+        GoesR::new("ABI_TrueColor_")
     }
 }
 

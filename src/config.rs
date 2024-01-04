@@ -130,6 +130,14 @@ mod tests {
         );
     }
 
+    fn assert_has_captures(m: Mirror) -> Mirror {
+        let mut cap = m.loop_captures();
+        assert!(!cap.is_empty());
+        let fc = cap.next().unwrap(); // first capture
+        assert!(fc.valid(), "first capture is valid");
+        m
+    }
+
     #[test]
     fn sdo() {
         let s = SourceConfig::sdo();
@@ -140,14 +148,15 @@ mod tests {
         let lp = Duration::new(28 * 24 * 60 * 60, 0);
         assert_eq!(sd.loop_period, lp);
 
-        let mut cap = sd.loop_captures();
-
         // unsafely assume *something* is in our repository
-        assert!(!cap.is_empty());
-        let fc = cap.next().unwrap(); // first capture
-        assert!(fc.valid())
+        let _sd = assert_has_captures(sd);
     }
 
     #[test]
-    fn abi_truecolor() {}
+    fn abi_truecolor() {
+        let s = SourceConfig::sdo();
+        let m = Mirror::try_from(s).unwrap();
+        assert_valid_mirror(&m);
+        assert_has_captures(m);
+    }
 }
