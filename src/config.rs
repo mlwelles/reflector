@@ -41,7 +41,7 @@ impl SourceConfig {
     }
 
     pub fn goes_abi() -> Self {
-        SourceConfig {
+        Self {
             name: "GOES ABI_TrueColor".to_string(),
             abbrev: "goesabi".to_string(),
             remote: "ftp://ftp.nnvl.noaa.gov/GOES/ABI_TrueColor".to_string(),
