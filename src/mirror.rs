@@ -7,6 +7,7 @@ use crate::{
     flatten_filename, Capture, CaptureError, CaptureList, FileList, FileStore, PathMaker,
     PathMakerError, SourceConfig, StoreError, TimeList, TimeRange,
 };
+use log::info;
 use std::fmt;
 use std::time::{self, Duration, SystemTime};
 use url::Url;
@@ -130,7 +131,7 @@ impl Mirror {
         // check the store for files within our range,
         // and set the status accordingly
         let cc = self.loop_captures();
-        eprintln!("captures {cc} len {}", cc.len());
+        info!("captures {cc} len {}", cc.len());
         match cc.full_ratio() {
             Err(e) => Err(StatusError::CaptureError(e)),
             Ok(f) => {

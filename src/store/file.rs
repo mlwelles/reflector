@@ -3,6 +3,7 @@
 
 use crate::store::StoreError::*;
 use crate::{Capture, CaptureList, FileList, PathMaker, StoreError};
+use log::info;
 use std::{
     ffi::OsString,
     fmt, fs, io,
@@ -91,8 +92,7 @@ impl FileStore {
                 Err(e) => {
                     let cs = l.to_str().unwrap();
                     match e {
-                        // FIXME: lower this case to debugging only
-                        NoSuchFile(_) => eprintln!(
+                        NoSuchFile(_) => info!(target: "remote",
                             "capture {} not found in dir {}",
                             cs,
                             self.path.to_str().unwrap()

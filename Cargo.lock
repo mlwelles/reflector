@@ -402,6 +402,7 @@ version = "0.1.0"
 dependencies = [
  "assert_cmd",
  "chrono",
+ "log",
  "regex",
  "serde",
  "suppaftp",

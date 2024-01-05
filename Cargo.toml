@@ -8,6 +8,7 @@ default-run = "reflector"
 
 [dependencies]
 chrono = "0.4.31"
+log = { version = "0.4.20", features = ["max_level_warn"] }
 regex = "1.10.0"
 serde = { version = "1.0.188", features = ["derive", "serde_derive"] }
 suppaftp = "5.2.1"
