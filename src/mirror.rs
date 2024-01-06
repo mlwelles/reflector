@@ -1,14 +1,17 @@
 //! Shadow upstream data to local storage.
 
 use crate::pathmaker;
-use crate::remote::{from_url as remote_from_url, PingError, RCFactoryError, RemoteClient};
+use crate::remote::{
+    from_url as remote_from_url, GetError, Gotten, PingError, RCFactoryError, RemoteClient,
+};
 use crate::time_range;
 use crate::{
-    flatten_filename, Capture, CaptureError, CaptureList, FileList, FileStore, PathMaker,
-    PathMakerError, SourceConfig, StoreError, TimeList, TimeRange,
+    flatten_filename, Capture, CaptureError, CaptureList, CaptureMissing, FileList, FileStore,
+    PathMaker, PathMakerError, SourceConfig, StoreError, TimeList, TimeRange,
 };
 use log::info;
 use std::fmt;
+use std::path::PathBuf;
 use std::time::{self, Duration, SystemTime};
 use url::Url;
 
@@ -155,6 +158,14 @@ impl Mirror {
         self.remote_client.ping()
     }
 
+    pub fn get(&mut self, rsrc: &str, path: PathBuf) -> Result<Gotten, GetError> {
+        self.remote_client.get(rsrc, path)
+    }
+
+    pub fn get_missing(&mut self, m: &CaptureMissing) -> Result<Gotten, GetError> {
+        self.remote_client.get(&m.resource, m.path.clone())
+    }
+
     pub fn timelist(&self, range: &TimeRange) -> TimeList {
         range
             .clone()
@@ -191,6 +202,26 @@ impl Mirror {
 
     pub fn loop_captures(&self) -> CaptureList {
         self.captures_in_range(&self.loop_range())
+    }
+
+    pub fn fill_captures(&mut self, c: CaptureList) -> Result<CaptureList, GetError> {
+        let mut new = CaptureList::empty();
+        // let mut errs = vec![GetError];
+        new.list = c.list;
+        for m in c.missing {
+            eprintln!("attempting to fill missing {:?}", m);
+            match self.get_missing(&m) {
+                Ok(g) => {
+                    let c = Capture::from((g, m.time));
+                    new.push(c)
+                }
+                Err(e) => {
+                    eprintln!("error: {:?}", e);
+                    new.push_missing(m)
+                }
+            }
+        }
+        Err(GetError::Unimplemented)
     }
 
     pub fn latest_capture(&self) -> Option<Capture> {

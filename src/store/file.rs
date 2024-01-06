@@ -2,7 +2,7 @@
 // storing and retreiving captures and dealing in CaptureLists
 
 use crate::store::StoreError::*;
-use crate::{Capture, CaptureList, FileList, PathMaker, StoreError};
+use crate::{Capture, CaptureList, CaptureMissing, FileList, PathMaker, StoreError};
 use log::info;
 use std::{
     ffi::OsString,
@@ -71,7 +71,7 @@ impl FileStore {
                 }),
                 Err(_) => Err(IncomprehensibleFilename(f.to_os_string())),
             },
-            None => Err(NotAFile(fetched)),
+            None => Err(NotAFile(fetched)), // FIXME: not sure about this state
         }
     }
 
@@ -88,9 +88,12 @@ impl FileStore {
         for l in ll {
             let p = PathBuf::from(&l);
             match self.get(&p) {
-                Ok(c) => cl.list.push(c),
+                Ok(c) => cl.push(c),
                 Err(e) => {
                     let cs = l.to_str().unwrap();
+                    let time = self.pathmaker.filename_to_systime(&l).unwrap();
+                    let m = CaptureMissing::new(p, time, cs);
+                    cl.push_missing(m);
                     match e {
                         NoSuchFile(_) => info!(target: "remote",
                             "capture {} not found in dir {}",
@@ -99,7 +102,6 @@ impl FileStore {
                         ),
                         _ => eprintln!("error on getting capture '{}': {:?}", cs, e),
                     };
-                    cl.missing.push(l);
                 }
             }
         }

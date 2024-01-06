@@ -1,30 +1,75 @@
 //! A simple representation of a capture and list of the same.
 //!
 //! [Capture]s represent a captured resource from a [Remote] source.
+//!
 //! They are collected into a [CaptureList], which also includes information on
 //! any missing resources which cannot be made into [Capture]s.
 
-use std::ffi::OsString;
+use crate::remote::Gotten;
+use crate::time_util::display_systime;
+use std::collections::VecDeque;
+use std::path::PathBuf;
+use std::time::SystemTime;
 use std::{fmt, path, time};
 use url::Url;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Capture {
-    pub time: time::SystemTime,
-    pub path: path::PathBuf,
+    pub time: SystemTime,
+    pub path: PathBuf,
     pub url: Option<Url>,
 }
 
 impl Capture {
+    pub fn new(time: SystemTime, path: PathBuf, url: Option<Url>) -> Self {
+        Self { time, path, url }
+    }
+
     pub fn valid(&self) -> bool {
         self.path.is_file()
     }
 }
 
+impl From<(Gotten, SystemTime)> for Capture {
+    fn from(input: (Gotten, SystemTime)) -> Self {
+        let g = input.0;
+        Self::new(input.1, g.output, Some(g.source))
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct CaptureMissing {
+    pub resource: String,
+    pub time: time::SystemTime,
+    pub path: path::PathBuf,
+}
+
+impl CaptureMissing {
+    pub fn new(path: path::PathBuf, time: SystemTime, resource: &str) -> Self {
+        let resource = resource.to_string();
+        Self {
+            resource,
+            path,
+            time,
+        }
+    }
+}
+
+impl fmt::Display for CaptureMissing {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "<Missing '{}' at {}>",
+            self.resource,
+            display_systime(self.time),
+        )
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct CaptureList {
-    pub list: Vec<Capture>,
-    pub missing: Vec<OsString>,
+    pub list: VecDeque<Capture>,
+    pub missing: VecDeque<CaptureMissing>,
 }
 
 #[derive(Debug)]
@@ -33,12 +78,12 @@ pub enum CaptureError {
 }
 
 impl CaptureList {
-    pub fn new(list: Vec<Capture>, missing: Vec<OsString>) -> Self {
+    pub fn new(list: VecDeque<Capture>, missing: VecDeque<CaptureMissing>) -> Self {
         CaptureList { list, missing }
     }
 
     pub fn empty() -> Self {
-        CaptureList::new(vec![], vec![])
+        CaptureList::new(VecDeque::new(), VecDeque::new())
     }
 
     pub fn is_empty(&self) -> bool {
@@ -57,6 +102,14 @@ impl CaptureList {
         self.list.len() + self.missing.len()
     }
 
+    pub fn push(&mut self, cap: Capture) {
+        self.list.push_back(cap)
+    }
+
+    pub fn push_missing(&mut self, mis: CaptureMissing) {
+        self.missing.push_back(mis)
+    }
+
     pub fn full_ratio(&self) -> Result<f64, CaptureError> {
         let all = self.len_all() as f64;
         if all > 0.0 {
@@ -69,7 +122,7 @@ impl CaptureList {
 
 impl From<Capture> for CaptureList {
     fn from(init: Capture) -> Self {
-        CaptureList::new(vec![init], vec![])
+        CaptureList::new(VecDeque::from([init]), VecDeque::new())
     }
 }
 
@@ -77,7 +130,7 @@ impl Iterator for CaptureList {
     type Item = Capture;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.list.pop()
+        self.list.pop_back()
     }
 }
 

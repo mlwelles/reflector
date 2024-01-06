@@ -1,9 +1,9 @@
 pub mod config;
 pub use config::{Config, SourceConfig, SourceSearchError};
 pub mod mirror;
-pub use mirror::Mirror;
+pub use mirror::{Mirror, MirrorError, MirrorStatus, StatusError};
 pub mod capture;
-pub use capture::{Capture, CaptureError, CaptureList};
+pub use capture::{Capture, CaptureError, CaptureList, CaptureMissing};
 pub mod time_util;
 pub use time_util::*;
 pub mod flatten;
