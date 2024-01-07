@@ -43,7 +43,7 @@ impl RemoteClient for Http {
         let u = self.url(resource)?;
         match self.agent.request_url("HEAD", &u).call() {
             Ok(_) => Ok(true),
-            Err(ureq::Error::Status(c, _)) if c == 404 => Ok(false),
+            Err(ureq::Error::Status(404, _)) => Ok(false),
             Err(e) => Err(GetError::RequestErr(Box::new(e))),
         }
     }
