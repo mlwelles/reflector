@@ -217,11 +217,16 @@ impl Mirror {
                 }
                 Err(e) => {
                     eprintln!("error: {:?}", e);
-                    new.push_missing(m)
+                    new.push_missing(m);
+                    return Err(e);
                 }
             }
         }
-        Err(GetError::Unimplemented)
+        Ok(new)
+    }
+
+    pub fn fill_loop(&mut self) -> Result<CaptureList, GetError> {
+        self.fill_captures(self.loop_captures())
     }
 
     pub fn latest_capture(&self) -> Option<Capture> {

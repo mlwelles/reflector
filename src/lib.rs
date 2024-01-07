@@ -17,4 +17,4 @@ pub use pathmaker::{PathMaker, PathMakerError};
 pub mod store;
 pub use store::{FileList, FileStore, StoreError};
 pub mod remote;
-pub use remote::{RCFactoryError, RemoteClient};
+pub use remote::{GetError, RCFactoryError, RemoteClient};
