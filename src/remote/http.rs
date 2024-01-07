@@ -26,7 +26,7 @@ impl Http {
     fn url(&self, resource: &str) -> Result<Url, GetError> {
         match self.base.join(resource) {
             Ok(u) => Ok(u),
-            Err(e) => return Err(GetError::UnparsableURL(e)),
+            Err(e) => Err(GetError::UnparsableURL(e)),
         }
     }
 }
@@ -43,8 +43,8 @@ impl RemoteClient for Http {
         let u = self.url(resource)?;
         match self.agent.request_url("HEAD", &u).call() {
             Ok(_) => Ok(true),
-            Err(ureq::Error::Status(c, _)) if c == 404 => return Ok(false),
-            Err(e) => return Err(GetError::RequestErr(Box::new(e))),
+            Err(ureq::Error::Status(c, _)) if c == 404 => Ok(false),
+            Err(e) => Err(GetError::RequestErr(Box::new(e))),
         }
     }
 

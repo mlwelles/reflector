@@ -8,5 +8,5 @@ pub fn flatten_filename(i: &OsStr) -> OsString {
     }
     // fallback to source
     eprintln!("failed to flatten");
-    return i.to_os_string();
+    i.to_os_string()
 }
