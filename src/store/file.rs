@@ -4,6 +4,7 @@
 use crate::store::StoreError::*;
 use crate::{Capture, CaptureList, CaptureMissing, FileList, PathMaker, StoreError};
 use log::info;
+use std::time::SystemTime;
 use std::{
     ffi::OsString,
     fmt, fs, io,
@@ -91,7 +92,13 @@ impl FileStore {
                 Ok(c) => cl.push(c),
                 Err(e) => {
                     let cs = l.to_str().unwrap();
-                    let time = self.pathmaker.filename_to_systime(&l).unwrap();
+                    let time = self.pathmaker.filename_to_systime(&l).unwrap_or_else(|ee| {
+                        eprintln!(
+                            "got error attempting to backtrack filename to systime: {:?}",
+                            ee
+                        );
+                        SystemTime::now()
+                    });
                     let m = CaptureMissing::new(p, time, cs);
                     cl.push_missing(m);
                     match e {
