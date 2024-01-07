@@ -82,7 +82,7 @@ impl RemoteClient for Ftp {
         }
     }
 
-    fn exists(&self, resource: &str) -> Result<bool, GetError> {
+    fn exists(&self, _resource: &str) -> Result<bool, GetError> {
         Err(GetError::Unimplemented)
     }
 

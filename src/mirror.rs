@@ -99,10 +99,7 @@ impl Mirror {
         }
         let local = local.unwrap();
 
-        let flatten = match cfg.flatten {
-            Some(true) => true,
-            _ => false,
-        };
+        let flatten = matches!(cfg.flatten, Some(true));
         let seed_past_midnight = Duration::new(cfg.seed_past_midnight.unwrap_or(0), 0);
         let loop_period = Duration::new(cfg.loop_period.unwrap_or(24 * 60 * 60), 0);
 

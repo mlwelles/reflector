@@ -24,7 +24,7 @@ impl RemoteClient for Mock {
         ))
     }
 
-    fn exists(&self, resource: &str) -> Result<bool, GetError> {
+    fn exists(&self, _resource: &str) -> Result<bool, GetError> {
         Ok(true)
     }
 
