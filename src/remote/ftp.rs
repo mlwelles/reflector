@@ -82,6 +82,10 @@ impl RemoteClient for Ftp {
         }
     }
 
+    fn exists(&self, resource: &str) -> Result<bool, GetError> {
+        Err(GetError::Unimplemented)
+    }
+
     fn get(&mut self, resource: &str, output: PathBuf) -> Result<Gotten, GetError> {
         let mimetype = "application/octet-stream";
         let source = match self.base.join(resource) {

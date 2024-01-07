@@ -22,6 +22,13 @@ impl Http {
         let agent = builder.build();
         Http { base, agent }
     }
+
+    fn url(&self, resource: &str) -> Result<Url, GetError> {
+        match self.base.join(resource) {
+            Ok(u) => Ok(u),
+            Err(e) => return Err(GetError::UnparsableURL(e)),
+        }
+    }
 }
 
 impl RemoteClient for Http {
@@ -32,11 +39,17 @@ impl RemoteClient for Http {
         }
     }
 
+    fn exists(&self, resource: &str) -> Result<bool, GetError> {
+        let u = self.url(resource)?;
+        match self.agent.request_url("HEAD", &u).call() {
+            Ok(_) => Ok(true),
+            Err(ureq::Error::Status(c, _)) if c == 404 => return Ok(false),
+            Err(e) => return Err(GetError::RequestErr(Box::new(e))),
+        }
+    }
+
     fn get(&mut self, resource: &str, output: PathBuf) -> Result<Gotten, GetError> {
-        let u = match self.base.join(resource) {
-            Ok(u) => u,
-            Err(e) => return Err(GetError::UnparsableURL(e)),
-        };
+        let u = self.url(resource)?;
         let resp = match self.agent.request_url("GET", &u).call() {
             Ok(resp) => resp,
             Err(e) => return Err(GetError::RequestErr(Box::new(e))),
@@ -107,6 +120,15 @@ mod tests {
     fn ping() {
         let mut m = mock();
         m.ping().unwrap();
+    }
+
+    #[test]
+    fn exists() {
+        let m = mock();
+        let e = m.exists(MOCK_RESOURCE).unwrap();
+        assert_eq!(true, e, "resource exists");
+        let e = m.exists("asdfasdfasdfafdasfdasdf").unwrap();
+        assert_eq!(false, e, "resource doesn't exist");
     }
 
     #[test]

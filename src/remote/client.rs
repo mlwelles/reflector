@@ -47,6 +47,7 @@ pub enum ListError {
 
 pub trait RemoteClient {
     fn ping(&mut self) -> Result<Duration, PingError>;
+    fn exists(&self, resource: &str) -> Result<bool, GetError>;
     fn get(&mut self, resource: &str, output: PathBuf) -> Result<Gotten, GetError>;
     fn remote_addr(&self) -> SocketAddr;
 

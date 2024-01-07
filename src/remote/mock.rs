@@ -24,6 +24,10 @@ impl RemoteClient for Mock {
         ))
     }
 
+    fn exists(&self, resource: &str) -> Result<bool, GetError> {
+        Ok(true)
+    }
+
     fn remote_addr(&self) -> SocketAddr {
         SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 6666)
     }
