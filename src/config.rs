@@ -162,26 +162,29 @@ mod tests {
         );
     }
 
-    fn assert_has_captures(m: Mirror) -> Mirror {
+    fn assert_has_captures(m: &Mirror) {
         let mut cap = m.loop_captures();
         assert!(!cap.is_empty());
         let fc = cap.next().unwrap(); // first capture
         assert!(fc.valid(), "first capture is valid");
-        m
     }
 
     #[test]
     fn sdo() {
         let s = SourceConfig::sdo();
-        let sd = Mirror::try_from(s).unwrap();
-        assert_valid_mirror(&sd);
+        let m = Mirror::try_from(s).unwrap();
+        assert_valid_mirror(&m);
 
         // hardcoded sanity check
         let lp = Duration::new(28 * 24 * 60 * 60, 0);
-        assert_eq!(sd.loop_period, lp);
+        assert_eq!(m.loop_period, lp);
 
         // unsafely assume *something* is in our repository
-        let _sd = assert_has_captures(sd);
+        let _sd = assert_has_captures(&m);
+
+        let cap = m.loop_captures().next().unwrap();
+        assert!(cap.path.exists(), "first capture path exists");
+        cap.url.unwrap(); // ensure we have an URL
     }
 
     #[test]
@@ -189,6 +192,6 @@ mod tests {
         let s = SourceConfig::sdo();
         let m = Mirror::try_from(s).unwrap();
         assert_valid_mirror(&m);
-        assert_has_captures(m);
+        assert_has_captures(&m); // FIXME: unsafe assumption
     }
 }
