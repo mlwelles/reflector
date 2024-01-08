@@ -169,11 +169,6 @@ impl Mirror {
             .make_timelist(&self.period, &self.seed_past_midnight)
     }
 
-    pub fn captures_in_range(&self, range: &TimeRange) -> CaptureList {
-        let files = self.range_to_filelist(range);
-        self.local.captures_in_list(files)
-    }
-
     fn filelist(&self, times: &TimeList) -> FileList {
         let mut files = FileList::empty();
         for t in times.clone() {
@@ -193,6 +188,8 @@ impl Mirror {
         self.filelist(&times)
     }
 
+    // based on a TimeList, construct a capturelist reflecting which
+    // files we've already downloaded
     pub fn times_to_capturelist(&self, times: TimeList) -> CaptureList {
         let mut c = CaptureList::empty();
         for time in times {
@@ -208,6 +205,11 @@ impl Mirror {
             }
         }
         c
+    }
+
+    pub fn captures_in_range(&self, range: &TimeRange) -> CaptureList {
+        let times = self.timelist(&range);
+        self.times_to_capturelist(times)
     }
 
     pub fn loop_range(&self) -> TimeRange {

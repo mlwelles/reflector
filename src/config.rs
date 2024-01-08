@@ -180,11 +180,14 @@ mod tests {
         assert_eq!(m.loop_period, lp);
 
         // unsafely assume *something* is in our repository
-        let _sd = assert_has_captures(&m);
+        assert_has_captures(&m);
 
-        let cap = m.loop_captures().next().unwrap();
+        let mut cl = m.loop_captures();
+        let cap = cl.next().unwrap();
+        assert!(cap.valid(), "capture valid");
         assert!(cap.path.exists(), "first capture path exists");
-        cap.url.unwrap(); // ensure we have an URL
+        let miss = cl.missing.pop_back().unwrap();
+        assert!(miss.resource != "")
     }
 
     #[test]
