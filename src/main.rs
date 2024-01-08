@@ -1,4 +1,3 @@
-use reflector::time_util::*;
 use reflector::{CaptureList, Config, GetError, Mirror, MirrorStatus, StatusError};
 use std::env;
 
@@ -19,21 +18,9 @@ fn get_mirror(mut m: Mirror) -> Result<GetMirrorResult, GetMirrorError> {
     match m.status() {
         Ok(s) => {
             let do_get = match s {
-                MirrorStatus::Empty => {
-                    eprintln!("empty, we should get");
-                    true
-                }
-                MirrorStatus::Partial(t) => {
-                    eprintln!("partial since {}, we should get", display_systime(t));
-                    true
-                }
-                MirrorStatus::Full(t) => {
-                    eprintln!(
-                        "full, our latest time is {}, nothing to get",
-                        display_systime(t)
-                    );
-                    false
-                }
+                MirrorStatus::Empty => true,
+                MirrorStatus::Partial(_) => true,
+                MirrorStatus::Full(_) => false,
                 MirrorStatus::Unimplemented => return Err(Unimplemented),
             };
             if do_get {
@@ -59,6 +46,7 @@ fn main() {
                 match get_mirror(m) {
                     Ok(c) => {
                         println!("now we have this capturelist: {:?}", c);
+                        println!("captures: {}", c.captures.unwrap());
                     }
                     Err(e) => {
                         eprintln!("filling loop captures failed: {:?}", e);
