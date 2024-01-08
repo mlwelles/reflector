@@ -86,15 +86,14 @@ impl RemoteClient for Http {
         let mut tot: u64 = 0;
         // keep looping while true
         while match r.read(&mut buf) {
+            Ok(0) => {
+                eprintln!("zero read after {tot} bytes");
+                false
+            }
             Ok(size) => match bw.write_all(&buf[0..size]) {
                 Ok(_) => {
                     tot += size as u64;
-                    if size == 0 {
-                        eprintln!("zero read after {tot} bytes");
-                        false
-                    } else {
-                        true
-                    }
+                    true
                 }
                 Err(e) => {
                     eprintln!("error from write: {:?}", e);
