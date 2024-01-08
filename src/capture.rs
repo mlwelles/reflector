@@ -39,18 +39,18 @@ impl From<(Gotten, SystemTime)> for Capture {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct CaptureMissing {
-    pub resource: String,
     pub time: time::SystemTime,
+    pub resource: String,
     pub path: path::PathBuf,
 }
 
 impl CaptureMissing {
-    pub fn new(path: path::PathBuf, time: SystemTime, resource: &str) -> Self {
+    pub fn new(time: SystemTime, path: path::PathBuf, resource: &str) -> Self {
         let resource = resource.to_string();
         Self {
+            time,
             resource,
             path,
-            time,
         }
     }
 }

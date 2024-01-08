@@ -14,7 +14,7 @@ pub use time::make_utc;
 use super::{FileList, TimeList};
 use chrono::{DateTime, Utc};
 use std::ffi::{OsStr, OsString};
-use std::path;
+use std::path::PathBuf;
 use std::time::{Duration, SystemTime};
 
 pub trait PathMaker {
@@ -41,10 +41,15 @@ pub trait PathMaker {
         self.time_to_filename(&utc)
     }
 
-    fn time_to_path(&self, time: &DateTime<Utc>) -> path::PathBuf {
-        path::PathBuf::from(self.time_to_filename(time))
+    fn systime_to_path(&self, time: &SystemTime) -> PathBuf {
+        PathBuf::from(self.systime_to_filename(time))
     }
 
+    fn time_to_path(&self, time: &DateTime<Utc>) -> PathBuf {
+        PathBuf::from(self.time_to_filename(time))
+    }
+
+    // FIXME: why?  whuh?
     fn time_to_string(&self, time: &DateTime<Utc>) -> String {
         time.to_rfc3339()
     }

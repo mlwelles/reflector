@@ -193,6 +193,23 @@ impl Mirror {
         self.filelist(&times)
     }
 
+    pub fn times_to_capturelist(&self, times: TimeList) -> CaptureList {
+        let mut c = CaptureList::empty();
+        for time in times {
+            let f = self.pathmaker.systime_to_filename(&time);
+            let path = match self.flatten {
+                true => flatten_filename(&f),
+                false => f.clone(),
+            };
+            let path = PathBuf::from(path);
+            match self.local.get(&path) {
+                Ok(cap) => c.push(cap),
+                Err(_) => c.push_missing(CaptureMissing::new(time, path, f.to_str().unwrap_or(""))),
+            }
+        }
+        c
+    }
+
     pub fn loop_range(&self) -> TimeRange {
         TimeRange::from_now_to(&self.loop_period).unwrap()
     }

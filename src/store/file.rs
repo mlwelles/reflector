@@ -99,7 +99,7 @@ impl FileStore {
                         );
                         SystemTime::now()
                     });
-                    let m = CaptureMissing::new(p, time, cs);
+                    let m = CaptureMissing::new(time, p, cs);
                     cl.push_missing(m);
                     match e {
                         NoSuchFile(_) => info!(target: "remote",
