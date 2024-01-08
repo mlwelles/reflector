@@ -4,13 +4,14 @@ use super::*;
 use std::io::{BufWriter, Write};
 use std::net::{SocketAddr, ToSocketAddrs};
 use std::path::PathBuf;
+use std::str::FromStr;
 use std::time::Duration;
 use ureq;
-use url::Url;
+use url::{ParseError, Url};
 
 pub struct Http {
-    base: Url,
-    agent: ureq::Agent,
+    pub base: Url,
+    pub agent: ureq::Agent,
 }
 
 impl Http {
@@ -23,11 +24,20 @@ impl Http {
         Http { base, agent }
     }
 
-    fn url(&self, resource: &str) -> Result<Url, GetError> {
+    pub fn url(&self, resource: &str) -> Result<Url, GetError> {
         match self.base.join(resource) {
             Ok(u) => Ok(u),
             Err(e) => Err(GetError::UnparsableURL(e)),
         }
+    }
+}
+
+impl FromStr for Http {
+    type Err = ParseError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let u = Url::parse(s)?;
+        Ok(Http::new(&u))
     }
 }
 
@@ -109,11 +119,30 @@ mod tests {
     use super::*;
     use tempfile::TempDir;
 
+    const MOCK_URL: &str = "http://deb.debian.org/debian";
     const MOCK_RESOURCE: &str = "README.html";
 
     fn mock() -> Http {
-        let u = Url::parse("http://deb.debian.org/debian/").unwrap();
-        Http::new(&u)
+        Http::from_str(MOCK_URL).expect("unable to setup mock from base URL")
+    }
+
+    #[test]
+    fn url() {
+        let exp = format!("{}/{}", MOCK_URL, MOCK_RESOURCE);
+        assert_eq!(
+            Url::parse(&exp).unwrap(),
+            mock().url(MOCK_RESOURCE).unwrap()
+        )
+    }
+
+    #[test]
+    fn url_trailing_slash() {
+        let m1 =
+            Http::from_str("http://deb.debian.org/debian").expect("client without trailing slash");
+        let m2 =
+            Http::from_str("http://deb.debian.org/debian/").expect("client with trailing slash");
+        let t = "testing";
+        assert_eq!(m1.url(t).unwrap(), m2.url(t).unwrap());
     }
 
     #[test]
