@@ -15,8 +15,14 @@ pub struct Http {
 }
 
 impl Http {
-    pub fn new(base: &Url) -> Http {
-        let base = base.clone();
+    pub fn new(inbound: &Url) -> Http {
+        let base = match inbound.as_str().chars().last() {
+            Some('/') => inbound.clone(),
+            _ => {
+                let s = inbound.to_string() + "/";
+                Url::parse(&s).unwrap()
+            }
+        };
         let builder = ureq::builder()
             .timeout_connect(Duration::from_secs(30))
             .timeout(Duration::from_secs(300));
