@@ -29,7 +29,10 @@ fn get_mirror(mut m: Mirror) -> Result<GetMirrorResult, GetMirrorError> {
                     Err(e) => Err(RealGetError(e)),
                 }
             } else {
-                Ok(GetMirrorResult { captures: None })
+                // already full
+                Ok(GetMirrorResult {
+                    captures: Some(m.loop_captures()),
+                })
             }
         }
         Err(e) => Err(RealStatusError(e)),
