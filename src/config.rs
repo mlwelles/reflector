@@ -139,7 +139,7 @@ impl From<Args> for Config {
 mod tests {
     use super::*;
     use crate::mirror::Mirror;
-    use crate::TimeRange;
+    use crate::{CaptureMissing, TimeRange};
     use std::time::{Duration, SystemTime};
 
     #[test]
@@ -169,6 +169,28 @@ mod tests {
         assert!(fc.valid(), "first capture is valid");
     }
 
+    fn assert_missing(m: &mut Mirror, miss: &CaptureMissing) {
+        assert!(m.local.get(&miss.path).is_err());
+        assert!(!miss.resource.is_empty());
+    }
+
+    fn assert_alpha_omega(mut m: &mut Mirror) {
+        let mut cl = m.loop_captures();
+        let cap = cl.next().unwrap();
+        assert!(cap.valid(), "capture valid");
+        assert!(cap.path.exists(), "first capture path exists");
+
+        if let Some(miss) = cl.missing.pop_front() {
+            assert_missing(&mut m, &miss);
+            m.get_missing(&miss).expect("get_missing(front) results");
+        }
+
+        if let Some(miss) = cl.missing.pop_back() {
+            assert_missing(&mut m, &miss);
+            m.get_missing(&miss).expect("get_missing(back) results");
+        }
+    }
+
     #[test]
     fn sdo() {
         let s = SourceConfig::sdo();
@@ -182,29 +204,18 @@ mod tests {
         // unsafely assume *something* is in our repository
         assert_has_captures(&m);
 
-        let mut cl = m.loop_captures();
-        let cap = cl.next().unwrap();
-        assert!(cap.valid(), "capture valid");
-        assert!(cap.path.exists(), "first capture path exists");
-
-        if let Some(miss) = cl.missing.pop_front() {
-            assert!(m.local.get(&miss.path).is_err());
-            assert!(!miss.resource.is_empty());
-            m.get_missing(&miss).expect("get_missing(front) results");
-        }
-
-        if let Some(miss) = cl.missing.pop_back() {
-            assert!(m.local.get(&miss.path).is_err());
-            assert!(!miss.resource.is_empty());
-            m.get_missing(&miss).expect("get_missing(back) results");
-        }
+        assert_alpha_omega(&mut m);
     }
 
     #[test]
     fn abi_truecolor() {
         let s = SourceConfig::sdo();
-        let m = Mirror::try_from(s).unwrap();
+        let mut m = Mirror::try_from(s).unwrap();
         assert_valid_mirror(&m);
-        assert_has_captures(&m); // FIXME: unsafe assumption
+
+        // FIXME: unsafe assumption
+        assert_has_captures(&m);
+
+        assert_alpha_omega(&mut m);
     }
 }
