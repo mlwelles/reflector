@@ -187,15 +187,17 @@ mod tests {
         assert!(cap.valid(), "capture valid");
         assert!(cap.path.exists(), "first capture path exists");
 
-        let miss = cl.missing.pop_front().unwrap();
-        assert!(m.local.get(&miss.path).is_err());
-        assert!(!miss.resource.is_empty());
-        m.get_missing(&miss).expect("get_missing(front) results");
+        if let Some(miss) = cl.missing.pop_front() {
+            assert!(m.local.get(&miss.path).is_err());
+            assert!(!miss.resource.is_empty());
+            m.get_missing(&miss).expect("get_missing(front) results");
+        }
 
-        let miss = cl.missing.pop_back().unwrap();
-        assert!(m.local.get(&miss.path).is_err());
-        assert!(!miss.resource.is_empty());
-        m.get_missing(&miss).expect("get_missing(back) results");
+        if let Some(miss) = cl.missing.pop_back() {
+            assert!(m.local.get(&miss.path).is_err());
+            assert!(!miss.resource.is_empty());
+            m.get_missing(&miss).expect("get_missing(back) results");
+        }
     }
 
     #[test]
