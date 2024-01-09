@@ -51,7 +51,7 @@ fn main() {
                         println!("no captures in our loop period");
                     }
                     Ok(r) => {
-                        println!("now we have this capturelist: {:?}", r.captures.unwrap());
+                        println!("now we have this capturelist: {}", r.captures.unwrap());
                     }
                     Err(e) => {
                         eprintln!("filling loop captures failed: {:?}", e);
