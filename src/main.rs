@@ -47,9 +47,11 @@ fn main() {
             Ok(m) => {
                 println!("ok, {}", m);
                 match get_mirror(m) {
-                    Ok(c) => {
-                        println!("now we have this capturelist: {:?}", c);
-                        println!("captures: {}", c.captures.unwrap());
+                    Ok(r) if r.captures.is_none() => {
+                        println!("no captures in our loop period");
+                    }
+                    Ok(r) => {
+                        println!("now we have this capturelist: {:?}", r.captures.unwrap());
                     }
                     Err(e) => {
                         eprintln!("filling loop captures failed: {:?}", e);
