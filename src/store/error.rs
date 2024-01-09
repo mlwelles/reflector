@@ -1,3 +1,5 @@
+use std::ffi::OsString;
+use std::path::PathBuf;
 use std::{io, path};
 
 #[derive(Debug)]
@@ -6,4 +8,11 @@ pub enum StoreError {
     NotDirectory(path::PathBuf),
     NotWritable(path::PathBuf),
     NotImplemented,
+}
+
+#[derive(Debug, PartialEq)]
+pub enum StoreGetError {
+    NotAFile(PathBuf),
+    NoSuchFile(PathBuf),
+    IncomprehensibleFilename(OsString),
 }

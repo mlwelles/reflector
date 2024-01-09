@@ -172,7 +172,7 @@ mod tests {
     #[test]
     fn sdo() {
         let s = SourceConfig::sdo();
-        let m = Mirror::try_from(s).unwrap();
+        let mut m = Mirror::try_from(s).unwrap();
         assert_valid_mirror(&m);
 
         // hardcoded sanity check
@@ -186,8 +186,16 @@ mod tests {
         let cap = cl.next().unwrap();
         assert!(cap.valid(), "capture valid");
         assert!(cap.path.exists(), "first capture path exists");
+
+        let miss = cl.missing.pop_front().unwrap();
+        assert!(m.local.get(&miss.path).is_err());
+        assert!(!miss.resource.is_empty());
+        m.get_missing(&miss).expect("get_missing(front) results");
+
         let miss = cl.missing.pop_back().unwrap();
-        assert!(miss.resource != "")
+        assert!(m.local.get(&miss.path).is_err());
+        assert!(!miss.resource.is_empty());
+        m.get_missing(&miss).expect("get_missing(back) results");
     }
 
     #[test]

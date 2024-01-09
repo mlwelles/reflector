@@ -7,7 +7,7 @@ use crate::remote::{
 use crate::time_range;
 use crate::{
     flatten_filename, Capture, CaptureError, CaptureList, CaptureMissing, FileList, FileStore,
-    PathMaker, PathMakerError, SourceConfig, StoreError, TimeList, TimeRange,
+    PathMaker, PathMakerError, SourceConfig, StoreError, StoreGetError, TimeList, TimeRange,
 };
 use log::info;
 use std::fmt;
@@ -160,7 +160,8 @@ impl Mirror {
     }
 
     pub fn get_missing(&mut self, m: &CaptureMissing) -> Result<Gotten, GetError> {
-        self.remote_client.get(&m.resource, m.path.clone())
+        let p = self.local.join(&m.path);
+        self.remote_client.get(&m.resource, p)
     }
 
     pub fn timelist(&self, range: &TimeRange) -> TimeList {
@@ -190,7 +191,7 @@ impl Mirror {
 
     // based on a TimeList, construct a capturelist reflecting which
     // files we've already downloaded
-    pub fn times_to_capturelist(&self, times: TimeList) -> CaptureList {
+    pub fn captures_in_timelist(&self, times: TimeList) -> CaptureList {
         let mut c = CaptureList::empty();
         for time in times {
             let f = self.pathmaker.systime_to_filename(&time);
@@ -201,7 +202,14 @@ impl Mirror {
             let path = PathBuf::from(path);
             match self.local.get(&path) {
                 Ok(cap) => c.push(cap),
-                Err(_) => c.push_missing(CaptureMissing::new(time, path, f.to_str().unwrap_or(""))),
+                Err(e) => {
+                    let cap = CaptureMissing::new(time, path, f.to_str().unwrap_or(""));
+                    c.push_missing(cap);
+                    match e {
+                        StoreGetError::NoSuchFile(_) => (),
+                        _ => eprintln!("unexpected error: {:?}", e),
+                    }
+                }
             }
         }
         c
@@ -209,7 +217,7 @@ impl Mirror {
 
     pub fn captures_in_range(&self, range: &TimeRange) -> CaptureList {
         let times = self.timelist(&range);
-        self.times_to_capturelist(times)
+        self.captures_in_timelist(times)
     }
 
     pub fn loop_range(&self) -> TimeRange {

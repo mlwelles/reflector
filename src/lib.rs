@@ -15,6 +15,6 @@ pub use time_list::TimeList;
 pub mod pathmaker;
 pub use pathmaker::{PathMaker, PathMakerError};
 pub mod store;
-pub use store::{FileList, FileStore, StoreError};
+pub use store::{FileList, FileStore, StoreError, StoreGetError};
 pub mod remote;
 pub use remote::{GetError, RCFactoryError, RemoteClient};

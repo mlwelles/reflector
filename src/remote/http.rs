@@ -66,11 +66,7 @@ impl RemoteClient for Http {
 
     fn get(&mut self, resource: &str, output: PathBuf) -> Result<Gotten, GetError> {
         let u = self.url(resource)?;
-        let resp = match self.agent.request_url("GET", &u).call() {
-            Ok(resp) => resp,
-            Err(e) => return Err(GetError::RequestErr(Box::new(e))),
-        };
-        let mimetype = String::from(resp.content_type());
+        eprintln!("DEBUG: getting to path {}", output.to_str().unwrap());
         let file = match self.create_output(&output) {
             Ok(f) => f,
             Err(e) => {
@@ -78,6 +74,11 @@ impl RemoteClient for Http {
                 return Err(e);
             }
         };
+        let resp = match self.agent.request_url("GET", &u).call() {
+            Ok(resp) => resp,
+            Err(e) => return Err(GetError::RequestErr(Box::new(e))),
+        };
+        let mimetype = String::from(resp.content_type());
 
         const BUFSIZE: usize = 8192;
         let mut buf: [u8; BUFSIZE] = [0; BUFSIZE];

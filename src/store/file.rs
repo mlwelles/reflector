@@ -1,12 +1,13 @@
 // a class representing a file store on local disk, geared towards
 // storing and retreiving captures and dealing in CaptureLists
 
+use super::StoreGetError;
+use super::StoreGetError::*;
 use crate::store::StoreError::*;
 use crate::{Capture, CaptureList, CaptureMissing, FileList, PathMaker, StoreError};
 use log::info;
 use std::time::SystemTime;
 use std::{
-    ffi::OsString,
     fmt, fs, io,
     path::{self, PathBuf},
 };
@@ -18,14 +19,6 @@ pub struct FileStore {
     // remote URL if any
     pub url: Option<Url>,
 }
-
-#[derive(Debug, PartialEq)]
-pub enum GetError {
-    NotAFile(PathBuf),
-    NoSuchFile(PathBuf),
-    IncomprehensibleFilename(OsString),
-}
-use GetError::*;
 
 impl FileStore {
     pub fn new(path: &str, pathmaker: Box<dyn PathMaker>) -> Result<Self, StoreError> {
@@ -57,8 +50,12 @@ impl FileStore {
         Ok(())
     }
 
-    pub fn get(&self, p: &PathBuf) -> Result<Capture, GetError> {
-        let fetched = self.path.join(p);
+    pub fn join(&self, p: &PathBuf) -> PathBuf {
+        self.path.join(p)
+    }
+
+    pub fn get(&self, p: &PathBuf) -> Result<Capture, StoreGetError> {
+        let fetched = self.join(p);
         // eprintln!("{}", fetched.metadata().unwrap().file_type());
         if !fetched.is_file() {
             return Err(NoSuchFile(fetched));
@@ -76,12 +73,12 @@ impl FileStore {
         }
     }
 
-    pub fn get_str(&self, p: &str) -> Result<Capture, GetError> {
+    pub fn get_str(&self, p: &str) -> Result<Capture, StoreGetError> {
         self.get(&PathBuf::from(p))
     }
 
     pub fn put(&self, path: &PathBuf, contents: &[u8]) -> io::Result<()> {
-        fs::write(self.path.join(path), contents)
+        fs::write(self.join(path), contents)
     }
 
     pub fn captures_in_list(&self, ll: FileList) -> CaptureList {
