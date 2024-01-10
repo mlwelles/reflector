@@ -1,6 +1,7 @@
 // HTTP and HTTPS remote client
 
 use super::*;
+use log::debug;
 use std::io::{BufWriter, Write};
 use std::net::{SocketAddr, ToSocketAddrs};
 use std::path::PathBuf;
@@ -66,7 +67,13 @@ impl RemoteClient for Http {
 
     fn get(&mut self, resource: &str, output: PathBuf) -> Result<Gotten, GetError> {
         let u = self.url(resource)?;
-        eprintln!("DEBUG: getting to path {}", output.to_str().unwrap());
+        let resp = match self.agent.request_url("GET", &u).call() {
+            Ok(resp) => resp,
+            Err(e) => return Err(GetError::RequestErr(Box::new(e))),
+        };
+        let mimetype = String::from(resp.content_type());
+        debug!("get with output to {}", output.to_str().unwrap());
+
         let file = match self.create_output(&output) {
             Ok(f) => f,
             Err(e) => {
@@ -74,11 +81,6 @@ impl RemoteClient for Http {
                 return Err(e);
             }
         };
-        let resp = match self.agent.request_url("GET", &u).call() {
-            Ok(resp) => resp,
-            Err(e) => return Err(GetError::RequestErr(Box::new(e))),
-        };
-        let mimetype = String::from(resp.content_type());
 
         const BUFSIZE: usize = 8192;
         let mut buf: [u8; BUFSIZE] = [0; BUFSIZE];
@@ -87,10 +89,7 @@ impl RemoteClient for Http {
         let mut tot: u64 = 0;
         // keep looping while true
         while match r.read(&mut buf) {
-            Ok(0) => {
-                eprintln!("zero read after {tot} bytes");
-                false
-            }
+            Ok(0) => false,
             Ok(size) => match bw.write_all(&buf[0..size]) {
                 Ok(_) => {
                     tot += size as u64;
@@ -106,7 +105,7 @@ impl RemoteClient for Http {
                 false
             }
         } {
-            eprintln!("read {tot} bytes");
+            // no op
         }
 
         let g = Gotten::new(&mimetype, resource, u, output, tot);
