@@ -171,7 +171,8 @@ mod tests {
             );
             assert!(
                 m.exists(&c.resource).unwrap(),
-                "{c} doesn't exist, not good"
+                "{c} at {} doesn't exist",
+                m.url(&c.resource).unwrap(),
             );
         }
 
