@@ -31,7 +31,7 @@ pub enum MirrorStatus {
     Unimplemented,
     Full(time::SystemTime),
     Partial(time::SystemTime),
-    Empty,
+    Empty(time::SystemTime),
 }
 
 impl fmt::Display for MirrorStatus {
@@ -44,7 +44,7 @@ impl fmt::Display for MirrorStatus {
                 MirrorStatus::Full(t) => format!("mirror latest {:?}, fully reflected", t),
                 MirrorStatus::Partial(t) =>
                     format!("mirror latest {:?}, only partially reflected", t),
-                MirrorStatus::Empty => "mirror is empty, unpulled".to_string(),
+                MirrorStatus::Empty(t) => format!("mirror has no captures since {:?}", t),
             }
         )
     }
@@ -136,7 +136,7 @@ impl Mirror {
             Err(e) => Err(StatusError::CaptureError(e)),
             Ok(f) => {
                 if !cc.has_captures() {
-                    Ok(MirrorStatus::Empty)
+                    Ok(MirrorStatus::Empty(cc.missing.front().unwrap().time))
                 } else if let Some(latest) = cc.last() {
                     let lt = latest.time;
                     if f < 1.0 {

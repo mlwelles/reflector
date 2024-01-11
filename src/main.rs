@@ -18,7 +18,7 @@ fn get_mirror(mut m: Mirror) -> Result<GetMirrorResult, GetMirrorError> {
     match m.status() {
         Ok(s) => {
             let do_get = match s {
-                MirrorStatus::Empty => true,
+                MirrorStatus::Empty(_) => true,
                 MirrorStatus::Partial(_) => true,
                 MirrorStatus::Full(_) => false,
                 MirrorStatus::Unimplemented => return Err(Unimplemented),
