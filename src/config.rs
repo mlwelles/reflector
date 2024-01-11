@@ -36,7 +36,7 @@ impl SourceConfig {
             pathmaker: "SDO _1024_0094.ogv".to_string(),
             flatten: Some(true),
             period: 24 * 60 * 60, // 24 hours, expressed as seconds
-            seed_past_midnight: None,
+            seed_past_midnight: Some((21 * 60 * 60) + (5 * 60)), // 21:05
             loop_period: Some(24 * 60 * 60 * 28), // 28 days
         }
     }
