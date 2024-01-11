@@ -21,7 +21,7 @@ pub struct SourceConfig {
     /// period between captures
     pub period: u64,
     /// seconds after midnight to offset all times
-    pub seed_past_midnight: Option<u64>,
+    pub offset: Option<u64>,
     pub loop_period: Option<u64>,
     pub flatten: Option<bool>,
 }
@@ -36,7 +36,7 @@ impl SourceConfig {
             pathmaker: "SDO _1024_0094.ogv".to_string(),
             flatten: Some(true),
             period: 24 * 60 * 60, // 24 hours, expressed as seconds
-            seed_past_midnight: Some((21 * 60 * 60) + (5 * 60)), // 21:05
+            offset: Some((21 * 60 * 60) + (5 * 60)), // 21:05
             loop_period: Some(24 * 60 * 60 * 28), // 28 days
         }
     }
@@ -50,7 +50,7 @@ impl SourceConfig {
             pathmaker: "GOES-R".to_string(),
             flatten: None,
             period: 5 * 60 * 10,
-            seed_past_midnight: None,
+            offset: None,
             loop_period: Some(24 * 60 * 60), // 24 hours
         }
     }

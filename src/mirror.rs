@@ -100,7 +100,7 @@ impl Mirror {
         let local = local.unwrap();
 
         let flatten = matches!(cfg.flatten, Some(true));
-        let seed_past_midnight = Duration::new(cfg.seed_past_midnight.unwrap_or(0), 0);
+        let seed_past_midnight = Duration::new(cfg.offset.unwrap_or(0), 0);
         let loop_period = Duration::new(cfg.loop_period.unwrap_or(24 * 60 * 60), 0);
 
         let m = Mirror {
@@ -311,7 +311,7 @@ mod tests {
             pathmaker: "identity".to_string(),
             flatten: None,
             period: 60 * 60, // once per hour
-            seed_past_midnight: None,
+            offset: None,
             loop_period: Some(60 * 60 * 24),
         }
     }

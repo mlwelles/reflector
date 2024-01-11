@@ -87,3 +87,17 @@ pathmaker = "SDO"
 freq      = "Daily"
 flatten   = true
 #+end_example
+
+* Oscillation of the mirror
+
+Esssentially each SourceConfig describes an oscillation, described by:
+  period
+  loop_period
+  offset
+
+So, for each day, our first element is:
+  midnight + offset
+and then continues, once per period, until the day ends.
+
+
+
