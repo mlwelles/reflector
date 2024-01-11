@@ -155,6 +155,10 @@ impl Mirror {
         self.remote_client.ping()
     }
 
+    pub fn exists(&self, rsrc: &str) -> Result<bool, GetError> {
+        self.remote_client.exists(rsrc)
+    }
+
     pub fn get(&mut self, rsrc: &str, path: PathBuf) -> Result<Gotten, GetError> {
         self.remote_client.get(rsrc, path)
     }

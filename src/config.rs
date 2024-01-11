@@ -160,6 +160,16 @@ mod tests {
             "length {} doesn't meet reasonable minimum captures",
             cap.len_all()
         );
+
+        // assert the latest in the capture missing list exists
+        if let Some(c) = cap.missing.back() {
+            assert!(m.exists(&c.resource).unwrap());
+        }
+
+        // assert the latest in the capture list exists
+        // if let Some(c) = cap.list.back() {
+        //     assert!(m.remote_client.exists(c));
+        // }
     }
 
     fn assert_has_captures(m: &Mirror) {
