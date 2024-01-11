@@ -164,7 +164,7 @@ mod tests {
         // assert the latest in the capture missing list exists
         if let Some(c) = cap.missing.back() {
             assert!(
-                c.time > now,
+                c.time < now,
                 "{} vs {}",
                 display_systime(c.time),
                 display_systime(now)
