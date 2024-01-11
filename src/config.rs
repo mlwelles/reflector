@@ -139,7 +139,7 @@ impl From<Args> for Config {
 mod tests {
     use super::*;
     use crate::mirror::Mirror;
-    use crate::{CaptureMissing, TimeRange};
+    use crate::{display_systime, CaptureMissing, TimeRange};
     use std::time::{Duration, SystemTime};
 
     #[test]
@@ -163,7 +163,16 @@ mod tests {
 
         // assert the latest in the capture missing list exists
         if let Some(c) = cap.missing.back() {
-            assert!(m.exists(&c.resource).unwrap());
+            assert!(
+                c.time > now,
+                "{} vs {}",
+                display_systime(c.time),
+                display_systime(now)
+            );
+            assert!(
+                m.exists(&c.resource).unwrap(),
+                "{c} doesn't exist, not good"
+            );
         }
 
         // assert the latest in the capture list exists
