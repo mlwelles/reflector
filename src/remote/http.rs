@@ -30,13 +30,6 @@ impl Http {
         let agent = builder.build();
         Http { base, agent }
     }
-
-    pub fn url(&self, resource: &str) -> Result<Url, GetError> {
-        match self.base.join(resource) {
-            Ok(u) => Ok(u),
-            Err(e) => Err(GetError::UnparsableURL(e)),
-        }
-    }
 }
 
 impl FromStr for Http {
@@ -49,6 +42,19 @@ impl FromStr for Http {
 }
 
 impl RemoteClient for Http {
+    fn remote_addr(&self) -> SocketAddr {
+        let host = self.base.host_str().unwrap();
+        let port = self.base.port_or_known_default().unwrap();
+        (host, port).to_socket_addrs().unwrap().next().unwrap()
+    }
+
+    fn url(&self, resource: &str) -> Result<Url, GetError> {
+        match self.base.join(resource) {
+            Ok(u) => Ok(u),
+            Err(e) => Err(GetError::UnparsableURL(e)),
+        }
+    }
+
     fn ping(&mut self) -> Result<Duration, PingError> {
         match self.agent.request_url("HEAD", &self.base).call() {
             Ok(_) => Ok(Duration::new(0, 0)),
@@ -110,12 +116,6 @@ impl RemoteClient for Http {
 
         let g = Gotten::new(&mimetype, resource, u, output, tot);
         Ok(g)
-    }
-
-    fn remote_addr(&self) -> SocketAddr {
-        let host = self.base.host_str().unwrap();
-        let port = self.base.port_or_known_default().unwrap();
-        (host, port).to_socket_addrs().unwrap().next().unwrap()
     }
 }
 

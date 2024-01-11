@@ -155,6 +155,11 @@ impl Mirror {
         self.remote_client.ping()
     }
 
+    // FIXME: Resource should be a type
+    pub fn url(&self, rsrc: &str) -> Result<Url, GetError> {
+        self.remote_client.url(rsrc)
+    }
+
     pub fn exists(&self, rsrc: &str) -> Result<bool, GetError> {
         self.remote_client.exists(rsrc)
     }

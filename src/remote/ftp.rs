@@ -82,6 +82,13 @@ impl RemoteClient for Ftp {
         }
     }
 
+    fn url(&self, resource: &str) -> Result<Url, GetError> {
+        match self.base.join(resource) {
+            Ok(u) => Ok(u),
+            Err(e) => Err(GetError::UnparsableURL(e)),
+        }
+    }
+
     fn exists(&self, _resource: &str) -> Result<bool, GetError> {
         Err(GetError::Unimplemented)
     }

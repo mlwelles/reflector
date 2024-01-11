@@ -9,6 +9,13 @@ use url::Url;
 pub struct Mock();
 
 impl RemoteClient for Mock {
+    fn url(&self, resource: &str) -> Result<Url, GetError> {
+        match Url::parse(resource) {
+            Ok(u) => Ok(u),
+            Err(e) => Err(GetError::UnparsableURL(e)),
+        }
+    }
+
     fn ping(&mut self) -> Result<Duration, PingError> {
         Ok(Duration::new(0, 0))
     }

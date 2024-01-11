@@ -6,7 +6,7 @@ use std::path::PathBuf;
 use std::time::Duration;
 use suppaftp::FtpError;
 use ureq;
-use url;
+use url::{ParseError, Url};
 
 #[derive(Debug)]
 pub enum ConnectError {
@@ -30,7 +30,7 @@ pub enum PingError {
 #[derive(Debug)]
 pub enum GetError {
     Unimplemented,
-    UnparsableURL(url::ParseError),
+    UnparsableURL(ParseError),
     NotConnected,
     RequestErr(Box<ureq::Error>),
     OutputExistsAsDir(PathBuf),
@@ -48,6 +48,7 @@ pub enum ListError {
 pub trait RemoteClient {
     fn ping(&mut self) -> Result<Duration, PingError>;
     fn exists(&self, resource: &str) -> Result<bool, GetError>;
+    fn url(&self, resource: &str) -> Result<Url, GetError>;
     fn get(&mut self, resource: &str, output: PathBuf) -> Result<Gotten, GetError>;
     fn remote_addr(&self) -> SocketAddr;
 
