@@ -36,9 +36,9 @@ impl SourceConfig {
             pathmaker: "SDO _1024_0094.ogv".to_string(),
             flatten: Some(true),
             period: 24 * 60 * 60, // 24 hours, expressed as seconds
-            // offset: Some((21 * 60 * 60) + (5 * 60)), // 21:05
-            offset: Some((23 * 60 * 60) + (5 * 60)), // 21:05 + TZ gah
-            loop_period: Some(24 * 60 * 60 * 28),    // 28 days
+            offset: Some((21 * 60 * 60) + (5 * 60)), // 21:05 -- this would work if midnight was defined at UTC
+            // offset: Some((23 * 60 * 60) + (5 * 60)), // 21:05 + TZ is more than 24, get as close as possible gah
+            loop_period: Some(24 * 60 * 60 * 28), // 28 days
         }
     }
 
