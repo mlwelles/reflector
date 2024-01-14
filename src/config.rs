@@ -237,7 +237,17 @@ mod tests {
 
         let r = TimeRange::from(StandardTimeRange::AllDayYesterday);
         let c = m.captures_in_range(&r);
-        assert!(!c.is_empty())
+        println!("all day yesterday captures: {}", c);
+        assert!(!c.is_empty());
+        assert_eq!(1, c.len_all());
+
+        // SDO captures around 9:15pm per day, thus a time range from
+        // midnight to 9pm (21 hours) should have no captures
+        let r = TimeRange::from((r.from, r.to - Duration::from_secs(3 * 60 * 60)));
+        let c = m.captures_in_range(&r);
+        println!("partial day yesterday captures: {}", c);
+        assert!(c.is_empty());
+        assert_eq!(0, c.len_all());
     }
 
     #[test]

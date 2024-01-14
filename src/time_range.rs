@@ -104,16 +104,22 @@ impl From<(NaiveDateTime, NaiveDateTime)> for TimeRange {
 
 pub enum StandardTimeRange {
     AllDayYesterday,
+    LastTwentyFourHours,
 }
 
 impl From<StandardTimeRange> for TimeRange {
     fn from(std: StandardTimeRange) -> Self {
+        let now = SystemTime::now();
+        let one_day = Duration::from_secs(60 * 60 * 24);
         match std {
             StandardTimeRange::AllDayYesterday => {
-                let now = SystemTime::now();
                 let end = naive_trunc_midnight(&naive_from_systime(now));
-                let start = end - Duration::from_secs(60 * 60 * 24);
+                let start = end - one_day;
                 Self::from((start, end))
+            }
+            StandardTimeRange::LastTwentyFourHours => {
+                let start = now - one_day;
+                Self::from((start, now))
             }
         }
     }
