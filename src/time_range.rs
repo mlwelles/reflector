@@ -57,6 +57,17 @@ impl TimeRange {
     }
 }
 
+impl fmt::Display for TimeRange {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{}--{}",
+            display_systime(self.from),
+            display_systime(self.to)
+        )
+    }
+}
+
 impl From<SystemTime> for TimeRange {
     fn from(start: SystemTime) -> Self {
         Self {
@@ -84,17 +95,6 @@ impl From<NaiveDateTime> for TimeRange {
 impl From<(NaiveDateTime, NaiveDateTime)> for TimeRange {
     fn from(input: (NaiveDateTime, NaiveDateTime)) -> Self {
         Self::from((systime_from_naive(input.0), systime_from_naive(input.1)))
-    }
-}
-
-impl fmt::Display for TimeRange {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{}--{}",
-            display_systime(self.from),
-            display_systime(self.to)
-        )
     }
 }
 
