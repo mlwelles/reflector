@@ -9,7 +9,7 @@ pub use time_util::*;
 pub mod flatten;
 pub use flatten::*;
 pub mod time_range;
-pub use time_range::{TimeRange, TimeRangeError};
+pub use time_range::{StandardTimeRange, TimeRange, TimeRangeError};
 pub mod time_list;
 pub use time_list::TimeList;
 pub mod pathmaker;

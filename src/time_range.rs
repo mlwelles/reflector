@@ -35,8 +35,12 @@ impl TimeRange {
         Self::new(from, to)
     }
 
-    pub fn empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool {
         self.from == self.to
+    }
+
+    pub fn duration(&self) -> Duration {
+        self.to.duration_since(self.from).unwrap()
     }
 
     pub fn equal_by_seconds(&self, compare: &Self) -> bool {
@@ -98,6 +102,23 @@ impl From<(NaiveDateTime, NaiveDateTime)> for TimeRange {
     }
 }
 
+pub enum StandardTimeRange {
+    AllDayYesterday,
+}
+
+impl From<StandardTimeRange> for TimeRange {
+    fn from(std: StandardTimeRange) -> Self {
+        match std {
+            StandardTimeRange::AllDayYesterday => {
+                let now = SystemTime::now();
+                let end = naive_trunc_midnight(&naive_from_systime(now));
+                let start = end - Duration::from_secs(60 * 60 * 24);
+                Self::from((start, end))
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -117,7 +138,7 @@ mod tests {
         let now = SystemTime::now();
         let r = TimeRange::from(now);
         assert_eq!(TimeRange::new(now, now).unwrap(), r);
-        assert!(r.empty())
+        assert!(r.is_empty())
     }
 
     #[test]
@@ -136,13 +157,23 @@ mod tests {
         let then = now - five_seconds;
         let r = TimeRange::from((then, now));
         assert_eq!(TimeRange::new(then, now).unwrap(), r);
-        assert!(!r.empty());
+        assert!(!r.is_empty());
     }
 
     #[test]
     fn check_empty() {
         let to = SystemTime::now();
         let range = TimeRange::new(to, to).unwrap();
-        assert!(range.empty());
+        assert!(range.is_empty());
+    }
+
+    #[test]
+    fn standard_range() {
+        let r = TimeRange::from(StandardTimeRange::AllDayYesterday);
+        println!("all day yesterday: {}", r);
+        assert!(r.from < r.to, "starts before it ends");
+        assert!(!r.is_empty(), "empty");
+        let oneday = Duration::from_secs(60 * 60 * 24);
+        assert_eq!(oneday, r.duration());
     }
 }

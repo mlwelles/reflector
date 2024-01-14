@@ -50,7 +50,7 @@ impl SourceConfig {
             local: "/net/sopa/winshare/sat/abi_truecolor".to_string(),
             pathmaker: "GOES-R".to_string(),
             flatten: None,
-            period: 5 * 60 * 10,
+            period: 5 * 60 * 10, // eh?
             offset: None,
             loop_period: Some(24 * 60 * 60), // 24 hours
         }
@@ -140,7 +140,7 @@ impl From<Args> for Config {
 mod tests {
     use super::*;
     use crate::mirror::Mirror;
-    use crate::{display_systime, CaptureMissing, TimeRange};
+    use crate::{display_systime, CaptureMissing, StandardTimeRange, TimeRange};
     use std::time::{Duration, SystemTime};
 
     #[test]
@@ -226,6 +226,18 @@ mod tests {
         assert_has_captures(&m);
 
         assert_alpha_omega(&mut m);
+    }
+
+    #[test]
+    fn sdo_capturelist() {
+        let m = Mirror::try_from(SourceConfig::sdo()).unwrap();
+        let c = m.loop_captures();
+        // this mirror uses 24 hours per capture with a 28 day loop period
+        assert_eq!(28, c.len_all());
+
+        let r = TimeRange::from(StandardTimeRange::AllDayYesterday);
+        let c = m.captures_in_range(&r);
+        assert!(!c.is_empty())
     }
 
     #[test]
