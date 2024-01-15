@@ -94,7 +94,7 @@ pub fn systime_from_naive(ndt: NaiveDateTime) -> SystemTime {
 /// use std::time::SystemTime;
 ///
 /// let epch = SystemTime::UNIX_EPOCH;
-/// assert_eq!("1970-01-01 00:00:00", display_systime(epch))
+/// assert_eq!("1970-01-01 00:00:00", display_systime(&epch))
 /// ```
 pub fn display_systime(st: &SystemTime) -> String {
     naive_from_systime(st.clone())

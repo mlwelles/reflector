@@ -137,8 +137,10 @@ impl From<(TimeRange, Duration, Duration)> for TimeList {
 /// let r = TimeRange::from((then, now));
 /// eprintln!("range: {r}");
 /// let tl = TimeList::from((r, d));
-/// assert_eq!(format!("[{}, {}, {}]", display_systime(now - 2 * d),
-///                     display_systime(now - d), display_systime(now)),
+/// let two_days_ago = now - 2 * d;
+/// let yesterday = now - d;
+/// assert_eq!(format!("[{}, {}, {}]", display_systime(&two_days_ago),
+///                     display_systime(&yesterday), display_systime(&now)),
 ///            format!("{tl}"));
 /// assert_eq!(3, tl.len())
 /// ```
