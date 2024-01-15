@@ -6,8 +6,9 @@ use crate::remote::{
 };
 use crate::time_range;
 use crate::{
-    flatten_filename, Capture, CaptureError, CaptureList, CaptureMissing, FileList, FileStore,
-    PathMaker, PathMakerError, SourceConfig, StoreError, StoreGetError, TimeList, TimeRange,
+    display_systime, flatten_filename, Capture, CaptureError, CaptureList, CaptureMissing,
+    FileList, FileStore, PathMaker, PathMakerError, SourceConfig, StoreError, StoreGetError,
+    TimeList, TimeRange,
 };
 use log::info;
 use std::fmt;
@@ -41,10 +42,14 @@ impl fmt::Display for MirrorStatus {
             "{}",
             match self {
                 MirrorStatus::Unimplemented => "status not implemented".to_string(),
-                MirrorStatus::Full(t) => format!("mirror latest {:?}, fully reflected", t),
-                MirrorStatus::Partial(t) =>
-                    format!("mirror latest {:?}, only partially reflected", t),
-                MirrorStatus::Empty(t) => format!("mirror has no captures since {:?}", t),
+                MirrorStatus::Full(t) =>
+                    format!("mirror latest {}, fully reflected", display_systime(t)),
+                MirrorStatus::Empty(t) =>
+                    format!("mirror has no captures since {}", display_systime(t)),
+                MirrorStatus::Partial(t) => format!(
+                    "mirror latest {}, only partially reflected",
+                    display_systime(t)
+                ),
             }
         )
     }

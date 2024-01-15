@@ -154,7 +154,7 @@ impl fmt::Display for TimeList {
             f,
             "[{}]",
             self.clone()
-                .map(display_systime)
+                .map(|t| display_systime(&t))
                 .collect::<Vec<String>>()
                 .join(", ")
         )
@@ -179,7 +179,7 @@ mod tests {
     fn display() {
         let now = SystemTime::now();
         let tl = TimeList::from(now);
-        assert_eq!(format!("[{}]", display_systime(now)), format!("{tl}"));
+        assert_eq!(format!("[{}]", display_systime(&now)), format!("{tl}"));
     }
 
     #[test]

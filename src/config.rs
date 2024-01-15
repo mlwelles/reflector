@@ -167,8 +167,8 @@ mod tests {
             assert!(
                 c.time < now,
                 "{} vs {}",
-                display_systime(c.time),
-                display_systime(now)
+                display_systime(&c.time),
+                display_systime(&now)
             );
             assert!(
                 m.exists(&c.resource).unwrap(),

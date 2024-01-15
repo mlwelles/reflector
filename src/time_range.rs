@@ -66,8 +66,8 @@ impl fmt::Display for TimeRange {
         write!(
             f,
             "{}--{}",
-            display_systime(self.from),
-            display_systime(self.to)
+            display_systime(&self.from),
+            display_systime(&self.to)
         )
     }
 }

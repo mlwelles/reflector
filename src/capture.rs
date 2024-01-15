@@ -61,7 +61,7 @@ impl fmt::Display for CaptureMissing {
             f,
             "<Missing '{}' at {}>",
             self.resource,
-            display_systime(self.time),
+            display_systime(&self.time),
         )
     }
 }
