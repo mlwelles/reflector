@@ -1,3 +1,4 @@
+use log::{debug, info};
 use reflector::{CaptureList, Config, GetError, Mirror, MirrorStatus, StatusError};
 use std::env;
 
@@ -24,12 +25,16 @@ fn get_mirror(mut m: Mirror) -> Result<GetMirrorResult, GetMirrorError> {
                 MirrorStatus::Unimplemented => return Err(Unimplemented),
             };
             if do_get {
+                println!("fetching mirror {}", m.name);
                 match m.fill_loop() {
                     Ok(l) => Ok(GetMirrorResult { captures: Some(l) }),
                     Err(e) => Err(RealGetError(e)),
                 }
             } else {
-                // already full
+                println!(
+                    "mirror {} is already full for the default loop period",
+                    m.name
+                );
                 Ok(GetMirrorResult {
                     captures: Some(m.loop_captures()),
                 })
@@ -42,16 +47,16 @@ fn get_mirror(mut m: Mirror) -> Result<GetMirrorResult, GetMirrorError> {
 fn main() {
     let cfg = Config::from(env::args());
     for src in cfg.sources {
-        println!("{:#?}", src);
+        debug!("{:#?}", src);
         match Mirror::new(src) {
             Ok(m) => {
-                println!("ok, {}", m);
+                info!("got mirror {m}");
                 match get_mirror(m) {
                     Ok(r) if r.captures.is_none() => {
                         println!("no captures in our loop period");
                     }
                     Ok(r) => {
-                        println!("now we have this capturelist: {}", r.captures.unwrap());
+                        println!("mirror has {}", r.captures.unwrap());
                     }
                     Err(e) => {
                         eprintln!("filling loop captures failed: {:?}", e);
