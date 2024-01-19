@@ -126,3 +126,30 @@ pub fn naive_since_midnight(inb: &NaiveDateTime) -> Duration {
 pub fn naive_trunc_midnight(inb: &NaiveDateTime) -> NaiveDateTime {
     *inb - naive_since_midnight(inb)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::process::Command;
+
+    // use chrono::prelude::*;
+
+    #[test]
+    fn now() {
+        let s = SystemTime::now();
+        // let u = Utc::now();
+        // assert_eq!(systime_as_secs(&s), systime_as_secs(&systime_from_naive(u)));
+
+        let output = Command::new("date")
+            .arg("+%Y-%m-%d %H:%M:%S")
+            .output()
+            .unwrap();
+        let mut expect = String::from_utf8(output.stdout).unwrap();
+        expect.pop(); // remove trailing newline
+        assert_eq!(
+            expect,
+            display_systime(&s),
+            "expected vs actual current time"
+        );
+    }
+}
