@@ -172,8 +172,10 @@ mod tests {
             );
             assert!(
                 m.exists(&c.resource).unwrap(),
-                "{c} at {} doesn't exist",
+                "{c} at {} doesn't exist at time {} (now {})",
                 m.url(&c.resource).unwrap(),
+                display_systime(&c.time),
+                display_systime(&now)
             );
         }
 
