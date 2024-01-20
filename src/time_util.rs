@@ -142,6 +142,7 @@ mod tests {
 
         let output = Command::new("date")
             .arg("+%Y-%m-%d %H:%M:%S")
+            .env("TZ", "UTC")
             .output()
             .unwrap();
         let mut expect = String::from_utf8(output.stdout).unwrap();
