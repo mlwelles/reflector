@@ -110,6 +110,10 @@ impl CaptureList {
         self.missing.push_back(mis)
     }
 
+    pub fn latest(&self) -> Option<&Capture> {
+        self.list.back()
+    }
+
     pub fn full_ratio(&self) -> Result<f64, CaptureError> {
         let all = self.len_all() as f64;
         if all > 0.0 {
@@ -158,6 +162,7 @@ mod tests {
     fn empty() {
         let l = CaptureList::empty();
         assert!(l.is_empty(), "is empty");
+        assert_eq!(None, l.latest(), "latest");
         assert_eq!(0, l.len(), "len");
         assert_eq!(0, l.len_all(), "len_all");
         assert!(l.full_ratio().is_err(), "full_ratio");

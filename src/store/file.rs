@@ -5,7 +5,7 @@ use super::StoreGetError;
 use super::StoreGetError::*;
 use crate::store::StoreError::*;
 use crate::{Capture, CaptureList, CaptureMissing, FileList, PathMaker, StoreError};
-use log::info;
+use log::{debug, info};
 use std::time::SystemTime;
 use std::{
     fmt, fs, io,
@@ -56,7 +56,7 @@ impl FileStore {
 
     pub fn get(&self, p: &PathBuf) -> Result<Capture, StoreGetError> {
         let fetched = self.join(p);
-        // eprintln!("{}", fetched.metadata().unwrap().file_type());
+        debug!("getting {}", fetched.display());
         if !fetched.is_file() {
             return Err(NoSuchFile(fetched));
         }

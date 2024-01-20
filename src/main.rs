@@ -1,5 +1,7 @@
 use log::{debug, info};
-use reflector::{CaptureList, Config, GetError, Mirror, MirrorStatus, StatusError};
+use reflector::{
+    display_systime, CaptureList, Config, GetError, Mirror, MirrorStatus, StatusError,
+};
 use std::env;
 
 #[derive(Debug)]
@@ -56,7 +58,14 @@ fn main() {
                         println!("no captures in our loop period");
                     }
                     Ok(r) => {
-                        println!("mirror has {}", r.captures.unwrap());
+                        let cap = r.captures.unwrap();
+                        println!("mirror has {}", cap);
+                        let l = cap.latest().unwrap();
+                        println!(
+                            "latest stamped {} file {}",
+                            display_systime(&l.time),
+                            l.path.display(),
+                        );
                     }
                     Err(e) => {
                         eprintln!("filling loop captures failed: {:?}", e);
