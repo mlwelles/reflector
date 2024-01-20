@@ -140,7 +140,7 @@ impl From<Args> for Config {
 mod tests {
     use super::*;
     use crate::mirror::Mirror;
-    use crate::{display_systime, CaptureMissing, StandardTimeRange, TimeRange};
+    use crate::{display_duration, display_systime, CaptureMissing, StandardTimeRange, TimeRange};
     use std::time::{Duration, SystemTime};
 
     #[test]
@@ -236,6 +236,14 @@ mod tests {
         let c = m.loop_captures();
         // this mirror uses 24 hours per capture with a 28 day loop period
         assert_eq!(28, c.len_all());
+
+        let latest = c.latest().unwrap();
+        let since = latest.time.elapsed().unwrap();
+        assert!(
+            since < Duration::new(60 * 60 * 24, 0),
+            "{} not recent",
+            display_duration(&since),
+        );
 
         let r = TimeRange::from(StandardTimeRange::AllDayYesterday);
         let c = m.captures_in_range(&r);

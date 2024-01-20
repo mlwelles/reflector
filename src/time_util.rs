@@ -102,6 +102,47 @@ pub fn display_systime(st: &SystemTime) -> String {
         .to_string()
 }
 
+fn plural_form(u: u64) -> String {
+    match u {
+        1 => "".to_string(),
+        _ => "s".to_string(),
+    }
+}
+
+/// show a duration, assuming we don't really care about nanos
+/// ```
+/// use reflector::time_util::*;
+/// use std::time::Duration;
+///
+/// let d = Duration::new(62, 20);
+/// assert_eq!("1 minute, 2 seconds", display_duration(&d));
+/// ```
+pub fn display_duration(d: &Duration) -> String {
+    const MINUTE: u64 = 60;
+    const HOUR: u64 = MINUTE * 60;
+    const DAY: u64 = HOUR * 24;
+    let mut s = vec!["".to_string()];
+    let mut v = d.as_secs();
+    if v > DAY {
+        let days = v / DAY;
+        s.push(format!("{days} days"));
+        v = v % DAY;
+    }
+    if v > HOUR {
+        let hours = v / HOUR;
+        s.push(format!("{hours} hours"));
+        v = v % HOUR;
+    }
+    if v > MINUTE {
+        let min = v / MINUTE;
+        s.push(format!("{min} minute{}", plural_form(min)));
+        v = v % MINUTE;
+    }
+    s.push(format!("{v} seconds"));
+
+    s[1..].join(", ")
+}
+
 /// how long since midnight happened?
 /// ```
 /// use reflector::time_util::*;
