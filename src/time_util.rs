@@ -102,7 +102,8 @@ pub fn display_systime(st: &SystemTime) -> String {
         .to_string()
 }
 
-fn plural_form(u: u64) -> String {
+// so far from general
+fn pluralize(u: u64) -> String {
     match u {
         1 => "".to_string(),
         _ => "s".to_string(),
@@ -125,17 +126,17 @@ pub fn display_duration(d: &Duration) -> String {
     let mut v = d.as_secs();
     if v > DAY {
         let days = v / DAY;
-        s.push(format!("{days} days"));
+        s.push(format!("{days} day{}", pluralize(days)));
         v = v % DAY;
     }
     if v > HOUR {
         let hours = v / HOUR;
-        s.push(format!("{hours} hours"));
+        s.push(format!("{hours} hour{}", pluralize(hours)));
         v = v % HOUR;
     }
     if v > MINUTE {
         let min = v / MINUTE;
-        s.push(format!("{min} minute{}", plural_form(min)));
+        s.push(format!("{min} minute{}", pluralize(min)));
         v = v % MINUTE;
     }
     s.push(format!("{v} seconds"));
