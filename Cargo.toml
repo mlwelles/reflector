@@ -8,9 +8,10 @@ default-run = "reflector"
 
 [dependencies]
 chrono = "0.4.31"
-log = { version = "0.4.20", features = ["max_level_warn"] }
+log = "0.4.20"
 regex = "1.10.0"
 serde = { version = "1.0.188", features = ["derive", "serde_derive"] }
+std-logger = "0.5.2"
 suppaftp = "5.2.1"
 toml = "0.7.6"
 ureq = "2.8.0"
