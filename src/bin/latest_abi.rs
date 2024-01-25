@@ -1,6 +1,6 @@
-use reflector::{Mirror, MirrorStatus, SourceConfig};
+use reflector::{Capture, Mirror, MirrorStatus, SourceConfig};
 // use std::env;
-use std::os;
+use std::process::exit;
 
 fn process_latest(c: Capture) {
     // we need to scale this enormous PNG
@@ -18,14 +18,15 @@ fn main() {
     match Mirror::try_from(SourceConfig::goes_abi()) {
         Ok(mut m) => match m.status() {
             Ok(MirrorStatus::Full(_) | MirrorStatus::Partial(_)) => eprintln!("ok to proceed"),
+            Ok(_) => eprintln!("probably cannot proceed erm"),
             Err(e) => {
                 eprintln!("mirror {} status error: {:?}", m.name, e);
-                os::exit(2);
+                exit(2);
             }
         },
         Err(e) => {
             eprintln!("error setting up ABI mirror: {:?}", e);
-            os::exit(1);
+            exit(1);
         }
     }
 }
