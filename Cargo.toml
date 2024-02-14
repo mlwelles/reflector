@@ -17,6 +17,7 @@ toml = "0.7.6"
 ureq = "2.8.0"
 url = "2.4.1"
 
+# these include examples and benchmarks, as well as tests
 [dev-dependencies]
 assert_cmd = "2.0.12"
 tempfile = "3.8.0"
