@@ -99,5 +99,3 @@ So, for each day, our first element is:
   midnight + offset
 and then continues, once per period, until the day ends.
 
-
-

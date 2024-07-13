@@ -1,0 +1,11 @@
+ad hoc bug tracking
+
+these should be converted into tests, if possible
+
+* TODO mirror instantiation fails if network is down
+
+We shouldn't need the network just to work out our capture list, for instance.
+
+* TODO mirror is filling in forward order
+
+Should fill in reverse order
