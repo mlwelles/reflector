@@ -3,6 +3,7 @@ use reflector::{
     display_systime, CaptureList, Config, GetError, Mirror, MirrorStatus, StatusError,
 };
 use std::env;
+use std_logger;
 
 #[derive(Debug)]
 enum GetMirrorError {
@@ -47,6 +48,7 @@ fn get_mirror(mut m: Mirror) -> Result<GetMirrorResult, GetMirrorError> {
 }
 
 fn main() {
+    std_logger::Config::logfmt().init();
     let cfg = Config::from(env::args());
     for src in cfg.sources {
         debug!("{:#?}", src);

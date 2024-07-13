@@ -91,6 +91,7 @@ impl Mirror {
             return Err(InvalidURL(e));
         }
         let remote = remote.unwrap();
+        // FIXME: requires network to be up
         let remote_client = remote_from_url(&remote);
         if let Err(e) = remote_client {
             return Err(InvalidRemote(e));
@@ -246,8 +247,9 @@ impl Mirror {
         let mut new = CaptureList::empty();
         // let mut errs = vec![GetError];
         new.list = c.list;
-        for m in c.missing {
-            eprintln!("attempting to fill missing {:?}", m);
+        let mut missing = c.missing.clone();
+        while let Some(m) = missing.pop_back() {
+            info!("attempting to fill missing {}", m.resource);
             match self.get_missing(&m) {
                 Ok(g) => {
                     let c = Capture::from((g, m.time));

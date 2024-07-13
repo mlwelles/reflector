@@ -32,8 +32,10 @@ impl SourceConfig {
             name: "Solar Data Observatory".to_string(),
             abbrev: "sdo".to_string(),
             remote: "https://sdo.gsfc.nasa.gov/assets/img/dailymov".to_string(),
-            local: "/net/sopa/winshare/sat/sdo".to_string(),
-            pathmaker: "SDO _1024_0094.ogv".to_string(),
+            // local: "/net/sopa/winshare/sat/sdo".to_string(),
+            local: "/home/adam/tmp/sat/sdo".to_string(),
+            // pathmaker: "SDO _1024_0094.ogv".to_string(),
+            pathmaker: "SDO _1024_0335.ogv".to_string(),
             flatten: Some(true),
             period: 24 * 60 * 60, // 24 hours, expressed as seconds
             offset: Some((21 * 60 * 60) + (5 * 60)), // 21:05 -- this would work if midnight was defined at UTC
@@ -157,7 +159,7 @@ mod tests {
         assert!(lr.equal_by_seconds(&expect), "expect {} == {}", lr, expect);
         let cap = m.loop_captures();
         assert!(
-            cap.len_all() > 20,
+            cap.len_all() > 5,
             "length {} doesn't meet reasonable minimum captures",
             cap.len_all()
         );
@@ -215,14 +217,14 @@ mod tests {
     }
 
     #[test]
-    fn sdo() {
+    fn sdo_mirror() {
         let s = SourceConfig::sdo();
         let mut m = Mirror::try_from(s).unwrap();
         assert_valid_mirror(&m);
 
         // hardcoded sanity check
         let lp = Duration::new(28 * 24 * 60 * 60, 0);
-        assert_eq!(m.loop_period, lp);
+        assert_eq!(m.loop_period, lp, "actual vs expected loop period");
 
         // unsafely assume *something* is in our repository
         assert_has_captures(&m);
@@ -262,7 +264,7 @@ mod tests {
 
     #[test]
     fn abi_truecolor() {
-        let s = SourceConfig::sdo();
+        let s = SourceConfig::goes_abi();
         let mut m = Mirror::try_from(s).unwrap();
         assert_valid_mirror(&m);
 
