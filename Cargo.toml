@@ -7,17 +7,17 @@ default-run = "reflector"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-chrono = "0.4.31"
-log = "0.4.20"
-regex = "1.10.0"
-serde = { version = "1.0.188", features = ["derive", "serde_derive"] }
-std-logger = "0.5.2"
-suppaftp = "5.2.1"
-toml = "0.7.6"
-ureq = "2.8.0"
-url = "2.4.1"
+chrono = "0.4.38"
+log = "0.4.22"
+regex = "1.10.6"
+serde = { version = "1.0.205", features = ["derive", "serde_derive"] }
+std-logger = "0.5.3"
+suppaftp = "5.4.0"
+toml = "0.7.8"
+ureq = "2.10.1"
+url = "2.5.2"
 
 # these include examples and benchmarks, as well as tests
 [dev-dependencies]
-assert_cmd = "2.0.12"
-tempfile = "3.8.0"
+assert_cmd = "2.0.16"
+tempfile = "3.12.0"
