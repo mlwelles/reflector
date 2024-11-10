@@ -12,7 +12,6 @@ as needed.  Optional argument specifies how far back to go, default is
 Various media producers which generate visualizations based on
 captured data.
 
-
 * Application Design
 
 Config has SourceConfigs
@@ -99,3 +98,13 @@ So, for each day, our first element is:
   midnight + offset
 and then continues, once per period, until the day ends.
 
+* URLs of note
+
+ftp://ftp.nnvl.noaa.gov/GOES/ABI_GeoColor/
+  -- 5424x5424, all year, reliability issues
+
+https://cdn.star.nesdis.noaa.gov/GOES16/ABI/FD/GEOCOLOR/
+ -- 10848x10848 and 5424x5424 and other resolutions, 72 hours only
+
+https://www.star.nesdis.noaa.gov/GOES/fulldisk.php?sat=G16
+ -- overview of what's available
