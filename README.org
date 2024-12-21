@@ -103,8 +103,17 @@ and then continues, once per period, until the day ends.
 ftp://ftp.nnvl.noaa.gov/GOES/ABI_GeoColor/
   -- 5424x5424, all year, reliability issues
 
+* Other interesting sources
+
 https://cdn.star.nesdis.noaa.gov/GOES16/ABI/FD/GEOCOLOR/
  -- 10848x10848 and 5424x5424 and other resolutions, 72 hours only
 
 https://www.star.nesdis.noaa.gov/GOES/fulldisk.php?sat=G16
  -- overview of what's available
+
+** SSEC
+
+https://tropic.ssec.wisc.edu/real-time/mtpw2/product.php?color_type=tpw_nrl_colors&prod=global2&timespan=24hrs&anim=html5
+
+https://realearth.ssec.wisc.edu/
+
