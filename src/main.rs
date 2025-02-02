@@ -5,6 +5,8 @@ use reflector::{
 use std::env;
 use std_logger;
 
+// why ?
+#[allow(dead_code)]
 #[derive(Debug)]
 enum GetMirrorError {
     Unimplemented,
