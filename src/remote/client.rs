@@ -1,4 +1,6 @@
 use super::Gotten;
+use crate::CaptureMissing;
+use std::collections::VecDeque;
 use std::fs::File;
 use std::io;
 use std::net::SocketAddr;
@@ -37,6 +39,7 @@ pub enum GetError {
     OutputFileExists(PathBuf),
     OutputCreateFile(io::Error),
     RetrieveError(FtpError),
+    IncompleteFill(Box<GetError>, VecDeque<CaptureMissing>),
 }
 
 #[derive(Debug)]
