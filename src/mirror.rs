@@ -312,9 +312,8 @@ mod tests {
         }
 
         // setup a mock capture, at midnight
-        let nt = naive_from_systime(SystemTime::now());
-        let dt = datetime_from_system(SystemTime::now());
-        let ts: String = format!("{}", nt.format("%Y-%m-%dT00:00:00+00:00"));
+        let dt = datetime_from_systemtime(SystemTime::now());
+        let ts: String = format!("{}", dt.format("%Y-%m-%dT00:00:00+00:00"));
         eprintln!("creating file in store '{}'...", fcp.join(&ts).display());
         let _file = File::create(fcp.join(&ts));
 
