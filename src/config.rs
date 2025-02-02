@@ -27,21 +27,30 @@ pub struct SourceConfig {
 }
 
 impl SourceConfig {
-    pub fn sdo() -> Self {
+    pub fn sdo_0094() -> Self {
         Self {
             name: "Solar Data Observatory".to_string(),
             abbrev: "sdo".to_string(),
             remote: "https://sdo.gsfc.nasa.gov/assets/img/dailymov".to_string(),
             // local: "/net/sopa/winshare/sat/sdo".to_string(),
             local: "/home/adam/tmp/sat/sdo".to_string(),
-            // pathmaker: "SDO _1024_0094.ogv".to_string(),
-            pathmaker: "SDO _1024_0335.ogv".to_string(),
+            pathmaker: "SDO _1024_0094.ogv".to_string(),
             flatten: Some(true),
             period: 24 * 60 * 60, // 24 hours, expressed as seconds
             offset: Some((21 * 60 * 60) + (5 * 60)), // 21:05 -- this would work if midnight was defined at UTC
             // offset: Some((23 * 60 * 60) + (5 * 60)), // 21:05 + TZ is more than 24, get as close as possible gah
             loop_period: Some(24 * 60 * 60 * 28), // 28 days
         }
+    }
+
+    pub fn sdo() -> Self {
+        Self::sdo_0094()
+    }
+
+    pub fn sdo_0335() -> Self {
+        let mut s = Self::sdo();
+        s.pathmaker = "SDO _1024_0335.ogv".to_string();
+        s
     }
 
     pub fn goes_abi() -> Self {
