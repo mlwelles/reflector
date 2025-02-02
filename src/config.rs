@@ -1,5 +1,6 @@
 //! Mirror configuration.
 
+use log::{info, warn};
 use serde::Deserialize;
 use std::default::Default;
 use std::env::Args;
@@ -126,19 +127,22 @@ impl From<Args> for Config {
             2 => {
                 if let Some(first) = args.nth(1) {
                     match Config::from_str(&first) {
-                        Ok(c) => c,
+                        Ok(c) => {
+                            info!("matched on {}", first);
+                            c
+                        }
                         Err(e) => {
-                            eprintln!("no matches for {}: {:?}", first, e);
+                            warn!("no matches for {}: {:?}", first, e);
                             default
                         }
                     }
                 } else {
-                    eprintln!("arg counting logic fail");
+                    warn!("arg counting logic fail");
                     default
                 }
             }
             _ => {
-                eprintln!("unimplemented");
+                warn!("unimplemented");
                 default
             }
         }
