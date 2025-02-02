@@ -1,7 +1,7 @@
 //! Handy functions for working with the time formats used in the
 //! reflector crate.
 
-use chrono::{NaiveDateTime, Timelike};
+use chrono::{DateTime, Timelike, Utc};
 use std::time::{Duration, SystemTime};
 
 /// convert a SystemTime into seconds since midnight, or else u64::MAX
@@ -62,29 +62,15 @@ pub fn systime_round_to_min(s: &SystemTime) -> SystemTime {
     }
 }
 
-/// convert a SystemTime into a NaiveDateTime, in a panicky way
-/// ```
-/// use reflector::time_util::*;
-/// use std::time::SystemTime;
-///
-/// let nt = naive_from_systime(SystemTime::now());
-/// ```
-pub fn naive_from_systime(st: SystemTime) -> NaiveDateTime {
+/// convert a SystemTime into a DateTime
+pub fn datetime_from_systime(st: SystemTime) -> DateTime<Utc> {
     let es = i64::try_from(systime_as_secs(&st)).unwrap();
-    NaiveDateTime::from_timestamp_opt(es, 0).unwrap()
+    DateTime::from_timestamp(es, 0).unwrap()
 }
 
-/// convert a NaiveDateTime into a SystemTime
-/// ```
-/// use reflector::time_util::*;
-/// use chrono::{NaiveDateTime, NaiveDate};
-/// use std::time::SystemTime;
-///
-/// let n = NaiveDate::from_ymd_opt(1970, 1, 1).unwrap().and_hms_opt(0, 0, 0).unwrap();
-/// assert_eq!(SystemTime::UNIX_EPOCH, systime_from_naive(n))
-/// ```
-pub fn systime_from_naive(ndt: NaiveDateTime) -> SystemTime {
-    let d = Duration::new(ndt.timestamp() as u64, 0);
+/// convert a DateTime into a SystemTime
+pub fn systime_from_datetime(dt: DateTime<Utc>) -> SystemTime {
+    let d = Duration::new(dt.timestamp() as u64, 0);
     SystemTime::UNIX_EPOCH + d
 }
 
@@ -97,7 +83,7 @@ pub fn systime_from_naive(ndt: NaiveDateTime) -> SystemTime {
 /// assert_eq!("1970-01-01 00:00:00", display_systime(&epch))
 /// ```
 pub fn display_systime(st: &SystemTime) -> String {
-    naive_from_systime(st.clone())
+    datetime_from_systime(st.clone())
         .format("%Y-%m-%d %H:%M:%S")
         .to_string()
 }
@@ -147,11 +133,11 @@ pub fn display_duration(d: &Duration) -> String {
 /// how long since midnight happened?
 /// ```
 /// use reflector::time_util::*;
-/// use chrono::{NaiveDateTime, Datelike};
+/// use chrono::{Datelike, DateTime, Utc};
 ///
-/// assert_eq!(0, naive_since_midnight(&NaiveDateTime::UNIX_EPOCH).as_secs());
+/// assert_eq!(0, datetime_since_midnight(&DateTime::UNIX_EPOCH).as_secs());
 /// ```
-pub fn naive_since_midnight(inb: &NaiveDateTime) -> Duration {
+pub fn datetime_since_midnight(inb: &DateTime<Utc>) -> Duration {
     Duration::new(inb.time().num_seconds_from_midnight() as u64, 0)
 }
 
@@ -159,14 +145,14 @@ pub fn naive_since_midnight(inb: &NaiveDateTime) -> Duration {
 /// day
 /// ```
 /// use reflector::time_util::*;
-/// use chrono::{NaiveDateTime, NaiveDate, Datelike};
+/// use chrono::{Datelike, Utc, DateTime};
 /// use std::time::SystemTime;
 ///
-/// let n = NaiveDate::from_ymd_opt(1970, 1, 1).unwrap().and_hms_opt(1, 2, 3).unwrap();
-/// assert_eq!(NaiveDateTime::UNIX_EPOCH, naive_trunc_midnight(&n));
+/// let n = DateTime::from_ymd_opt(1970, 1, 1).unwrap().and_hms_opt(1, 2, 3).unwrap();
+/// assert_eq!(NaiveDateTime::UNIX_EPOCH, datetime_trunc_midnight(&n));
 /// ```
-pub fn naive_trunc_midnight(inb: &NaiveDateTime) -> NaiveDateTime {
-    *inb - naive_since_midnight(inb)
+pub fn datetime_trunc_midnight(inb: &DateTime<Utc>) -> DateTime<Utc> {
+    *inb - datetime_since_midnight(inb)
 }
 
 #[cfg(test)]

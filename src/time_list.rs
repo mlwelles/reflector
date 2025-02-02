@@ -23,7 +23,7 @@
 #![allow(unused_imports)]
 use super::time_util::*;
 use super::{CaptureList, TimeRange};
-use chrono::NaiveDateTime;
+use chrono::{DateTime, NaiveDateTime, Utc};
 use std::collections::VecDeque;
 use std::fmt;
 use std::time::{Duration, SystemTime};
@@ -81,9 +81,9 @@ impl From<SystemTime> for TimeList {
     }
 }
 
-impl From<NaiveDateTime> for TimeList {
-    fn from(start: NaiveDateTime) -> Self {
-        Self::from(systime_from_naive(start))
+impl From<DateTime<Utc>> for TimeList {
+    fn from(start: DateTime<Utc>) -> Self {
+        Self::from(systime_from_datetime(start))
     }
 }
 
@@ -95,19 +95,19 @@ impl From<(TimeRange, Duration, Duration)> for TimeList {
         let offset = input.2;
 
         // start is the leading edge of the range, minus the offset (for now)
-        let from = naive_from_systime(range.from) - offset;
+        let from = datetime_from_systime(range.from) - offset;
 
         // make a duration between start and midnight
-        let since_midnight = naive_since_midnight(&from);
+        let since_midnight = datetime_since_midnight(&from);
 
         // divide that by period to get x
         let x = since_midnight / (period.as_secs() as u32);
 
         // our initial time is (x * period) + offset
-        let start = naive_trunc_midnight(&from) + (period * x.as_secs() as u32) + offset;
+        let start = datetime_trunc_midnight(&from) + (period * x.as_secs() as u32) + offset;
 
         // shift back from Chrono to std
-        let start = systime_from_naive(start);
+        let start = systime_from_datetime(start);
 
         // stack on one per period, accumulating the period
         // until our accum is larger than our end time

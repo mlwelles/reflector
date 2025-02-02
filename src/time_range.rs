@@ -1,6 +1,6 @@
 use super::time_util::*;
 use super::TimeList;
-use chrono::NaiveDateTime;
+use chrono::{DateTime, Utc};
 use std::fmt;
 use std::time::{Duration, SystemTime};
 
@@ -90,15 +90,18 @@ impl From<(SystemTime, SystemTime)> for TimeRange {
     }
 }
 
-impl From<NaiveDateTime> for TimeRange {
-    fn from(start: NaiveDateTime) -> Self {
-        Self::from(systime_from_naive(start))
+impl From<DateTime<Utc>> for TimeRange {
+    fn from(start: DateTime<Utc>) -> Self {
+        Self::from(systime_from_datetime(start))
     }
 }
 
-impl From<(NaiveDateTime, NaiveDateTime)> for TimeRange {
-    fn from(input: (NaiveDateTime, NaiveDateTime)) -> Self {
-        Self::from((systime_from_naive(input.0), systime_from_naive(input.1)))
+impl From<(DateTime<Utc>, DateTime<Utc>)> for TimeRange {
+    fn from(input: (DateTime<Utc>, DateTime<Utc>)) -> Self {
+        Self::from((
+            systime_from_datetime(input.0),
+            systime_from_datetime(input.1),
+        ))
     }
 }
 
@@ -113,7 +116,7 @@ impl From<StandardTimeRange> for TimeRange {
         let one_day = Duration::from_secs(60 * 60 * 24);
         match std {
             StandardTimeRange::AllDayYesterday => {
-                let end = naive_trunc_midnight(&naive_from_systime(now));
+                let end = datetime_trunc_midnight(&datetime_from_systime(now));
                 let start = end - one_day;
                 Self::from((start, end))
             }

@@ -6,6 +6,5 @@ fn this() -> Command {
 
 #[test]
 fn noargs() {
-    let mut c = this();
-    c.assert().success().stderr("");
+    this().assert().success().stderr("");
 }

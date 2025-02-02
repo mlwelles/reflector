@@ -4,11 +4,10 @@ use crate::pathmaker;
 use crate::remote::{
     from_url as remote_from_url, GetError, Gotten, PingError, RCFactoryError, RemoteClient,
 };
-use crate::time_range;
 use crate::{
-    display_systime, flatten_filename, Capture, CaptureError, CaptureList, CaptureMissing,
-    FileList, FileStore, PathMaker, PathMakerError, SourceConfig, StoreError, StoreGetError,
-    TimeList, TimeRange,
+    display_systime, flatten_filename, time_range, Capture, CaptureError, CaptureList,
+    CaptureMissing, FileList, FileStore, PathMaker, PathMakerError, SourceConfig, StoreError,
+    StoreGetError, TimeList, TimeRange,
 };
 use log::info;
 use std::fmt;
@@ -248,6 +247,7 @@ impl Mirror {
         // let mut errs = vec![GetError];
         new.list = c.list;
         let mut missing = c.missing.clone();
+        let mut err: Option<GetError> = None;
         while let Some(m) = missing.pop_back() {
             info!("attempting to fill missing {}", m.resource);
             match self.get_missing(&m) {
@@ -258,10 +258,17 @@ impl Mirror {
                 Err(e) => {
                     eprintln!("error: {:?}", e);
                     new.push_missing(m);
-                    return Err(e);
+                    if err.is_none() {
+                        err = Some(e);
+                    }
                 }
             }
         }
+        if err.is_some() {
+            let e = err.unwrap();
+            return Err(e);
+        }
+
         Ok(new)
     }
 
@@ -306,6 +313,7 @@ mod tests {
 
         // setup a mock capture, at midnight
         let nt = naive_from_systime(SystemTime::now());
+        let dt = datetime_from_system(SystemTime::now());
         let ts: String = format!("{}", nt.format("%Y-%m-%dT00:00:00+00:00"));
         eprintln!("creating file in store '{}'...", fcp.join(&ts).display());
         let _file = File::create(fcp.join(&ts));
