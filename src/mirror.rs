@@ -9,7 +9,7 @@ use crate::{
     CaptureMissing, FileList, FileStore, PathMaker, PathMakerError, SourceConfig, StoreError,
     StoreGetError, TimeList, TimeRange,
 };
-use log::info;
+use log::{info, warn};
 use std::fmt;
 use std::path::PathBuf;
 use std::time::{self, Duration, SystemTime};
@@ -252,11 +252,12 @@ impl Mirror {
             info!("attempting to fill missing {}", m.resource);
             match self.get_missing(&m) {
                 Ok(g) => {
+                    info!("success with {}", g.source);
                     let c = Capture::from((g, m.time));
                     new.push(c)
                 }
                 Err(e) => {
-                    eprintln!("error: {:?}", e);
+                    warn!("error: {:?}", e);
                     new.push_missing(m);
                     if err.is_none() {
                         err = Some(e);
@@ -264,12 +265,13 @@ impl Mirror {
                 }
             }
         }
-        if err.is_some() {
-            let e = err.unwrap();
-            return Err(e);
+        match err.is_some() {
+            true => Err(GetError::IncompleteFill(
+                Box::new(err.unwrap()),
+                new.missing,
+            )),
+            false => Ok(new),
         }
-
-        Ok(new)
     }
 
     pub fn fill_loop(&mut self) -> Result<CaptureList, GetError> {
