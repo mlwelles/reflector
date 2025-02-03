@@ -28,7 +28,7 @@ pub struct SourceConfig {
 }
 
 impl SourceConfig {
-    pub fn sdo_0094() -> Self {
+    pub fn sdo() -> Self {
         Self {
             name: "Solar Data Observatory".to_string(),
             abbrev: "sdo".to_string(),
@@ -44,13 +44,10 @@ impl SourceConfig {
         }
     }
 
-    pub fn sdo() -> Self {
-        Self::sdo_0094()
-    }
-
     pub fn sdo_0335() -> Self {
         let mut s = Self::sdo();
         s.pathmaker = "SDO _1024_0335.ogv".to_string();
+        s.abbrev = "sdo_0335".to_string();
         s
     }
 
@@ -81,7 +78,11 @@ impl fmt::Display for SourceConfig {
 
 impl Default for Config {
     fn default() -> Config {
-        let srcs = vec![SourceConfig::sdo(), SourceConfig::goes_abi()];
+        let srcs = vec![
+            SourceConfig::sdo(),
+            SourceConfig::sdo_0335(),
+            SourceConfig::goes_abi(),
+        ];
         Config { sources: srcs }
     }
 }
