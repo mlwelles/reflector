@@ -33,8 +33,7 @@ impl SourceConfig {
             name: "Solar Data Observatory".to_string(),
             abbrev: "sdo".to_string(),
             remote: "https://sdo.gsfc.nasa.gov/assets/img/dailymov".to_string(),
-            // local: "/net/sopa/winshare/sat/sdo".to_string(),
-            local: "/home/adam/tmp/sat/sdo".to_string(),
+            local: "/net/sopa/scratch/sat/sdo".to_string(),
             pathmaker: "SDO _1024_0094.ogv".to_string(),
             flatten: Some(true),
             period: 24 * 60 * 60, // 24 hours, expressed as seconds
@@ -56,7 +55,7 @@ impl SourceConfig {
             name: "GOES ABI_TrueColor".to_string(),
             abbrev: "goesabi".to_string(),
             remote: "ftp://ftp.nnvl.noaa.gov/GOES/ABI_TrueColor".to_string(),
-            local: "/net/sopa/winshare/sat/abi_truecolor".to_string(),
+            local: "/net/sopa/scratch/sat/abi_truecolor".to_string(),
             pathmaker: "GOES-R".to_string(),
             flatten: None,
             period: 5 * 60 * 10, // eh?
