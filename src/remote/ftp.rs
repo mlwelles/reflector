@@ -163,12 +163,12 @@ mod tests {
     use tempfile::TempDir;
 
     // a public server which might be used, ftp.gnu.org
-    // const FTPSERVER: &str = "209.51.188.20";
-    // const MOCK_RESOURCE: &str = "README";
+    const FTPSERVER: &str = "209.51.188.20";
+    const MOCK_RESOURCE: &str = "README";
 
     // a local server
-    const FTPSERVER: &str = "sopa.coo";
-    const MOCK_RESOURCE: &str = "README";
+    // const FTPSERVER: &str = "sopa.coo";
+    // const MOCK_RESOURCE: &str = "README";
 
     fn mock() -> Ftp {
         let u = format!("ftp://{}/", FTPSERVER);
