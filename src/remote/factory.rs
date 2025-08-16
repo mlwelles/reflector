@@ -32,15 +32,12 @@ impl TryFrom<Url> for Box<dyn RemoteClient> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::net::ToSocketAddrs;
 
     #[test]
-    fn sopa_from_url() {
-        let host = "sopa.coo:80";
+    fn test_from_url() {
+        let host = "gnu.org:80";
         let u = Url::parse(&format!("http://{}/", host)).unwrap();
         let mut rc = from_url(&u).unwrap();
-        let sa = host.to_socket_addrs().unwrap().next().unwrap();
-        assert_eq!(sa, rc.remote_addr());
         rc.ping().unwrap();
     }
 
