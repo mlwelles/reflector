@@ -301,13 +301,24 @@ impl TryFrom<SourceConfig> for Mirror {
 mod tests {
     use super::*;
     use crate::time_util::*;
+    use httpmock;
     use std::fs::{DirBuilder, File};
     use std::path::Path;
 
+    fn mock_server() -> httpmock::MockServer {
+        let server = httpmock::MockServer::start();
+        server.mock(|when, then| {
+            when.any_request();
+            then.status(200);
+        });
+        server
+    }
+
     fn mock_src_config() -> SourceConfig {
+        let srv = mock_server();
+        // setup local storage
         let fc = "/tmp/mock_mirror_store";
         let fcp = Path::new(fc);
-
         // ensure our store dir exists
         if !fcp.is_dir() {
             DirBuilder::new().create(fc).unwrap();
@@ -322,7 +333,7 @@ mod tests {
         SourceConfig {
             name: "mock mirror source".to_string(),
             abbrev: "mock".to_string(),
-            remote: "http://sopa.coo/mock".to_string(),
+            remote: srv.base_url(),
             local: fc.to_string(),
             pathmaker: "identity".to_string(),
             flatten: None,
