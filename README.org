@@ -117,3 +117,19 @@ https://tropic.ssec.wisc.edu/real-time/mtpw2/product.php?color_type=tpw_nrl_colo
 
 https://realearth.ssec.wisc.edu/
 
+* tasks / issues / problems
+** TODO tweeze out local mirror config from site configuration -- make global
+** TODO operation testing and bug chasing
+*** TODO sdo
+*** TODO goes
+** TODO local destination storage abstraction
+
+E.g. s3.
+
+** TODO start playback side
+
+Organize project for playback and shared.
+
+** TODO convert to git / github
+
+
