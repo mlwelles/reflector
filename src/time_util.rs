@@ -145,11 +145,11 @@ pub fn datetime_since_midnight(inb: &DateTime<Utc>) -> Duration {
 /// day
 /// ```
 /// use reflector::time_util::*;
-/// use chrono::{Datelike, Utc, DateTime};
-/// use std::time::SystemTime;
+/// use std::time::{Duration,SystemTime};
 ///
-/// let n = DateTime::from_ymd_opt(1970, 1, 1).unwrap().and_hms_opt(1, 2, 3).unwrap();
-/// assert_eq!(NaiveDateTime::UNIX_EPOCH, datetime_trunc_midnight(&n));
+/// let epoch = SystemTime::UNIX_EPOCH;
+/// let n = datetime_from_systime(epoch + Duration::from_secs(60 * 63 + 5));
+/// assert_eq!(epoch, datetime_trunc_midnight(&n).into());
 /// ```
 pub fn datetime_trunc_midnight(inb: &DateTime<Utc>) -> DateTime<Utc> {
     *inb - datetime_since_midnight(inb)
