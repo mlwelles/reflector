@@ -118,25 +118,3 @@ https://tropic.ssec.wisc.edu/real-time/mtpw2/product.php?color_type=tpw_nrl_colo
 https://realearth.ssec.wisc.edu/
 
 * tasks / issues / problems
-** TODO tweeze out local mirror config from site configuration -- make global
-** TODO mock or provide local mirror storage for github actions
-
-This should enable us to revert the following commits, which merely
-disable tests which would otherwise work:
- - 1dc26ecea138d3569b1892395ffb4c7f95209b42
- - df4aabb289c08b9020d96747b9dbbefaabc9f2dd
-
-** TODO operation testing and bug chasing
-*** TODO sdo
-*** TODO goes
-** TODO local destination storage abstraction
-
-E.g. s3.
-
-** TODO start playback side
-
-Organize project for playback and shared.
-
-** TODO convert to git / github
-
-
