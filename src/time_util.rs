@@ -149,7 +149,8 @@ pub fn datetime_since_midnight(inb: &DateTime<Utc>) -> Duration {
 ///
 /// let epoch = SystemTime::UNIX_EPOCH;
 /// let n = datetime_from_systime(epoch + Duration::from_secs(60 * 63 + 5));
-/// assert_eq!(epoch, datetime_trunc_midnight(&n).into());
+/// assert_eq!(datetime_from_systime(epoch),
+///            datetime_trunc_midnight(&n));
 /// ```
 pub fn datetime_trunc_midnight(inb: &DateTime<Utc>) -> DateTime<Utc> {
     *inb - datetime_since_midnight(inb)
