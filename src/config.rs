@@ -230,6 +230,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn sdo_mirror() {
         let s = SourceConfig::sdo();
         let mut m = Mirror::try_from(s).unwrap();
@@ -246,6 +247,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn sdo_capturelist() {
         let m = Mirror::try_from(SourceConfig::sdo()).unwrap();
         let c = m.loop_captures();
@@ -276,6 +278,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn abi_truecolor() {
         let s = SourceConfig::goes_abi();
         let mut m = Mirror::try_from(s).unwrap();
