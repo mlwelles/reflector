@@ -118,3 +118,5 @@ https://tropic.ssec.wisc.edu/real-time/mtpw2/product.php?color_type=tpw_nrl_colo
 https://realearth.ssec.wisc.edu/
 
 * tasks / issues / problems
+
+See `BUGS.org`
