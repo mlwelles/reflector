@@ -1,6 +1,6 @@
-ad hoc bug tracking
+			 Ad hoc bug tracking
 
-these should be converted into tests, if possible
+These should be converted into tests, if possible.
 
 * TODO mirror instantiation fails if network is down
 
