@@ -1,4 +1,5 @@
 use super::*;
+use log::{debug, warn};
 use std::io::{BufWriter, Write};
 use std::net::SocketAddr;
 use std::path::PathBuf;
@@ -116,29 +117,29 @@ impl RemoteClient for Ftp {
                     Ok(_) => {
                         tot += size as u64;
                         if size == 0 {
-                            eprintln!("zero read after {tot} bytes");
+                            warn!("zero read after {tot} bytes");
                             false
                         } else {
                             true
                         }
                     }
                     Err(e) => {
-                        eprintln!("error from write at {} bytes: {:?}", tot, e);
+                        warn!("error from write at {} bytes: {:?}", tot, e);
                         false
                     }
                 },
                 Err(e) => {
-                    eprintln!("error from read after {} bytes: {:?}", tot, e);
+                    warn!("error from read after {} bytes: {:?}", tot, e);
                     false
                 }
             } {
-                eprintln!("read and wrote {tot} bytes");
+                debug!("read and wrote {tot} bytes");
             }
             Ok(())
         });
         if s.is_err() {
             let e = s.unwrap_err();
-            eprintln!("error {:?}", e);
+            warn!("error {:?}", e);
             return Err(GetError::RetrieveError(e));
         }
 
