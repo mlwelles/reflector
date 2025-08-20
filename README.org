@@ -1,6 +1,4 @@
-#+TITLE: Reflector Readme
-
-* Overview -- what does this do?
+* Reflector -- what does it do?
 
 This program is meant to mirror satellite data from various government
 sources.  A local copy is maintained, generally an image file or short
