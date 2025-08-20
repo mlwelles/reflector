@@ -230,8 +230,9 @@ mod tests {
         t.push("reflector-ftp-validation-test");
         fs::create_dir_all(&t).expect("failed to create temp directory");
         t.push(MOCK_RESOURCE);
-        let got = m.get(MOCK_RESOURCE, t).unwrap();
+        let got = m.get(MOCK_RESOURCE, t.clone()).unwrap();
         got.validate().unwrap();
+        fs::remove_file(&t).unwrap();
     }
 
     #[test]

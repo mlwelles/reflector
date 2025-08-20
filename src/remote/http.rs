@@ -182,8 +182,9 @@ mod tests {
         t.push("reflector-http-validation-test");
         fs::create_dir_all(&t).expect("failed to create temp directory");
         let path = t.join("test.bin");
-        let got = m.get(MOCK_RESOURCE, path).unwrap();
+        let got = m.get(MOCK_RESOURCE, path.clone()).unwrap();
         got.validate().unwrap();
+        fs::remove_file(&path).unwrap();
     }
 
     #[test]
