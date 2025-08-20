@@ -320,7 +320,7 @@ mod tests {
         // setup local storage
         let mut fc = env::temp_dir();
         fc.push("mock_mirror_store");
-        fs::create_dir_all(&fc).expect("Failed to create temp directory");
+        fs::create_dir_all(&fc).expect("failed to create temp directory");
         let fcp = Path::new(&fc);
 
         // setup a mock capture, at midnight

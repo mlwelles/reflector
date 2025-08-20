@@ -152,9 +152,7 @@ mod tests {
 
     fn mock_file_store() -> FileStore {
         let pbuf = path::PathBuf::from(mock_path());
-        if !pbuf.is_dir() {
-            fs::create_dir(&pbuf).unwrap()
-        }
+        fs::create_dir_all(&pbuf).expect("failed to create temp directory");
         let pathmaker = Box::new(pathmaker::Identity::new());
 
         // create a file to be in our store
