@@ -22,13 +22,7 @@ impl RemoteClient for Mock {
 
     fn get(&mut self, resource: &str, output: PathBuf) -> Result<Gotten, GetError> {
         let source = Url::parse("http://127.0.0.1/").unwrap();
-        Ok(Gotten::new(
-            "x-raw/mock",
-            resource,
-            source,
-            output.to_path_buf(),
-            0,
-        ))
+        Ok(Gotten::new("x-raw/mock", resource, source, output, 0))
     }
 
     fn exists(&self, _resource: &str) -> Result<bool, GetError> {
