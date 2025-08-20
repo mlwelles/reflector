@@ -1,7 +1,19 @@
-* Overview
+#+TITLE: Reflector Readme
 
-Tools to facilitate the production of visualizations based on upstream
-data sources, where new material appears on a periodic basis.
+* Overview -- what does this do?
+
+This program is meant to mirror satellite data from various government
+sources.  A local copy is maintained, generally an image file or short
+movie.
+
+For each configured source, the reflector is able to predict and
+mirror upstream data.  By default, the system seems to ensure the more
+recent loop period -- where the loop period is configured by the
+source -- has populated data.
+
+Currently, the reflector supports FTP and HTTP protocols.
+
+* Future expansion
 
 The following tools are planned:
 
