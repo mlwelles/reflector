@@ -302,7 +302,8 @@ mod tests {
     use super::*;
     use crate::time_util::*;
     use httpmock;
-    use std::fs::{DirBuilder, File};
+    use std::env;
+    use std::fs;
     use std::path::Path;
 
     fn mock_server() -> httpmock::MockServer {
@@ -317,24 +318,22 @@ mod tests {
     fn mock_src_config() -> SourceConfig {
         let srv = mock_server();
         // setup local storage
-        let fc = "/tmp/mock_mirror_store";
-        let fcp = Path::new(fc);
-        // ensure our store dir exists
-        if !fcp.is_dir() {
-            DirBuilder::new().create(fc).unwrap();
-        }
+        let mut fc = env::temp_dir();
+        fc.push("mock_mirror_store");
+        fs::create_dir_all(&fc).expect("Failed to create temp directory");
+        let fcp = Path::new(&fc);
 
         // setup a mock capture, at midnight
         let dt = datetime_from_systime(SystemTime::now());
         let ts: String = format!("{}", dt.format("%Y-%m-%dT00:00:00+00:00"));
         eprintln!("creating file in store '{}'...", fcp.join(&ts).display());
-        let _file = File::create(fcp.join(&ts));
+        let _file = fs::File::create(fcp.join(&ts));
 
         SourceConfig {
             name: "mock mirror source".to_string(),
             abbrev: "mock".to_string(),
             remote: srv.base_url(),
-            local: fc.to_string(),
+            local: fc.display().to_string(),
             pathmaker: "identity".to_string(),
             flatten: None,
             period: 60 * 60, // once per hour
