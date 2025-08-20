@@ -122,7 +122,8 @@ impl RemoteClient for Http {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tempfile::TempDir;
+    use std::env;
+    use std::fs;
 
     const MOCK_URL: &str = "http://deb.debian.org/debian";
     const MOCK_RESOURCE: &str = "README.html";
@@ -177,8 +178,10 @@ mod tests {
     #[test]
     fn validation() {
         let mut m = mock();
-        let t = TempDir::new().unwrap();
-        let path = t.path().join("test.bin");
+        let mut t = env::temp_dir();
+        t.push("reflector-http-validation-test");
+        fs::create_dir_all(&t).expect("failed to create temp directory");
+        let path = t.join("test.bin");
         let got = m.get(MOCK_RESOURCE, path).unwrap();
         got.validate().unwrap();
     }

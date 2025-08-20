@@ -159,8 +159,9 @@ impl RemoteClient for Ftp {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::env;
+    use std::fs;
     use std::net::ToSocketAddrs;
-    use tempfile::TempDir;
 
     // a public server which might be used, ftp.gnu.org
     const FTPSERVER: &str = "209.51.188.20";
@@ -224,9 +225,11 @@ mod tests {
     #[test]
     fn validation() {
         let mut m = mock();
-        let t = TempDir::new().unwrap();
-        let path = t.path().join("test.bin");
-        let got = m.get(MOCK_RESOURCE, path).unwrap();
+        let mut t = env::temp_dir();
+        t.push("reflector-ftp-validation-test");
+        fs::create_dir_all(&t).expect("failed to create temp directory");
+        t.push(MOCK_RESOURCE);
+        let got = m.get(MOCK_RESOURCE, t).unwrap();
         got.validate().unwrap();
     }
 
