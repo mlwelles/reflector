@@ -1,4 +1,4 @@
-			 Ad hoc bug tracking
+#+TITLE: Ad Hoc Bug Tracking
 
 These should be converted into tests, if possible.
 
