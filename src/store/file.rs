@@ -139,13 +139,19 @@ mod tests {
     use super::*;
     use crate::pathmaker;
     use chrono::Utc;
+    use std::env;
     use std::ffi::OsString;
 
-    const MOCK_PATH: &str = "/tmp/reflector_file_store_test";
     static MOCK_FILE: &str = "2023-11-21T14:40:00+00:00";
 
+    fn mock_path() -> String {
+        let mut fc = env::temp_dir();
+        fc.push("reflector_file_store_test");
+        fc.display().to_string()
+    }
+
     fn mock_file_store() -> FileStore {
-        let pbuf = path::PathBuf::from(MOCK_PATH);
+        let pbuf = path::PathBuf::from(mock_path());
         if !pbuf.is_dir() {
             fs::create_dir(&pbuf).unwrap()
         }
@@ -165,7 +171,7 @@ mod tests {
     #[test]
     fn check_mock() {
         let m = mock_file_store();
-        assert_eq!(m.path, PathBuf::from(MOCK_PATH));
+        assert_eq!(m.path, PathBuf::from(mock_path()));
         assert_eq!((), m.validate().unwrap());
 
         let f = OsString::from(MOCK_FILE);
