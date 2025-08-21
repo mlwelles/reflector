@@ -36,3 +36,4 @@ Organize project for playback and shared.
   CLOSED: [2025-08-21 Thu 11:22]
 
   - State "DONE"       from "TODO"       [2025-08-21 Thu 11:22]
+* TODO zero length files in local store considered valid
