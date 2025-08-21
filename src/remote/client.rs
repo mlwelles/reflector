@@ -38,7 +38,7 @@ pub enum GetError {
     OutputExistsAsDir(PathBuf),
     OutputFileExists(PathBuf),
     OutputCreateFile(io::Error),
-    RetrieveError(FtpError),
+    RetrieveFTPError(FtpError),
     IncompleteFill(Box<GetError>, VecDeque<CaptureMissing>),
 }
 
