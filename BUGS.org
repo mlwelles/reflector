@@ -37,3 +37,14 @@ Organize project for playback and shared.
 
   - State "DONE"       from "TODO"       [2025-08-21 Thu 11:22]
 * TODO zero length files in local store considered valid
+* TODO logging is so ugly
+
+#+begin_example
+ts="2025-08-21T15:10:56.013043Z" lvl="INFO" msg="matched on goesabi" target="reflector::config" module="reflector::config"
+ts="2025-08-21T15:10:56.327345Z" lvl="INFO" msg="got mirror <mirror GOES ABI_TrueColor>" target="reflector" module="reflector"
+ts="2025-08-21T15:10:56.385521Z" lvl="INFO" msg="captures list of 28 out of 29 captures, 96.55172413793103% full len 28" target="reflector::mirror" module="reflector::mirror"
+fetching mirror GOES ABI_TrueColor
+ts="2025-08-21T15:10:56.385927Z" lvl="INFO" msg="attempting to fill missing ABI_TrueColor_20250821_1510z.png" target="reflector::mirror" module="reflector::mirror"
+ts="2025-08-21T15:10:56.448070Z" lvl="WARN" msg="error retrieveing resource ABI_TrueColor_20250821_1510z.png: UnexpectedResponse(Response { status: FileUnavailable, body: [53, 53, 48, 32, 70, 97, 105, 108, 101, 100, 32, 116, 111, 32, 111, 112, 101, 110, 32, 102, 105, 108, 101, 46, 13, 10] })" target="reflector::remote::ftp" module="reflector::remote::ftp"
+#+end_example
+
