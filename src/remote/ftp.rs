@@ -96,7 +96,10 @@ impl RemoteClient for Ftp {
 
     fn get(&mut self, resource: &str, output: PathBuf) -> Result<Gotten, GetError> {
         let mimetype = "application/octet-stream";
-        let source = match self.base.join(resource) {
+        let source = match self
+            .base
+            .join(&format!("{}/{}", self.base.path(), resource))
+        {
             Ok(s) => s,
             Err(e) => return Err(GetError::UnparsableURL(e)),
         };
@@ -172,15 +175,33 @@ mod tests {
     // const FTPSERVER: &str = "sopa.coo";
     // const MOCK_RESOURCE: &str = "README";
 
-    fn mock() -> Ftp {
+    fn mock_url() -> Url {
         let u = format!("ftp://{}/", FTPSERVER);
-        let u = Url::parse(&u).unwrap();
-        Ftp::new(&u, None).unwrap()
+        Url::parse(&u).unwrap()
+    }
+
+    fn mock_resource_url(rsrc: &str) -> Url {
+        let u = mock_url();
+        let u = u.join(&format!("gnu/{rsrc}")).unwrap();
+        eprintln!("CHECK A: {u}");
+        u
+    }
+
+    #[test]
+    fn test_mock_resource_url() {
+        // intentionally double coded
+        let expect = Url::parse("ftp://209.51.188.20/gnu/README").unwrap();
+        assert_eq!(expect, mock_resource_url("README"));
+    }
+
+    fn mock() -> Ftp {
+        Ftp::new(&mock_url(), None).unwrap()
     }
 
     #[test]
     fn test_connect() {
         let m = mock();
+        assert_eq!(mock_url(), m.base);
         connect(m.remote, &m.base, &m.creds).unwrap();
     }
 
@@ -230,8 +251,12 @@ mod tests {
         t.push("reflector-ftp-validation-test");
         fs::create_dir_all(&t).expect("failed to create temp directory");
         t.push(MOCK_RESOURCE);
+        if t.exists() {
+            fs::remove_file(&t).unwrap();
+        }
         let got = m.get(MOCK_RESOURCE, t.clone()).unwrap();
         got.validate().unwrap();
+        assert_eq!(mock_resource_url(MOCK_RESOURCE), got.source);
         fs::remove_file(&t).unwrap();
     }
 
