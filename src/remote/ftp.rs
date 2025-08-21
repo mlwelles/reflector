@@ -117,7 +117,7 @@ impl RemoteClient for Ftp {
                     Ok(_) => {
                         tot += size as u64;
                         if size == 0 {
-                            warn!("zero read after {tot} bytes");
+                            debug!("zero read after {tot} bytes");
                             false
                         } else {
                             true
@@ -133,13 +133,13 @@ impl RemoteClient for Ftp {
                     false
                 }
             } {
-                debug!("read and wrote {tot} bytes");
+                debug!("read and wrote {tot} bytes for file {resource}");
             }
             Ok(())
         });
         if s.is_err() {
             let e = s.unwrap_err();
-            warn!("error {:?}", e);
+            warn!("error on file {resource}: {:?}", e);
             return Err(GetError::RetrieveError(e));
         }
 
