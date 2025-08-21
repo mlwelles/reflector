@@ -6,8 +6,10 @@ These should be converted into tests, if possible.
 
 We shouldn't need the network just to work out our capture list, for instance.
 
-* TODO mirror is filling in forward order
+* DONE mirror is filling in forward order
+  CLOSED: [2025-08-21 Thu 11:22]
 
+  - State "DONE"       from "TODO"       [2025-08-21 Thu 11:22]
 Should fill in reverse order
 
 * TODO tweeze out local mirror config from site configuration -- make global
@@ -18,9 +20,10 @@ disable tests which would otherwise work:
  - 1dc26ecea138d3569b1892395ffb4c7f95209b42
  - df4aabb289c08b9020d96747b9dbbefaabc9f2dd
 
-* TODO operation testing and bug chasing
+* operation testing and bug chasing
 ** TODO sdo
-** TODO goes
+** INPROGRESS goes
+   - State "INPROGRESS" from "TODO"       [2025-08-21 Thu 11:22]
 * TODO local destination storage abstraction
 
 E.g. s3.
@@ -29,5 +32,7 @@ E.g. s3.
 
 Organize project for playback and shared.
 
-* TODO convert to git / github
+* DONE convert to git / github
+  CLOSED: [2025-08-21 Thu 11:22]
 
+  - State "DONE"       from "TODO"       [2025-08-21 Thu 11:22]
