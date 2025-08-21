@@ -167,7 +167,7 @@ mod tests {
 
     // a public server which might be used, ftp.gnu.org
     const FTPSERVER: &str = "209.51.188.20";
-    // plus /pub
+    // plus /gnu
     const MOCK_RESOURCE: &str = "README.DESCRIPTIONS";
 
     // a local server
