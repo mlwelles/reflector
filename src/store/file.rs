@@ -126,7 +126,7 @@ impl FileStore {
                 Err(e) => eprintln!("error on {}: {}", self.path.display(), e),
             }
         }
-        Ok(ll)
+        Ok(ll.sorted())
     }
 }
 
