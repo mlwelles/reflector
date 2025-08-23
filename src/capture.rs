@@ -185,6 +185,7 @@ impl CaptureList {
         self.list.back()
     }
 
+    #[allow(clippy::map_clone)]
     pub fn latest(&self) -> Option<Capture> {
         let cl = self.sorted();
         cl.back().map(|cap| cap.clone())
