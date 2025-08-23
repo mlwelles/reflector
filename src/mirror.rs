@@ -234,6 +234,10 @@ impl Mirror {
         self.captures_in_timelist(times)
     }
 
+    pub fn all_capturess(&self) -> Result<CaptureList, StoreGetError> {
+        self.local.all_captures()
+    }
+
     pub fn loop_range(&self) -> TimeRange {
         TimeRange::from_now_to(&self.loop_period).unwrap()
     }

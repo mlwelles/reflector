@@ -5,11 +5,10 @@
 //! They are collected into a [CaptureList], which also includes information on
 //! any missing resources which cannot be made into [Capture]s.
 
-use crate::remote::Gotten;
-use crate::time_util::display_systime;
+use crate::{display_systime, remote::Gotten};
 use std::collections::VecDeque;
 use std::path::PathBuf;
-use std::time::SystemTime;
+use std::time::{SystemTime, UNIX_EPOCH};
 use std::{fmt, path, time};
 use url::Url;
 
@@ -17,7 +16,7 @@ use url::Url;
 pub struct Capture {
     pub time: SystemTime,
     pub path: PathBuf,
-    pub url: Option<Url>,
+    pub url: Option<Url>, // upstream / remote URL, if any
 }
 
 impl Capture {
@@ -30,10 +29,46 @@ impl Capture {
     }
 }
 
+impl fmt::Display for Capture {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{} => {}",
+            self.path.display(),
+            display_systime(&self.time)
+        )
+    }
+}
+
 impl From<(Gotten, SystemTime)> for Capture {
     fn from(input: (Gotten, SystemTime)) -> Self {
         let g = input.0;
         Self::new(input.1, g.output, Some(g.source))
+    }
+}
+
+impl From<(PathBuf, SystemTime)> for Capture {
+    fn from(input: (PathBuf, SystemTime)) -> Self {
+        Self {
+            time: input.1,
+            path: input.0,
+            url: None,
+        }
+    }
+}
+
+impl From<PathBuf> for Capture {
+    fn from(path: PathBuf) -> Self {
+        let url = None;
+        let default = UNIX_EPOCH;
+        let time = match path.metadata() {
+            Ok(md) => md.modified().unwrap_or(default),
+            Err(e) => {
+                eprintln!("error reading {}: {}", path.display(), e);
+                default
+            }
+        };
+        Self { time, path, url }
     }
 }
 
