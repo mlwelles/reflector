@@ -5,19 +5,19 @@
 //! They are collected into a [CaptureList], which also includes information on
 //! any missing resources which cannot be made into [Capture]s.
 
-use crate::remote::Gotten;
-use crate::time_util::display_systime;
+use crate::{display_systime, remote::Gotten};
+use std::cmp::Ordering;
 use std::collections::VecDeque;
 use std::path::PathBuf;
-use std::time::SystemTime;
+use std::time::{SystemTime, UNIX_EPOCH};
 use std::{fmt, path, time};
 use url::Url;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub struct Capture {
     pub time: SystemTime,
     pub path: PathBuf,
-    pub url: Option<Url>,
+    pub url: Option<Url>, // upstream / remote URL, if any
 }
 
 impl Capture {
@@ -30,10 +30,66 @@ impl Capture {
     }
 }
 
+impl Ord for Capture {
+    fn cmp(&self, other: &Self) -> Ordering {
+        return self.time.cmp(&other.time);
+    }
+}
+
+impl PartialOrd for Capture {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl PartialEq for Capture {
+    fn eq(&self, other: &Self) -> bool {
+        self.time == other.time
+    }
+}
+
+impl Eq for Capture {}
+
+impl fmt::Display for Capture {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{} => {}",
+            self.path.display(),
+            display_systime(&self.time)
+        )
+    }
+}
+
 impl From<(Gotten, SystemTime)> for Capture {
     fn from(input: (Gotten, SystemTime)) -> Self {
         let g = input.0;
         Self::new(input.1, g.output, Some(g.source))
+    }
+}
+
+impl From<(PathBuf, SystemTime)> for Capture {
+    fn from(input: (PathBuf, SystemTime)) -> Self {
+        Self {
+            time: input.1,
+            path: input.0,
+            url: None,
+        }
+    }
+}
+
+impl From<PathBuf> for Capture {
+    fn from(path: PathBuf) -> Self {
+        let url = None;
+        let default = UNIX_EPOCH;
+        let time = match path.metadata() {
+            Ok(md) => md.modified().unwrap_or(default),
+            Err(e) => {
+                eprintln!("error reading {}: {}", path.display(), e);
+                default
+            }
+        };
+        Self { time, path, url }
     }
 }
 
@@ -110,16 +166,30 @@ impl CaptureList {
         self.missing.push_back(mis)
     }
 
-    pub fn latest(&self) -> Option<&Capture> {
-        self.list.back()
-    }
-
     pub fn full_ratio(&self) -> Result<f64, CaptureError> {
         let all = self.len_all() as f64;
         if all > 0.0 {
             Ok(self.len() as f64 / all)
         } else {
             Err(CaptureError::NoCaptures)
+        }
+    }
+
+    pub fn sorted(&self) -> Self {
+        let mut cl = self.to_owned();
+        cl.list.make_contiguous().sort();
+        cl
+    }
+
+    pub fn back(&self) -> Option<&Capture> {
+        self.list.back()
+    }
+
+    pub fn latest(&self) -> Option<Capture> {
+        let cl = self.sorted();
+        match cl.back() {
+            Some(cap) => Some(cap.clone()),
+            _ => None,
         }
     }
 }

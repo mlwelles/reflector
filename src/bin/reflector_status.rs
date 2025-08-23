@@ -1,5 +1,17 @@
-use reflector::{Config, Mirror};
+use reflector::{Config, Mirror, MirrorStatus};
 use std::env;
+
+fn summarize_status(m: &Mirror, st: &MirrorStatus) {
+    println!("{}\t{}", m.name, m.local);
+    println!("\tstatus:\t{}", st);
+}
+
+fn captures(m: &Mirror) {
+    println!("captures in local store:");
+    for c in m.local.all_captures().unwrap() {
+        println!("{c}");
+    }
+}
 
 fn main() {
     let cfg = Config::from(env::args());
@@ -7,8 +19,8 @@ fn main() {
         match Mirror::new(src.clone()) {
             Ok(mut m) => match m.status() {
                 Ok(st) => {
-                    println!("{}\t{}", m.name, m.local);
-                    println!("{}\tstatus: {}", m.name, st);
+                    summarize_status(&m, &st);
+                    captures(&m);
                 }
                 Err(e) => eprintln!("{} status error: {:?}", m.name, e),
             },

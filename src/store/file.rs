@@ -4,13 +4,14 @@
 use super::StoreGetError;
 use super::StoreGetError::*;
 use crate::store::StoreError::*;
-use crate::{Capture, CaptureList, CaptureMissing, FileList, PathMaker, StoreError};
-use log::{debug, info};
-use std::time::SystemTime;
-use std::{
-    fmt, fs, io,
-    path::{self, PathBuf},
+use crate::{
+    Capture, CaptureList, CaptureMissing, FileList, PathMaker, PathMakerError, StoreError,
 };
+use log::{debug, info};
+use std::ffi::OsStr;
+use std::path::{self, PathBuf};
+use std::time::SystemTime;
+use std::{fmt, fs, io};
 use url::Url;
 
 pub struct FileStore {
@@ -54,6 +55,10 @@ impl FileStore {
         self.path.join(p)
     }
 
+    pub fn filename_to_systime(&self, f: &OsStr) -> Result<SystemTime, PathMakerError> {
+        self.pathmaker.filename_to_systime(f)
+    }
+
     pub fn get(&self, p: &PathBuf) -> Result<Capture, StoreGetError> {
         let fetched = self.join(p);
         debug!("getting {}", fetched.display());
@@ -61,12 +66,8 @@ impl FileStore {
             return Err(NoSuchFile(fetched));
         }
         match fetched.file_name() {
-            Some(f) => match self.pathmaker.filename_to_systime(f) {
-                Ok(time) => Ok(Capture {
-                    time,
-                    path: fetched,
-                    url: None,
-                }),
+            Some(f) => match self.filename_to_systime(f) {
+                Ok(time) => Ok(Capture::from((fetched, time))),
                 Err(_) => Err(IncomprehensibleFilename(f.to_os_string())),
             },
             None => Err(NotAFile(fetched)), // FIXME: not sure about this state
@@ -89,7 +90,7 @@ impl FileStore {
                 Ok(c) => cl.push(c),
                 Err(e) => {
                     let cs = l.to_str().unwrap();
-                    let time = self.pathmaker.filename_to_systime(&l).unwrap_or_else(|ee| {
+                    let time = self.filename_to_systime(&l).unwrap_or_else(|ee| {
                         eprintln!(
                             "got error attempting to backtrack filename to systime: {:?}",
                             ee
@@ -110,6 +111,22 @@ impl FileStore {
             }
         }
         cl
+    }
+
+    pub fn all_captures(&self) -> Result<CaptureList, StoreGetError> {
+        let mut ll = CaptureList::empty();
+        for ent in fs::read_dir(&self.path).unwrap() {
+            match ent {
+                Ok(ent) => {
+                    let p = ent.path();
+                    if p.is_file() {
+                        ll.push(Capture::from(p));
+                    }
+                }
+                Err(e) => eprintln!("error on {}: {}", self.path.display(), e),
+            }
+        }
+        Ok(ll.sorted())
     }
 }
 
