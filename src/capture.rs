@@ -32,7 +32,7 @@ impl Capture {
 
 impl Ord for Capture {
     fn cmp(&self, other: &Self) -> Ordering {
-        return self.time.cmp(&other.time);
+        self.time.cmp(&other.time)
     }
 }
 
@@ -187,10 +187,7 @@ impl CaptureList {
 
     pub fn latest(&self) -> Option<Capture> {
         let cl = self.sorted();
-        match cl.back() {
-            Some(cap) => Some(cap.clone()),
-            _ => None,
-        }
+        cl.back().map(|cap| cap.clone())
     }
 }
 

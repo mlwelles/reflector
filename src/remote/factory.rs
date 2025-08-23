@@ -47,7 +47,7 @@ mod tests {
         let r = from_url(&u);
         assert!(r.is_err());
         assert!(match r {
-            Err(NoHandlerForScheme(s)) => s == "gopher".to_string(),
+            Err(NoHandlerForScheme(s)) => s == "gopher",
             _ => false,
         });
     }

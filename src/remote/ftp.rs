@@ -138,8 +138,7 @@ impl RemoteClient for Ftp {
             }
             Ok(())
         });
-        if s.is_err() {
-            let e = s.unwrap_err();
+        if let Err(e) = s {
             warn!("error retrieveing resource {resource}: {:?}", e);
             return Err(GetError::RetrieveFTPError(e));
         }
@@ -232,10 +231,7 @@ mod tests {
     fn get() {
         let mut m = mock();
         let path = PathBuf::from("/dev/null");
-        let got = m.get(MOCK_RESOURCE, path).expect(&format!(
-            "error getting {MOCK_RESOURCE} at URL {}",
-            m.base.as_str()
-        ));
+        let got = m.get(MOCK_RESOURCE, path).unwrap();
         assert_eq!(MOCK_RESOURCE, got.resource);
     }
 

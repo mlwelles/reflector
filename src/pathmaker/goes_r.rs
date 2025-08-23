@@ -87,7 +87,7 @@ mod tests {
     #[test]
     fn time_to_filename() {
         let p = GoesR::default();
-        let t = Utc.with_ymd_and_hms(2023, 09, 23, 12, 0, 0).unwrap();
+        let t = Utc.with_ymd_and_hms(2023, 9, 23, 12, 0, 0).unwrap();
         let expect = "ABI_TrueColor_20230923_1200z.png";
         assert_eq!(OsString::from(expect), p.time_to_filename(&t));
     }

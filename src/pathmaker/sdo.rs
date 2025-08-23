@@ -71,7 +71,7 @@ mod tests {
     #[test]
     fn time_to_filename() {
         let p = Sdo::default();
-        let t = Utc.with_ymd_and_hms(2023, 09, 23, 0, 1, 32).unwrap();
+        let t = Utc.with_ymd_and_hms(2023, 9, 23, 0, 1, 32).unwrap();
         let expect = "2023/09/23/20230923";
         assert_eq!(OsString::from(expect), p.time_to_filename(&t));
 

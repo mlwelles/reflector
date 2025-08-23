@@ -3,7 +3,6 @@ use reflector::{Capture, Mirror, MirrorStatus, SourceConfig};
 use std::process::exit;
 
 #[allow(dead_code)]
-
 fn process_latest(_c: Capture) {
     // we need to scale this enormous PNG
     // use these rectangle coordinates:

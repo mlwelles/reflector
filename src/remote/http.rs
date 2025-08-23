@@ -161,9 +161,9 @@ mod tests {
     fn exists() {
         let m = mock();
         let e = m.exists(MOCK_RESOURCE).unwrap();
-        assert_eq!(true, e, "resource exists");
+        assert!(e, "resource exists");
         let e = m.exists("asdfasdfasdfafdasfdasdf").unwrap();
-        assert_eq!(false, e, "resource doesn't exist");
+        assert!(!e, "resource doesn't exist");
     }
 
     #[test]

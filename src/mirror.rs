@@ -230,7 +230,7 @@ impl Mirror {
     }
 
     pub fn captures_in_range(&self, range: &TimeRange) -> CaptureList {
-        let times = self.timelist(&range);
+        let times = self.timelist(range);
         self.captures_in_timelist(times)
     }
 

@@ -212,19 +212,19 @@ mod tests {
         assert!(!miss.resource.is_empty());
     }
 
-    fn assert_alpha_omega(mut m: &mut Mirror) {
+    fn assert_alpha_omega(m: &mut Mirror) {
         let mut cl = m.loop_captures();
         let cap = cl.next().unwrap();
         assert!(cap.valid(), "capture valid");
         assert!(cap.path.exists(), "first capture path exists");
 
         if let Some(miss) = cl.missing.pop_front() {
-            assert_missing(&mut m, &miss);
+            assert_missing(m, &miss);
             m.get_missing(&miss).expect("get_missing(front) results");
         }
 
         if let Some(miss) = cl.missing.pop_back() {
-            assert_missing(&mut m, &miss);
+            assert_missing(m, &miss);
             m.get_missing(&miss).expect("get_missing(back) results");
         }
     }

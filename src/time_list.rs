@@ -8,7 +8,6 @@
 //! Some open questions:
 //!   - do we need a uniqueness constraint?
 //!   - do we need to guarantee order?
-//! None of that currently present.
 //!
 //! # Examples
 //! ```
