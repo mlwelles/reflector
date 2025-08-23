@@ -184,6 +184,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::unit_cmp)]
     fn check_mock() {
         let m = mock_file_store();
         assert_eq!(m.path, PathBuf::from(mock_path()));

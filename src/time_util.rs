@@ -83,7 +83,7 @@ pub fn systime_from_datetime(dt: DateTime<Utc>) -> SystemTime {
 /// assert_eq!("1970-01-01 00:00:00", display_systime(&epch))
 /// ```
 pub fn display_systime(st: &SystemTime) -> String {
-    datetime_from_systime(st.clone())
+    datetime_from_systime(*st)
         .format("%Y-%m-%d %H:%M:%S")
         .to_string()
 }
@@ -113,17 +113,17 @@ pub fn display_duration(d: &Duration) -> String {
     if v > DAY {
         let days = v / DAY;
         s.push(format!("{days} day{}", pluralize(days)));
-        v = v % DAY;
+        v %= DAY;
     }
     if v > HOUR {
         let hours = v / HOUR;
         s.push(format!("{hours} hour{}", pluralize(hours)));
-        v = v % HOUR;
+        v %= HOUR;
     }
     if v > MINUTE {
         let min = v / MINUTE;
         s.push(format!("{min} minute{}", pluralize(min)));
-        v = v % MINUTE;
+        v %= MINUTE;
     }
     s.push(format!("{v} seconds"));
 

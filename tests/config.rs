@@ -1,5 +1,4 @@
 use reflector::Config;
-use toml;
 
 fn basic_toml() -> &'static str {
     r#"

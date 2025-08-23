@@ -3,7 +3,6 @@ use reflector::{
     display_systime, CaptureList, Config, GetError, Mirror, MirrorStatus, StatusError,
 };
 use std::env;
-use std_logger;
 
 // why ?
 #[allow(dead_code)]
