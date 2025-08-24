@@ -36,7 +36,7 @@ jobs:
           command: test
           args: -- --nocapture
 
-  lints:
+  code-hygene:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
