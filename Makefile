@@ -2,6 +2,9 @@
 build test clean::
 	cargo $@
 
+test::
+	yamllint .github/workflows/*.yml
+
 .PHONY: install
 install:
 	cargo install --path .
