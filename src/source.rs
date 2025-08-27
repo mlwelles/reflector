@@ -1,0 +1,211 @@
+use std::fmt;
+use serde::Deserialize;
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct Source {
+    pub name: String,
+    pub abbrev: String,
+    pub remote: String,
+    pub local: String,
+    pub pathmaker: String,
+    /// period between captures
+    pub period: u64,
+    /// seconds after midnight to offset all times
+    pub offset: Option<u64>,
+    pub loop_period: Option<u64>,
+    pub flatten: Option<bool>,
+    pub create_local_parent: Option<bool>,
+}
+
+impl Source {
+    pub(crate) fn sdo_fallback() -> Self {
+        Self {
+            name: "Solar Data Observatory".to_string(),
+            abbrev: "sdo".to_string(),
+            remote: "https://sdo.gsfc.nasa.gov/assets/img/dailymov".to_string(),
+            local: "/net/sopa/scratch/sat/sdo".to_string(),
+            pathmaker: "SDO _1024_0094.ogv".to_string(),
+            flatten: Some(true),
+            period: 24 * 60 * 60, // 24 hours, expressed as seconds
+            offset: Some((21 * 60 * 60) + (5 * 60)), // 21:05 -- this would work if midnight was defined at UTC
+            // offset: Some((23 * 60 * 60) + (5 * 60)), // 21:05 + TZ is more than 24, get as close as possible gah
+            loop_period: Some(24 * 60 * 60 * 28), // 28 days
+            create_local_parent: Some(true),
+        }
+    }
+
+    pub(crate) fn sdo_0335_fallback() -> Self {
+        let mut s = Self::sdo_fallback();
+        s.pathmaker = "SDO _1024_0335.ogv".to_string();
+        s.abbrev = "sdo_0335".to_string();
+        s
+    }
+
+    pub(crate) fn goes_abi_fallback() -> Self {
+        Self {
+            name: "GOES ABI_TrueColor".to_string(),
+            abbrev: "goesabi".to_string(),
+            remote: "ftp://ftp.nnvl.noaa.gov/GOES/ABI_TrueColor".to_string(),
+            local: "/net/sopa/scratch/sat/abi_truecolor".to_string(),
+            pathmaker: "GOES-R".to_string(),
+            flatten: None,
+            period: 5 * 60 * 10, // eh?
+            offset: None,
+            loop_period: Some(24 * 60 * 60), // 24 hours
+            create_local_parent: Some(true),
+        }
+    }
+}
+
+impl fmt::Display for Source {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        write!(
+            f,
+            "<SourceConfig {} l: {} r: {}>",
+            self.name, self.local, self.remote
+        )
+    }
+}
+
+#[derive(Debug)]
+pub enum SourceSearchError {
+    NotImplemented,
+    NoMatchForName(String),
+    EmptyName,
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::config::*;
+    use crate::mirror::Mirror;
+    use crate::{display_duration, display_systime, CaptureMissing, StandardTimeRange, TimeRange};
+    use std::time::{Duration, SystemTime};
+    
+    fn assert_valid_mirror(m: &Mirror) {
+        let now = SystemTime::now();
+        let lr = m.loop_range();
+        let expect = TimeRange::new(now - m.loop_period, now).unwrap();
+        assert!(lr.equal_by_seconds(&expect), "expect {} == {}", lr, expect);
+        let cap = m.loop_captures();
+        assert!(
+            cap.len_all() > 5,
+            "length {} doesn't meet reasonable minimum captures",
+            cap.len_all()
+        );
+
+        // assert the latest in the capture missing list exists
+        if let Some(c) = cap.missing.back() {
+            assert!(
+                c.time < now,
+                "{} vs {}",
+                display_systime(&c.time),
+                display_systime(&now)
+            );
+            assert!(
+                m.exists(&c.resource).unwrap(),
+                "{c} at {} doesn't exist at time {} (now {})",
+                m.url(&c.resource).unwrap(),
+                display_systime(&c.time),
+                display_systime(&now)
+            );
+        }
+
+        // assert the latest in the capture list exists
+        // if let Some(c) = cap.list.back() {
+        //     assert!(m.remote_client.exists(c));
+        // }
+    }
+
+    fn assert_has_captures(m: &Mirror) {
+        let mut cap = m.loop_captures();
+        assert!(!cap.is_empty());
+        let fc = cap.next().unwrap(); // first capture
+        assert!(fc.valid(), "first capture is valid");
+    }
+
+    fn assert_missing(m: &mut Mirror, miss: &CaptureMissing) {
+        assert!(m.local.get(&miss.path).is_err());
+        assert!(!miss.resource.is_empty());
+    }
+
+    fn assert_alpha_omega(m: &mut Mirror) {
+        let mut cl = m.loop_captures();
+        let cap = cl.next().unwrap();
+        assert!(cap.valid(), "capture valid");
+        assert!(cap.path.exists(), "first capture path exists");
+
+        if let Some(miss) = cl.missing.pop_front() {
+            assert_missing(m, &miss);
+            m.get_missing(&miss).expect("get_missing(front) results");
+        }
+
+        if let Some(miss) = cl.missing.pop_back() {
+            assert_missing(m, &miss);
+            m.get_missing(&miss).expect("get_missing(back) results");
+        }
+    }
+
+    #[test]
+    #[ignore]
+    fn sdo_mirror() {
+        let config = Config::default();
+        let s = config.sdo();
+        let mut m = Mirror::try_from(s).unwrap();
+        assert_valid_mirror(&m);
+
+        // hardcoded sanity check
+        let lp = Duration::new(28 * 24 * 60 * 60, 0);
+        assert_eq!(m.loop_period, lp, "actual vs expected loop period");
+
+        // unsafely assume *something* is in our repository
+        assert_has_captures(&m);
+
+        assert_alpha_omega(&mut m);
+    }
+
+    #[test]
+    #[ignore]
+    fn sdo_capturelist() {
+        let config = Config::default();
+        let m = Mirror::try_from(config.sdo()).unwrap();
+        let c = m.loop_captures();
+        // this mirror uses 24 hours per capture with a 28 day loop period
+        assert_eq!(28, c.len_all());
+
+        let latest = c.latest().unwrap();
+        let since = latest.time.elapsed().unwrap();
+        assert!(
+            since < Duration::new(60 * 60 * 24, 0),
+            "{} not recent",
+            display_duration(&since),
+        );
+
+        let r = TimeRange::from(StandardTimeRange::AllDayYesterday);
+        let c = m.captures_in_range(&r);
+        println!("all day yesterday captures: {}", c);
+        assert!(!c.is_empty());
+        assert_eq!(1, c.len_all());
+
+        // SDO captures around 9:15pm per day, thus a time range from
+        // midnight to 9pm (21 hours) should have no captures
+        let r = TimeRange::from((r.from, r.to - Duration::from_secs(3 * 60 * 60)));
+        let c = m.captures_in_range(&r);
+        println!("partial day yesterday captures: {}", c);
+        assert!(c.is_empty());
+        assert_eq!(0, c.len_all());
+    }
+
+    #[test]
+    #[ignore]
+    fn abi_truecolor() {
+        let config = Config::default();
+        let s = config.goes_abi();
+        let mut m = Mirror::try_from(s).unwrap();
+        assert_valid_mirror(&m);
+
+        // FIXME: unsafe assumption
+        assert_has_captures(&m);
+
+        assert_alpha_omega(&mut m);
+    }
+}

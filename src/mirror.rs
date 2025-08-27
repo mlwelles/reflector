@@ -6,7 +6,7 @@ use crate::remote::{
 };
 use crate::{
     display_systime, flatten_filename, time_range, Capture, CaptureError, CaptureList,
-    CaptureMissing, FileList, FileStore, PathMaker, PathMakerError, SourceConfig, StoreError,
+    CaptureMissing, FileList, FileStore, PathMaker, PathMakerError, StoreError,
     StoreGetError, TimeList, TimeRange,
 };
 use log::{info, warn};
@@ -23,6 +23,7 @@ pub enum MirrorError {
     InvalidRemote(RCFactoryError),
 }
 use MirrorError::*;
+use crate::source::Source;
 
 /// the current status of the mirror, specifically related to how
 /// completely upstream data is shadowed
@@ -74,10 +75,11 @@ pub struct Mirror {
     remote_client: Box<dyn RemoteClient>,
     pub flatten: bool,
     pub pathmaker: Box<dyn PathMaker>,
+    pub create_local_parent: bool,
 }
 
 impl Mirror {
-    pub fn new(cfg: SourceConfig) -> Result<Mirror, MirrorError> {
+    pub fn new(cfg: Source) -> Result<Mirror, MirrorError> {
         let period = time::Duration::from_secs(cfg.period);
         let pathmaker = pathmaker::new(&cfg.pathmaker);
         if let Err(e) = pathmaker {
@@ -105,6 +107,7 @@ impl Mirror {
         let local = local.unwrap();
 
         let flatten = matches!(cfg.flatten, Some(true));
+        let create_local_parent = matches!(cfg.create_local_parent, Some(true));
         let seed_past_midnight = Duration::new(cfg.offset.unwrap_or(0), 0);
         let loop_period = Duration::new(cfg.loop_period.unwrap_or(24 * 60 * 60), 0);
 
@@ -118,6 +121,7 @@ impl Mirror {
             pathmaker,
             flatten,
             loop_period,
+            create_local_parent,
         };
         Ok(m)
     }
@@ -133,7 +137,7 @@ impl Mirror {
             return Err(StatusError::CannotPing(e));
         }
 
-        // check the store for files within our range,
+        // check the store for files within our range
         // and set the status accordingly
         let cc = self.loop_captures();
         info!("captures {cc} len {}", cc.len());
@@ -175,6 +179,15 @@ impl Mirror {
 
     pub fn get_missing(&mut self, m: &CaptureMissing) -> Result<Gotten, GetError> {
         let p = self.local.join(&m.path);
+        
+        // Create parent directories if configured to do so
+        if self.create_local_parent {
+            if let Some(parent) = p.parent() {
+                std::fs::create_dir_all(parent)
+                    .map_err(|e| GetError::OutputCreateFile(e))?;
+            }
+        }
+        
         self.remote_client.get(&m.resource, p)
     }
 
@@ -293,10 +306,10 @@ impl fmt::Display for Mirror {
     }
 }
 
-impl TryFrom<SourceConfig> for Mirror {
+impl TryFrom<Source> for Mirror {
     type Error = MirrorError;
 
-    fn try_from(src: SourceConfig) -> Result<Self, Self::Error> {
+    fn try_from(src: Source) -> Result<Self, Self::Error> {
         Mirror::new(src)
     }
 }
@@ -319,7 +332,7 @@ mod tests {
         server
     }
 
-    fn mock_src_config() -> SourceConfig {
+    fn mock_src_config() -> Source {
         let srv = mock_server();
         // setup local storage
         let mut fc = env::temp_dir();
@@ -333,7 +346,7 @@ mod tests {
         eprintln!("creating file in store '{}'...", fcp.join(&ts).display());
         let _file = fs::File::create(fcp.join(&ts));
 
-        SourceConfig {
+        Source {
             name: "mock mirror source".to_string(),
             abbrev: "mock".to_string(),
             remote: srv.base_url(),
@@ -343,6 +356,7 @@ mod tests {
             period: 60 * 60, // once per hour
             offset: None,
             loop_period: Some(60 * 60 * 24),
+            create_local_parent: None,
         }
     }
 
@@ -363,5 +377,50 @@ mod tests {
         assert!(matches!(s, MirrorStatus::Partial(_)));
         let ss: String = format!("{s}");
         assert!(ss.contains("only partially reflected"));
+    }
+
+    #[test]
+    fn create_local_parent_functionality() {
+        use std::fs;
+        use std::path::PathBuf;
+        use crate::CaptureMissing;
+        
+        // Create a unique temporary directory for testing
+        let temp_base = std::env::temp_dir();
+        let unique_name = format!("reflector_test_{}", std::process::id());
+        let temp_path = temp_base.join(unique_name);
+        fs::create_dir_all(&temp_path).unwrap();
+        
+        // Create a source with create_local_parent = true
+        let mut cfg = mock_src_config();
+        cfg.local = temp_path.to_string_lossy().to_string();
+        cfg.create_local_parent = Some(true);
+        
+        let mut mirror = Mirror::new(cfg).unwrap();
+        assert!(mirror.create_local_parent);
+        
+        // Create a CaptureMissing with a nested path that doesn't exist
+        let nested_path = PathBuf::from("subdir/deep/file.txt");
+        let missing = CaptureMissing::new(
+            std::time::SystemTime::now(),
+            nested_path.clone(),
+            "test-resource",
+        );
+        
+        // The parent directory should not exist initially
+        let full_path = mirror.local.join(&nested_path);
+        let parent_dir = full_path.parent().unwrap();
+        assert!(!parent_dir.exists());
+        
+        // Attempt to get the missing file - this should create the parent directories
+        // Note: This will fail because we don't have a real remote server, but the directory creation should happen
+        let _ = mirror.get_missing(&missing);
+        
+        // Verify that the parent directory was created
+        assert!(parent_dir.exists());
+        assert!(parent_dir.is_dir());
+        
+        // Clean up
+        let _ = fs::remove_dir_all(&temp_path);
     }
 }

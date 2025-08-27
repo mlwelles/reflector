@@ -1,4 +1,4 @@
-use reflector::{Capture, Mirror, MirrorStatus, SourceConfig};
+use reflector::{Capture, Mirror, MirrorStatus, Config};
 // use std::env;
 use std::process::exit;
 
@@ -16,7 +16,8 @@ fn process_latest(_c: Capture) {
 }
 
 fn main() {
-    match Mirror::try_from(SourceConfig::goes_abi()) {
+    let config = Config::default();
+    match Mirror::try_from(config.goes_abi()) {
         Ok(mut m) => match m.status() {
             Ok(MirrorStatus::Full(_) | MirrorStatus::Partial(_)) => eprintln!("ok to proceed"),
             Ok(_) => eprintln!("probably cannot proceed erm"),

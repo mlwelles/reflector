@@ -1,5 +1,5 @@
 pub mod config;
-pub use config::{Config, SourceConfig, SourceSearchError};
+pub use config::Config;
 pub mod mirror;
 pub use mirror::{Mirror, MirrorError, MirrorStatus, StatusError};
 pub mod capture;
@@ -17,4 +17,9 @@ pub use pathmaker::{PathMaker, PathMakerError};
 pub mod store;
 pub use store::{FileList, FileStore, StoreError, StoreGetError};
 pub mod remote;
+pub mod source;
+pub use source::Source;
+pub use source::SourceSearchError;
 pub use remote::{GetError, RCFactoryError, RemoteClient};
+
+

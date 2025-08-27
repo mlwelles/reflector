@@ -1,0 +1,34 @@
+
+[[sources]]
+name = "Solar Data Observatory"
+abbrev = "sdo"
+remote = "https://sdo.gsfc.nasa.gov/assets/img/dailymov"
+local = "mirror/sat/sdo"
+pathmaker = "SDO _1024_0094.ogv"
+period = 86400  # 24 hours in seconds
+offset = 75900  # 21:05 in seconds (21 * 60 * 60 + 5 * 60)
+loop_period = 2419200  # 28 days in seconds (28 * 24 * 60 * 60)
+flatten = true
+create_local_parent = true
+
+[[sources]]
+name = "Solar Data Observatory 0335"
+abbrev = "sdo_0335"
+remote = "https://sdo.gsfc.nasa.gov/assets/img/dailymov"
+local = "mirror/sat/sdo_0335"
+pathmaker = "SDO _1024_0335.ogv"
+period = 86400  # 24 hours in seconds
+offset = 75900  # 21:05 in seconds (21 * 60 * 60 + 5 * 60)
+loop_period = 2419200  # 28 days in seconds (28 * 24 * 60 * 60)
+flatten = true
+create_local_parent = true
+
+[[sources]]
+name = "GOES ABI_TrueColor"
+abbrev = "goesabi"
+remote = "ftp://ftp.nnvl.noaa.gov/GOES/ABI_TrueColor"
+local = "mirror/sat/abi_truecolor"
+pathmaker = "GOES-R"
+period = 3000  # 5 * 60 * 10 = 3000 seconds
+loop_period = 86400  # 24 hours in seconds
+create_local_parent = true
