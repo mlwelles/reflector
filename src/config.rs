@@ -119,7 +119,7 @@ impl fmt::Display for SourceConfig {
     }
 }
 
-#[derive(Debug, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Deserialize)]
 pub struct SourceConfigs(Vec<SourceConfig>);
 
 impl SourceConfigs {
@@ -164,6 +164,7 @@ impl IntoIterator for SourceConfigs {
 pub enum ConfigArgsError {
     NotImplemented,
     UnknownSource(String),
+    NoSourcesFound,
 }
 
 impl TryFrom<Args> for Config {
@@ -187,8 +188,14 @@ impl TryFrom<Args> for Config {
                         }
                     }
                 }
+
+                let l = sources.clone().len();
                 c.sources = sources;
-                Ok(c)
+                if l > 0 {
+                    Ok(c)
+                } else {
+                    Err(ConfigArgsError::NoSourcesFound)
+                }
             }
         }
     }
