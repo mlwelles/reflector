@@ -11,7 +11,7 @@ fn captures(m: &Mirror) {
 }
 
 fn main() {
-    let cfg = Config::from(env::args());
+    let cfg = Config::try_from(env::args()).unwrap();
     for src in cfg.sources {
         match Mirror::new(src.clone()) {
             Ok(m) => captures(&m),
