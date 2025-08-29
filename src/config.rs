@@ -189,39 +189,6 @@ impl TryFrom<Args> for Config {
     }
 }
 
-// // obsolete
-// impl From<Args> for Config {
-//     fn from(mut args: Args) -> Config {
-//         let default = Config::default();
-//         match args.len() {
-//             1 => default,
-//             2 => {
-//                 if let Some(first) = args.nth(1) {
-//                     match Config::from_str(&first) {
-//                         Ok(c) => {
-//                             info!("matched on {}", first);
-//                             c
-//                         }
-//                         Err(e) => {
-//                             warn!("no matches for {}: {:?}", first, e);
-//                             default
-//                         }
-//                     }
-//                 } else {
-//                     warn!("arg counting logic fail");
-//                     default
-//                 }
-//             }
-//             _ => {
-//                 warn!("unimplemented");
-//                 default
-//             }
-//         }
-//     }
-// }
-
-// TODO: From<Vec<String>> or some such
-
 #[cfg(test)]
 mod tests {
     use super::*;
