@@ -7,6 +7,8 @@ use std::env::Args;
 use std::fmt;
 use std::str::FromStr;
 
+// note: be sure to update ../test/config.rs, specifically the serialized TOML representation,
+// if anything other than field order changes
 #[derive(Debug, Deserialize, Default)]
 pub struct Config {
     pub sources: SourceConfigs,
