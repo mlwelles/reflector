@@ -134,6 +134,10 @@ impl SourceConfigs {
     fn push(&mut self, c: SourceConfig) {
         self.0.push(c)
     }
+
+    fn len(self) -> usize {
+        self.0.len()
+    }
 }
 
 impl Default for SourceConfigs {
