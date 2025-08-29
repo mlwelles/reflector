@@ -106,7 +106,7 @@ impl Mirror {
 
         let flatten = matches!(cfg.flatten, Some(true));
         let seed_past_midnight = Duration::new(cfg.offset.unwrap_or(0), 0);
-        let loop_period = Duration::new(cfg.loop_period.unwrap_or(24 * 60 * 60), 0);
+        let loop_period = Duration::new(cfg.loop_period.unwrap_or(cfg.period), 0);
 
         let m = Mirror {
             name: cfg.name,
