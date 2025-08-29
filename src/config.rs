@@ -7,13 +7,28 @@ use std::env::Args;
 use std::fmt;
 use std::str::FromStr;
 
+#[derive(Debug, Deserialize)]
+pub struct LoopCount(u8);
+
+impl LoopCount {
+    fn incr(&mut self) {
+        self.0 += 1;
+    }
+}
+
+impl Default for LoopCount {
+    fn default() -> Self {
+        Self(1)
+    }
+}
+
 // note: be sure to update ../test/config.rs, specifically the serialized TOML representation,
 // if anything other than field order changes
 #[derive(Debug, Deserialize, Default)]
 pub struct Config {
     pub sources: SourceConfigs,
     pub verbose: bool,
-    pub loops: u8,
+    pub loops: LoopCount,
 }
 
 impl FromStr for Config {
@@ -165,8 +180,10 @@ pub enum ConfigArgsError {
     NotImplemented,
     UnknownSource(String),
     NoSourcesFound,
+    UnknownOption(String),
 }
 
+/// a very naive command line argument processor
 impl TryFrom<Args> for Config {
     type Error = ConfigArgsError;
 
@@ -177,14 +194,22 @@ impl TryFrom<Args> for Config {
             _ => {
                 let mut sources = SourceConfigs::empty();
                 for a in args.skip(1) {
-                    match SourceConfig::from_str(&a) {
-                        Ok(s) => {
-                            info!("matched on {}", a);
-                            sources.push(s);
-                        }
-                        Err(e) => {
-                            warn!("no matches for {}: {:?}", a, e);
-                            return Err(ConfigArgsError::UnknownSource(a));
+                    if a.starts_with('-') {
+                        match a.chars().next() {
+                            Some('v') => c.verbose = true,
+                            Some('l') => c.loops.incr(),
+                            _ => return Err(ConfigArgsError::UnknownOption(a)),
+                        };
+                    } else {
+                        match SourceConfig::from_str(&a) {
+                            Ok(s) => {
+                                info!("matched on {}", a);
+                                sources.push(s);
+                            }
+                            Err(e) => {
+                                warn!("no matches for {}: {:?}", a, e);
+                                return Err(ConfigArgsError::UnknownSource(a));
+                            }
                         }
                     }
                 }
