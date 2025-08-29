@@ -7,9 +7,11 @@ use std::env::Args;
 use std::fmt;
 use std::str::FromStr;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Default)]
 pub struct Config {
-    pub sources: Vec<SourceConfig>,
+    pub sources: SourceConfigs,
+    pub verbose: bool,
+    pub loops: u8,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -75,14 +77,25 @@ impl fmt::Display for SourceConfig {
     }
 }
 
-impl Default for Config {
-    fn default() -> Config {
-        let srcs = vec![
+#[derive(Debug, serde::Deserialize)]
+pub struct SourceConfigs(Vec<SourceConfig>);
+
+impl Default for SourceConfigs {
+    fn default() -> Self {
+        Self(vec![
             SourceConfig::sdo(),
             SourceConfig::sdo_0335(),
             SourceConfig::goes_abi(),
-        ];
-        Config { sources: srcs }
+        ])
+    }
+}
+
+impl IntoIterator for SourceConfigs {
+    type Item = SourceConfig;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
     }
 }
 
@@ -103,7 +116,7 @@ impl FromStr for Config {
         }
 
         let mut mm: Vec<SourceConfig> = vec![];
-        for src in Config::default().sources {
+        for src in SourceConfigs::default() {
             // FIXME: lowercase too?
             if src.name == s || src.abbrev == s {
                 mm.push(src);
@@ -113,41 +126,58 @@ impl FromStr for Config {
 
         match mm.len() {
             0 => Err(SourceSearchError::NoMatchForName(s.to_string())),
-            _ => Ok(Config { sources: mm }),
+            _ => Ok(Config {
+                sources: SourceConfigs(mm),
+                ..Default::default()
+            }),
         }
     }
 }
 
-// should this be a tryfrom?
-impl From<Args> for Config {
-    fn from(mut args: Args) -> Config {
-        let default = Config::default();
-        match args.len() {
-            1 => default,
-            2 => {
-                if let Some(first) = args.nth(1) {
-                    match Config::from_str(&first) {
-                        Ok(c) => {
-                            info!("matched on {}", first);
-                            c
-                        }
-                        Err(e) => {
-                            warn!("no matches for {}: {:?}", first, e);
-                            default
-                        }
-                    }
-                } else {
-                    warn!("arg counting logic fail");
-                    default
-                }
-            }
-            _ => {
-                warn!("unimplemented");
-                default
-            }
-        }
+#[derive(Debug)]
+pub enum ConfigArgsError {
+    NotImplemented,
+    UnknownSource(String),
+}
+
+impl TryFrom<Args> for Config {
+    type Error = ConfigArgsError;
+
+    fn try_from(args: Args) -> Result<Self, Self::Error> {
+        Err(ConfigArgsError::NotImplemented)
     }
 }
+
+// // obsolete
+// impl From<Args> for Config {
+//     fn from(mut args: Args) -> Config {
+//         let default = Config::default();
+//         match args.len() {
+//             1 => default,
+//             2 => {
+//                 if let Some(first) = args.nth(1) {
+//                     match Config::from_str(&first) {
+//                         Ok(c) => {
+//                             info!("matched on {}", first);
+//                             c
+//                         }
+//                         Err(e) => {
+//                             warn!("no matches for {}: {:?}", first, e);
+//                             default
+//                         }
+//                     }
+//                 } else {
+//                     warn!("arg counting logic fail");
+//                     default
+//                 }
+//             }
+//             _ => {
+//                 warn!("unimplemented");
+//                 default
+//             }
+//         }
+//     }
+// }
 
 // TODO: From<Vec<String>> or some such
 

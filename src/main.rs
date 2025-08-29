@@ -50,7 +50,7 @@ fn get_mirror(mut m: Mirror) -> Result<GetMirrorResult, GetMirrorError> {
 
 fn main() {
     std_logger::Config::logfmt().init();
-    let cfg = Config::from(env::args());
+    let cfg = Config::try_from(env::args()).expect("error with args");
     for src in cfg.sources {
         debug!("{:#?}", src);
         match Mirror::new(src) {
