@@ -14,6 +14,20 @@ pub struct Config {
     pub loops: u8,
 }
 
+impl FromStr for Config {
+    type Err = SourceSearchError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match SourceConfig::from_str(s) {
+            Ok(sc) => Ok(Self {
+                sources: SourceConfigs::new(sc),
+                ..Default::default()
+            }),
+            Err(e) => Err(e),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Deserialize)]
 pub struct SourceConfig {
     pub name: String,
@@ -67,6 +81,32 @@ impl SourceConfig {
     }
 }
 
+#[derive(Debug)]
+pub enum SourceSearchError {
+    NotImplemented,
+    NoMatchForName(String),
+    EmptyName,
+}
+
+impl FromStr for SourceConfig {
+    type Err = SourceSearchError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.is_empty() {
+            return Err(SourceSearchError::EmptyName);
+        }
+
+        for src in SourceConfigs::default() {
+            // FIXME: lowercase too?
+            if src.name == s || src.abbrev == s {
+                return Ok(src);
+            }
+        }
+
+        Err(SourceSearchError::NoMatchForName(s.to_string()))
+    }
+}
+
 impl fmt::Display for SourceConfig {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         write!(
@@ -79,6 +119,20 @@ impl fmt::Display for SourceConfig {
 
 #[derive(Debug, serde::Deserialize)]
 pub struct SourceConfigs(Vec<SourceConfig>);
+
+impl SourceConfigs {
+    fn new(sc: SourceConfig) -> Self {
+        SourceConfigs(vec![sc])
+    }
+
+    fn empty() -> Self {
+        SourceConfigs(vec![])
+    }
+
+    fn push(&mut self, c: SourceConfig) {
+        self.0.push(c)
+    }
+}
 
 impl Default for SourceConfigs {
     fn default() -> Self {
@@ -100,41 +154,6 @@ impl IntoIterator for SourceConfigs {
 }
 
 #[derive(Debug)]
-pub enum SourceSearchError {
-    NotImplemented,
-    NoMatchForName(String),
-    EmptyName,
-}
-
-impl FromStr for Config {
-    type Err = SourceSearchError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        // crate non_empty_string ?
-        if s.is_empty() {
-            return Err(SourceSearchError::EmptyName);
-        }
-
-        let mut mm: Vec<SourceConfig> = vec![];
-        for src in SourceConfigs::default() {
-            // FIXME: lowercase too?
-            if src.name == s || src.abbrev == s {
-                mm.push(src);
-            }
-            // FIXME: lowercase too?
-        }
-
-        match mm.len() {
-            0 => Err(SourceSearchError::NoMatchForName(s.to_string())),
-            _ => Ok(Config {
-                sources: SourceConfigs(mm),
-                ..Default::default()
-            }),
-        }
-    }
-}
-
-#[derive(Debug)]
 pub enum ConfigArgsError {
     NotImplemented,
     UnknownSource(String),
@@ -144,7 +163,27 @@ impl TryFrom<Args> for Config {
     type Error = ConfigArgsError;
 
     fn try_from(args: Args) -> Result<Self, Self::Error> {
-        Err(ConfigArgsError::NotImplemented)
+        let mut c = Config::default();
+        match args.len() {
+            1 => Ok(c),
+            _ => {
+                let mut sources = SourceConfigs::empty();
+                for a in args {
+                    match SourceConfig::from_str(&a) {
+                        Ok(s) => {
+                            info!("matched on {}", a);
+                            sources.push(s);
+                        }
+                        Err(e) => {
+                            warn!("no matches for {}: {:?}", a, e);
+                            return Err(ConfigArgsError::UnknownSource(a));
+                        }
+                    }
+                }
+                c.sources = sources;
+                Ok(c)
+            }
+        }
     }
 }
 
