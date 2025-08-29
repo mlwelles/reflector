@@ -170,7 +170,7 @@ impl TryFrom<Args> for Config {
             1 => Ok(c),
             _ => {
                 let mut sources = SourceConfigs::empty();
-                for a in args {
+                for a in args.skip(1) {
                     match SourceConfig::from_str(&a) {
                         Ok(s) => {
                             info!("matched on {}", a);
