@@ -135,6 +135,7 @@ impl SourceConfigs {
         self.0.push(c)
     }
 
+    #[allow(dead_code)]
     fn len(self) -> usize {
         self.0.len()
     }
