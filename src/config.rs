@@ -28,6 +28,18 @@ impl fmt::Display for LoopCount {
     }
 }
 
+impl From<u8> for LoopCount {
+    fn from(input: u8) -> Self {
+        Self(input)
+    }
+}
+
+impl From<&LoopCount> for u32 {
+    fn from(input: &LoopCount) -> Self {
+        input.0 as u32
+    }
+}
+
 // note: be sure to update ../test/config.rs, specifically the serialized TOML representation,
 // if anything other than field order changes
 #[derive(Debug, Deserialize, Default)]
@@ -159,20 +171,28 @@ impl fmt::Display for SourceConfig {
 pub struct SourceConfigs(Vec<SourceConfig>);
 
 impl SourceConfigs {
-    fn new(sc: SourceConfig) -> Self {
+    pub fn new(sc: SourceConfig) -> Self {
         SourceConfigs(vec![sc])
     }
 
-    fn empty() -> Self {
+    pub fn empty() -> Self {
         SourceConfigs(vec![])
     }
 
-    fn push(&mut self, c: SourceConfig) {
+    pub fn push(&mut self, c: SourceConfig) {
         self.0.push(c)
     }
 
-    fn len(&self) -> usize {
+    pub fn len(&self) -> usize {
         self.0.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+
+    pub fn inner(&self) -> Vec<SourceConfig> {
+        self.0.clone()
     }
 }
 
