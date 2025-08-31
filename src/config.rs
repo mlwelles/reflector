@@ -220,6 +220,7 @@ pub enum ConfigArgsError {
     NotImplemented,
     UnknownSource(String),
     NoSourcesFound,
+    UnknownFlag(char),
     UnknownOption(String),
 }
 
@@ -235,9 +236,10 @@ impl TryFrom<Args> for Config {
                 let mut sources = SourceConfigs::empty();
                 for a in args.skip(1) {
                     if a.starts_with('-') {
-                        match a.chars().next() {
+                        match a.chars().skip(1).next() {
                             Some('v') => c.verbose = true,
                             Some('l') => c.loops.incr(),
+                            Some(x) => return Err(ConfigArgsError::UnknownFlag(x)),
                             _ => return Err(ConfigArgsError::UnknownOption(a)),
                         };
                     } else {
