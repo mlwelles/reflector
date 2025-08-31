@@ -1,14 +1,8 @@
 //! Shadow upstream data to local storage.
 
 use crate::pathmaker;
-use crate::remote::{
-    from_url as remote_from_url, GetError, Gotten, PingError, RCFactoryError, RemoteClient,
-};
-use crate::{
-    display_systime, flatten_filename, time_range, Capture, CaptureError, CaptureList,
-    CaptureMissing, FileList, FileStore, PathMaker, PathMakerError, SourceConfig, StoreError,
-    StoreGetError, TimeList, TimeRange,
-};
+use crate::remote::{from_url as remote_from_url, Gotten, PingError};
+use crate::*;
 use log::{info, warn};
 use std::fmt;
 use std::path::PathBuf;
@@ -122,9 +116,12 @@ impl Mirror {
         Ok(m)
     }
 
-    pub fn period_timerange(&self) -> Result<TimeRange, time_range::TimeRangeError> {
+    pub fn period_timerange(
+        &self,
+        count: &LoopCount,
+    ) -> Result<TimeRange, time_range::TimeRangeError> {
         let now = SystemTime::now();
-        let then = now - self.period;
+        let then = now - (self.period * count.into());
         TimeRange::new(then, now)
     }
 
