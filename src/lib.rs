@@ -1,5 +1,5 @@
 pub mod config;
-pub use config::{Config, SourceConfig, SourceSearchError};
+pub use config::{Config, LoopCount, SourceConfig, SourceSearchError};
 pub mod mirror;
 pub use mirror::{Mirror, MirrorError, MirrorStatus, StatusError};
 pub mod capture;

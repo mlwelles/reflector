@@ -3,18 +3,24 @@
 use reflector::{Config, Mirror};
 use std::env;
 
-fn captures(m: &Mirror) {
-    println!("captures in local store:");
-    for c in m.local.all_captures().unwrap() {
-        println!("{c}");
+fn captures(cfg: &Config, m: &Mirror) {
+    match m.period_timerange(&cfg.loops) {
+        Ok(per) => {
+            let cc = m.captures_in_range(&per);
+            println!("{} captures in {} periods:", cc.len(), cfg.loops);
+            for c in cc {
+                println!("{c}");
+            }
+        }
+        Err(e) => eprintln!("error time range for {} loop: {:?}", cfg.loops, e),
     }
 }
 
 fn main() {
-    let cfg = Config::from(env::args());
-    for src in cfg.sources {
+    let cfg = Config::try_from(env::args()).unwrap();
+    for src in cfg.sources.inner().iter() {
         match Mirror::new(src.clone()) {
-            Ok(m) => captures(&m),
+            Ok(m) => captures(&cfg, &m),
             Err(e) => eprintln!("error with {src}: {:#?}", e),
         }
     }

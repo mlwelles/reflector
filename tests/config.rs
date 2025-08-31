@@ -2,6 +2,8 @@ use reflector::Config;
 
 fn basic_toml() -> &'static str {
     r#"
+verbose = false
+loops = 1
 [[sources]]
 name      = "Solar Data Observatory"
 abbrev    = "sdo"

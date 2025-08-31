@@ -9,7 +9,7 @@ fn summarize_status(m: &Mirror, st: &MirrorStatus) {
 }
 
 fn main() {
-    let cfg = Config::from(env::args());
+    let cfg = Config::try_from(env::args()).unwrap();
     for src in cfg.sources {
         match Mirror::new(src.clone()) {
             Ok(mut m) => match m.status() {

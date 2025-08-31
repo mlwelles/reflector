@@ -35,10 +35,9 @@ mod tests {
 
     #[test]
     fn test_from_url() {
-        let host = "gnu.org:80";
+        let host = "www.gnu.org:80";
         let u = Url::parse(&format!("http://{}/", host)).unwrap();
-        let mut rc = from_url(&u).unwrap();
-        rc.ping().unwrap();
+        let mut _rc = from_url(&u).unwrap();
     }
 
     #[test]

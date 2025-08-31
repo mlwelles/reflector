@@ -8,8 +8,73 @@ use std::fmt;
 use std::str::FromStr;
 
 #[derive(Debug, Deserialize)]
+pub struct LoopCount(u8);
+
+impl LoopCount {
+    fn incr(&mut self) {
+        self.0 += 1;
+    }
+}
+
+impl Default for LoopCount {
+    fn default() -> Self {
+        Self(1)
+    }
+}
+
+impl fmt::Display for LoopCount {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl From<u8> for LoopCount {
+    fn from(input: u8) -> Self {
+        Self(input)
+    }
+}
+
+impl From<&LoopCount> for u32 {
+    fn from(input: &LoopCount) -> Self {
+        input.0 as u32
+    }
+}
+
+// note: be sure to update ../test/config.rs, specifically the serialized TOML representation,
+// if anything other than field order changes
+#[derive(Debug, Deserialize, Default)]
 pub struct Config {
-    pub sources: Vec<SourceConfig>,
+    pub sources: SourceConfigs,
+    pub verbose: bool,
+    pub loops: LoopCount,
+}
+
+impl fmt::Display for Config {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        write!(
+            f,
+            "{} sources {}",
+            self.sources.len(),
+            match self.verbose {
+                true => "verbose",
+                false => "",
+            }
+        )
+    }
+}
+
+impl FromStr for Config {
+    type Err = SourceSearchError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match SourceConfig::from_str(s) {
+            Ok(sc) => Ok(Self {
+                sources: SourceConfigs::new(sc),
+                ..Default::default()
+            }),
+            Err(e) => Err(e),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -23,6 +88,7 @@ pub struct SourceConfig {
     pub period: u64,
     /// seconds after midnight to offset all times
     pub offset: Option<u64>,
+    /// FIXME: why?  we have `period` above
     pub loop_period: Option<u64>,
     pub flatten: Option<bool>,
 }
@@ -65,6 +131,32 @@ impl SourceConfig {
     }
 }
 
+#[derive(Debug)]
+pub enum SourceSearchError {
+    NotImplemented,
+    NoMatchForName(String),
+    EmptyName,
+}
+
+impl FromStr for SourceConfig {
+    type Err = SourceSearchError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.is_empty() {
+            return Err(SourceSearchError::EmptyName);
+        }
+
+        for src in SourceConfigs::default() {
+            // FIXME: lowercase too?
+            if src.name == s || src.abbrev == s {
+                return Ok(src);
+            }
+        }
+
+        Err(SourceSearchError::NoMatchForName(s.to_string()))
+    }
+}
+
 impl fmt::Display for SourceConfig {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         write!(
@@ -75,81 +167,106 @@ impl fmt::Display for SourceConfig {
     }
 }
 
-impl Default for Config {
-    fn default() -> Config {
-        let srcs = vec![
+#[derive(Clone, Debug, serde::Deserialize)]
+pub struct SourceConfigs(Vec<SourceConfig>);
+
+impl SourceConfigs {
+    pub fn new(sc: SourceConfig) -> Self {
+        SourceConfigs(vec![sc])
+    }
+
+    pub fn empty() -> Self {
+        SourceConfigs(vec![])
+    }
+
+    pub fn push(&mut self, c: SourceConfig) {
+        self.0.push(c)
+    }
+
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+
+    pub fn inner(&self) -> Vec<SourceConfig> {
+        self.0.clone()
+    }
+}
+
+impl Default for SourceConfigs {
+    fn default() -> Self {
+        Self(vec![
             SourceConfig::sdo(),
             SourceConfig::sdo_0335(),
             SourceConfig::goes_abi(),
-        ];
-        Config { sources: srcs }
+        ])
+    }
+}
+
+impl IntoIterator for SourceConfigs {
+    type Item = SourceConfig;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
     }
 }
 
 #[derive(Debug)]
-pub enum SourceSearchError {
+pub enum ConfigArgsError {
     NotImplemented,
-    NoMatchForName(String),
-    EmptyName,
+    UnknownSource(String),
+    NoSourcesFound,
+    UnknownFlag(char),
+    UnknownOption(String),
 }
 
-impl FromStr for Config {
-    type Err = SourceSearchError;
+/// a very naive command line argument processor
+impl TryFrom<Args> for Config {
+    type Error = ConfigArgsError;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        // crate non_empty_string ?
-        if s.is_empty() {
-            return Err(SourceSearchError::EmptyName);
-        }
-
-        let mut mm: Vec<SourceConfig> = vec![];
-        for src in Config::default().sources {
-            // FIXME: lowercase too?
-            if src.name == s || src.abbrev == s {
-                mm.push(src);
-            }
-            // FIXME: lowercase too?
-        }
-
-        match mm.len() {
-            0 => Err(SourceSearchError::NoMatchForName(s.to_string())),
-            _ => Ok(Config { sources: mm }),
-        }
-    }
-}
-
-// should this be a tryfrom?
-impl From<Args> for Config {
-    fn from(mut args: Args) -> Config {
-        let default = Config::default();
+    fn try_from(args: Args) -> Result<Self, Self::Error> {
+        let mut c = Config::default();
         match args.len() {
-            1 => default,
-            2 => {
-                if let Some(first) = args.nth(1) {
-                    match Config::from_str(&first) {
-                        Ok(c) => {
-                            info!("matched on {}", first);
-                            c
-                        }
-                        Err(e) => {
-                            warn!("no matches for {}: {:?}", first, e);
-                            default
+            1 => Ok(c),
+            _ => {
+                let mut sources = SourceConfigs::empty();
+                for a in args.skip(1) {
+                    if a.starts_with('-') {
+                        match a.chars().nth(1) {
+                            Some('v') => c.verbose = true,
+                            Some('l') => c.loops.incr(),
+                            Some(x) => return Err(ConfigArgsError::UnknownFlag(x)),
+                            _ => return Err(ConfigArgsError::UnknownOption(a)),
+                        };
+                    } else {
+                        match SourceConfig::from_str(&a) {
+                            Ok(s) => {
+                                info!("matched on {}", a);
+                                sources.push(s);
+                            }
+                            Err(e) => {
+                                warn!("no matches for {}: {:?}", a, e);
+                                return Err(ConfigArgsError::UnknownSource(a));
+                            }
                         }
                     }
-                } else {
-                    warn!("arg counting logic fail");
-                    default
                 }
-            }
-            _ => {
-                warn!("unimplemented");
-                default
+
+                let l = sources.clone().len();
+                c.sources = sources;
+                if l > 0 {
+                    Ok(c)
+                } else {
+                    Err(ConfigArgsError::NoSourcesFound)
+                }
             }
         }
     }
 }
-
-// TODO: From<Vec<String>> or some such
 
 #[cfg(test)]
 mod tests {
