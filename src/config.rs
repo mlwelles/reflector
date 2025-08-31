@@ -22,6 +22,12 @@ impl Default for LoopCount {
     }
 }
 
+impl fmt::Display for LoopCount {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        write!(f, "{}", self.0)
+    }
+}
+
 // note: be sure to update ../test/config.rs, specifically the serialized TOML representation,
 // if anything other than field order changes
 #[derive(Debug, Deserialize, Default)]
@@ -29,6 +35,20 @@ pub struct Config {
     pub sources: SourceConfigs,
     pub verbose: bool,
     pub loops: LoopCount,
+}
+
+impl fmt::Display for Config {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        write!(
+            f,
+            "{} sources {}",
+            self.sources.len(),
+            match self.verbose {
+                true => "verbose",
+                false => "",
+            }
+        )
+    }
 }
 
 impl FromStr for Config {
@@ -56,6 +76,7 @@ pub struct SourceConfig {
     pub period: u64,
     /// seconds after midnight to offset all times
     pub offset: Option<u64>,
+    /// FIXME: why?  we have `period` above
     pub loop_period: Option<u64>,
     pub flatten: Option<bool>,
 }
@@ -150,8 +171,7 @@ impl SourceConfigs {
         self.0.push(c)
     }
 
-    #[allow(dead_code)]
-    fn len(self) -> usize {
+    fn len(&self) -> usize {
         self.0.len()
     }
 }
