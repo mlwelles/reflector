@@ -236,7 +236,7 @@ impl TryFrom<Args> for Config {
                 let mut sources = SourceConfigs::empty();
                 for a in args.skip(1) {
                     if a.starts_with('-') {
-                        match a.chars().skip(1).next() {
+                        match a.chars().nth(1) {
                             Some('v') => c.verbose = true,
                             Some('l') => c.loops.incr(),
                             Some(x) => return Err(ConfigArgsError::UnknownFlag(x)),
