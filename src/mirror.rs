@@ -60,6 +60,7 @@ pub enum StatusError {
 /// a remote site, kept in sync with a local file store
 pub struct Mirror {
     pub name: String,
+    pub abbrev: String,
     pub period: time::Duration,
     pub seed_past_midnight: time::Duration,
     pub loop_period: time::Duration,
@@ -68,10 +69,12 @@ pub struct Mirror {
     remote_client: Box<dyn RemoteClient>,
     pub flatten: bool,
     pub pathmaker: Box<dyn PathMaker>,
+    pub sourceconfig: SourceConfig,
 }
 
 impl Mirror {
     pub fn new(cfg: SourceConfig) -> Result<Mirror, MirrorError> {
+        let sourceconfig = cfg.clone();
         let period = time::Duration::from_secs(cfg.period);
         let pathmaker = pathmaker::new(&cfg.pathmaker);
         if let Err(e) = pathmaker {
@@ -104,6 +107,7 @@ impl Mirror {
 
         let m = Mirror {
             name: cfg.name,
+            abbrev: cfg.abbrev,
             period,
             seed_past_midnight,
             local,
@@ -112,6 +116,7 @@ impl Mirror {
             pathmaker,
             flatten,
             loop_period,
+            sourceconfig,
         };
         Ok(m)
     }
