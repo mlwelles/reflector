@@ -67,3 +67,5 @@ It might make sense to run all logging through, say:
   - State "INPROGRESS" from "TODO"       [2025-09-01 Mon 00:31]
 
 captured with a failing test, mirror::tests::periods_and_ranges
+
+* TODO rename SourceConfig to MirrorSpecification
