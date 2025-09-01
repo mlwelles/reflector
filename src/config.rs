@@ -273,6 +273,7 @@ mod tests {
     use super::*;
     use crate::mirror::Mirror;
     use crate::{display_duration, display_systime, CaptureMissing, StandardTimeRange, TimeRange};
+    use std::collections::HashSet;
     use std::time::{Duration, SystemTime};
 
     #[test]
@@ -280,6 +281,22 @@ mod tests {
         Config::from_str("Solar Data Observatory").unwrap();
         Config::from_str("sdo").unwrap();
         // Config::from_str("SDO").unwrap();
+    }
+
+    // FIXME: isn't there a type-driven way to ensure unique strings?
+    // this test is a workaround
+    #[test]
+    fn sourceconfig_uniqueness() {
+        let mut names = HashSet::new();
+        let mut abbrevs = HashSet::new();
+        for s in SourceConfigs::default() {
+            assert!(names.insert(s.name.clone()), "duplicate name '{}'", s.name);
+            assert!(
+                abbrevs.insert(s.abbrev.clone()),
+                "duplicate abbrev '{}'",
+                s.abbrev
+            );
+        }
     }
 
     fn assert_valid_mirror(m: &Mirror) {
