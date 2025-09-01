@@ -12,7 +12,11 @@ pub struct LoopCount(u8);
 
 impl LoopCount {
     pub fn new(c: u8) -> Self {
-        Self(c)
+        if c > 0 {
+            Self(c)
+        } else {
+            Self(1)
+        }
     }
 
     pub fn incr(&mut self) {
