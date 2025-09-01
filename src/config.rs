@@ -111,6 +111,7 @@ impl SourceConfig {
 
     pub fn sdo_0335() -> Self {
         let mut s = Self::sdo();
+        s.name = "Solar Data Obs, 0335 variant".to_string();
         s.pathmaker = "SDO _1024_0335.ogv".to_string();
         s.abbrev = "sdo_0335".to_string();
         s
