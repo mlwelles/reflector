@@ -359,10 +359,15 @@ mod tests {
         dailycfg.period = 60 * 60 * 24;
         let lup = 60 * 60 * 24 * 14;
         dailycfg.loop_period = Some(lup);
+
         let m = Mirror::new(dailycfg).unwrap();
         let p = m.period_timerange(&LoopCount::new(1)).unwrap();
-        let exp = TimeRange::from_now_to(&Duration::from_secs(lup)).unwrap();
-        assert_eq!(p, exp, "1 fortnightly period");
+        let exp = TimeRange::from(StandardTimeRange::LastFortnight);
+        assert_eq!(p, exp, "1 loop should be 1 fortnightly period");
+        assert!(
+            p.equal_by_seconds(&exp),
+            "1 loop should be 1 fortnightly period"
+        );
     }
 
     #[test]

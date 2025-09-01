@@ -108,6 +108,8 @@ impl From<(DateTime<Utc>, DateTime<Utc>)> for TimeRange {
 pub enum StandardTimeRange {
     AllDayYesterday,
     LastTwentyFourHours,
+    LastWeek,
+    LastFortnight,
 }
 
 impl From<StandardTimeRange> for TimeRange {
@@ -122,6 +124,14 @@ impl From<StandardTimeRange> for TimeRange {
             }
             StandardTimeRange::LastTwentyFourHours => {
                 let start = now - one_day;
+                Self::from((start, now))
+            }
+            StandardTimeRange::LastWeek => {
+                let start = now - one_day * 7;
+                Self::from((start, now))
+            }
+            StandardTimeRange::LastFortnight => {
+                let start = now - one_day * 14;
                 Self::from((start, now))
             }
         }
