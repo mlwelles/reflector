@@ -61,7 +61,7 @@ pub enum StatusError {
 pub struct Mirror {
     pub name: String,
     pub abbrev: String,
-    pub period: time::Duration,
+    pub period: time::Duration, // period between captures
     pub seed_past_midnight: time::Duration,
     pub loop_period: time::Duration,
     pub local: FileStore,
@@ -344,12 +344,25 @@ mod tests {
             flatten: None,
             period: 60 * 60, // once per hour
             offset: None,
-            loop_period: Some(60 * 60 * 24),
+            loop_period: Some(60 * 60 * 24), // 1 day
         }
     }
 
     fn mock_mirror() -> Mirror {
         Mirror::new(mock_src_config()).unwrap()
+    }
+
+    #[test]
+    fn periods_and_ranges() {
+        // setup a once a day, fortnightly looping sourceconfig
+        let mut dailycfg = mock_src_config();
+        dailycfg.period = 60 * 60 * 24;
+        let lup = 60 * 60 * 24 * 14;
+        dailycfg.loop_period = Some(lup);
+        let m = Mirror::new(dailycfg).unwrap();
+        let p = m.period_timerange(&LoopCount::new(1)).unwrap();
+        let exp = TimeRange::from_now_to(&Duration::from_secs(lup)).unwrap();
+        assert_eq!(p, exp, "1 fortnightly period");
     }
 
     #[test]
