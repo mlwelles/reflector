@@ -11,7 +11,11 @@ use std::str::FromStr;
 pub struct LoopCount(u8);
 
 impl LoopCount {
-    fn incr(&mut self) {
+    pub fn new(c: u8) -> Self {
+        Self(c)
+    }
+
+    pub fn incr(&mut self) {
         self.0 += 1;
     }
 }
@@ -84,11 +88,11 @@ pub struct SourceConfig {
     pub remote: String,
     pub local: String,
     pub pathmaker: String,
-    /// period between captures
+    /// period between captures, in seconds
     pub period: u64,
     /// seconds after midnight to offset all times
     pub offset: Option<u64>,
-    /// FIXME: why?  we have `period` above
+    /// loop periods, in seconds
     pub loop_period: Option<u64>,
     pub flatten: Option<bool>,
 }
