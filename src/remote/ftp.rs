@@ -160,8 +160,10 @@ impl RemoteClient for Ftp {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(feature = "network_tests")]
     use std::env;
     use std::fs;
+    #[cfg(feature = "network_tests")]
     use std::net::ToSocketAddrs;
 
     // a public server which might be used, ftp.gnu.org
@@ -173,14 +175,18 @@ mod tests {
     // const FTPSERVER: &str = "sopa.coo";
     // const MOCK_RESOURCE: &str = "README";
 
+    fn mock_dir() -> String {
+        "/gnu".to_string()
+    }
+
+    // FIXME: not really a mock, actually a real FTP server
     fn mock_url() -> Url {
-        let u = format!("ftp://{}/gnu/", FTPSERVER);
+        let u = format!("ftp://{}{}/", FTPSERVER, mock_dir());
         Url::parse(&u).unwrap()
     }
 
     fn mock_resource_url(rsrc: &str) -> Url {
         let u = mock_url();
-        // let u = u.join(&format!("{}/{}", u.path(), rsrc)).unwrap();
         let u = u.join(rsrc).unwrap();
         eprintln!("CHECK A: {u}");
         u
@@ -198,6 +204,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "network_tests")]
     fn test_connect() {
         let m = mock();
         assert_eq!(mock_url(), m.base);
@@ -205,21 +212,21 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "network_tests")]
     fn cwd() {
-        let dir = "/gnu";
-        let base = format!("ftp://{}{}", FTPSERVER, dir);
-        let base = Url::parse(&base).unwrap();
-        let mut ftp = Ftp::new(&base, None).unwrap();
-        assert_eq!(dir, ftp.stream.pwd().unwrap());
+        let mut m = mock();
+        assert_eq!(mock_dir(), m.stream.pwd().unwrap());
     }
 
     #[test]
+    #[cfg(feature = "network_tests")]
     fn ping() {
         let mut m = mock();
         m.ping().unwrap();
     }
 
     #[test]
+    #[cfg(feature = "network_tests")]
     fn remote_addr() {
         let m = mock();
         let ss = format!("{}:21", FTPSERVER);
@@ -228,6 +235,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "network_tests")]
     fn get() {
         let mut m = mock();
         let path = PathBuf::from("/dev/null");
@@ -236,6 +244,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "network_tests")]
     fn not_found() {
         let mut m = mock();
         let path = PathBuf::from("/dev/null");
@@ -244,6 +253,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "network_tests")]
     fn validation() {
         let mut m = mock();
         let mut t = env::temp_dir();
@@ -264,6 +274,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "network_tests")]
     fn list() {
         let mut m = mock();
         let l = m.listing().unwrap();
