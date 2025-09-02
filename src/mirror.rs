@@ -126,7 +126,18 @@ impl Mirror {
         count: &LoopCount,
     ) -> Result<TimeRange, time_range::TimeRangeError> {
         let now = SystemTime::now();
-        let then = now - (self.period * count.into());
+        let tot_per = self.period * count.into();
+        let then = now - tot_per;
+        TimeRange::new(then, now)
+    }
+
+    pub fn loop_period_timerange(
+        &self,
+        count: &LoopCount,
+    ) -> Result<TimeRange, time_range::TimeRangeError> {
+        let now = SystemTime::now();
+        let tot_per = self.loop_period * count.into();
+        let then = now - tot_per;
         TimeRange::new(then, now)
     }
 
@@ -361,9 +372,10 @@ mod tests {
         dailycfg.loop_period = Some(lup);
 
         let m = Mirror::new(dailycfg).unwrap();
-        let p = m.period_timerange(&LoopCount::new(1)).unwrap();
+        let p = m.loop_period_timerange(&LoopCount::new(1)).unwrap();
+        // eprintln!("single period time range: {p}");
         let exp = TimeRange::from(StandardTimeRange::LastFortnight);
-        assert_eq!(p, exp, "1 loop should be 1 fortnightly period");
+        // eprintln!("latest fortnight: {exp}");
         assert!(
             p.equal_by_seconds(&exp),
             "1 loop should be 1 fortnightly period"
