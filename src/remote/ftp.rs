@@ -157,13 +157,12 @@ impl RemoteClient for Ftp {
     }
 }
 
+#[cfg(feature = "network_tests")]
 #[cfg(test)]
 mod tests {
     use super::*;
-    #[cfg(feature = "network_tests")]
     use std::env;
     use std::fs;
-    #[cfg(feature = "network_tests")]
     use std::net::ToSocketAddrs;
 
     // a public server which might be used, ftp.gnu.org
@@ -204,7 +203,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "network_tests")]
     fn test_connect() {
         let m = mock();
         assert_eq!(mock_url(), m.base);
@@ -212,21 +210,18 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "network_tests")]
     fn cwd() {
         let mut m = mock();
         assert_eq!(mock_dir(), m.stream.pwd().unwrap());
     }
 
     #[test]
-    #[cfg(feature = "network_tests")]
     fn ping() {
         let mut m = mock();
         m.ping().unwrap();
     }
 
     #[test]
-    #[cfg(feature = "network_tests")]
     fn remote_addr() {
         let m = mock();
         let ss = format!("{}:21", FTPSERVER);
@@ -235,7 +230,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "network_tests")]
     fn get() {
         let mut m = mock();
         let path = PathBuf::from("/dev/null");
@@ -244,7 +238,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "network_tests")]
     fn not_found() {
         let mut m = mock();
         let path = PathBuf::from("/dev/null");
@@ -253,7 +246,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "network_tests")]
     fn validation() {
         let mut m = mock();
         let mut t = env::temp_dir();
@@ -274,7 +266,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "network_tests")]
     fn list() {
         let mut m = mock();
         let l = m.listing().unwrap();
