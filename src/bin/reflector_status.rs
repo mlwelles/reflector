@@ -4,7 +4,7 @@ use reflector::{Config, Mirror, MirrorStatus};
 use std::env;
 
 fn summarize_status(m: &Mirror, st: &MirrorStatus) {
-    println!("{}\t{}", m.name, m.local);
+    println!("{}: {}\t{}", m.abbrev, m.name, m.local);
     println!("\tstatus:\t{}", st);
 }
 

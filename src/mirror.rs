@@ -60,7 +60,8 @@ pub enum StatusError {
 /// a remote site, kept in sync with a local file store
 pub struct Mirror {
     pub name: String,
-    pub period: time::Duration,
+    pub abbrev: String,
+    pub period: time::Duration, // period between captures
     pub seed_past_midnight: time::Duration,
     pub loop_period: time::Duration,
     pub local: FileStore,
@@ -68,10 +69,12 @@ pub struct Mirror {
     remote_client: Box<dyn RemoteClient>,
     pub flatten: bool,
     pub pathmaker: Box<dyn PathMaker>,
+    pub sourceconfig: SourceConfig,
 }
 
 impl Mirror {
     pub fn new(cfg: SourceConfig) -> Result<Mirror, MirrorError> {
+        let sourceconfig = cfg.clone();
         let period = time::Duration::from_secs(cfg.period);
         let pathmaker = pathmaker::new(&cfg.pathmaker);
         if let Err(e) = pathmaker {
@@ -104,6 +107,7 @@ impl Mirror {
 
         let m = Mirror {
             name: cfg.name,
+            abbrev: cfg.abbrev,
             period,
             seed_past_midnight,
             local,
@@ -112,6 +116,7 @@ impl Mirror {
             pathmaker,
             flatten,
             loop_period,
+            sourceconfig,
         };
         Ok(m)
     }
@@ -121,7 +126,18 @@ impl Mirror {
         count: &LoopCount,
     ) -> Result<TimeRange, time_range::TimeRangeError> {
         let now = SystemTime::now();
-        let then = now - (self.period * count.into());
+        let tot_per = self.period * count.into();
+        let then = now - tot_per;
+        TimeRange::new(then, now)
+    }
+
+    pub fn loop_period_timerange(
+        &self,
+        count: &LoopCount,
+    ) -> Result<TimeRange, time_range::TimeRangeError> {
+        let now = SystemTime::now();
+        let tot_per = self.loop_period * count.into();
+        let then = now - tot_per;
         TimeRange::new(then, now)
     }
 
@@ -339,12 +355,31 @@ mod tests {
             flatten: None,
             period: 60 * 60, // once per hour
             offset: None,
-            loop_period: Some(60 * 60 * 24),
+            loop_period: Some(60 * 60 * 24), // 1 day
         }
     }
 
     fn mock_mirror() -> Mirror {
         Mirror::new(mock_src_config()).unwrap()
+    }
+
+    #[test]
+    fn periods_and_ranges() {
+        // setup a once a day, fortnightly looping sourceconfig
+        let mut dailycfg = mock_src_config();
+        dailycfg.period = 60 * 60 * 24;
+        let lup = 60 * 60 * 24 * 14;
+        dailycfg.loop_period = Some(lup);
+
+        let m = Mirror::new(dailycfg).unwrap();
+        let p = m.loop_period_timerange(&LoopCount::new(1)).unwrap();
+        // eprintln!("single period time range: {p}");
+        let exp = TimeRange::from(StandardTimeRange::LastFortnight);
+        // eprintln!("latest fortnight: {exp}");
+        assert!(
+            p.equal_by_seconds(&exp),
+            "1 loop should be 1 fortnightly period"
+        );
     }
 
     #[test]

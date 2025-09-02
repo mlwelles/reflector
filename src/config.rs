@@ -11,7 +11,15 @@ use std::str::FromStr;
 pub struct LoopCount(u8);
 
 impl LoopCount {
-    fn incr(&mut self) {
+    pub fn new(c: u8) -> Self {
+        if c > 0 {
+            Self(c)
+        } else {
+            Self(1)
+        }
+    }
+
+    pub fn incr(&mut self) {
         self.0 += 1;
     }
 }
@@ -84,11 +92,11 @@ pub struct SourceConfig {
     pub remote: String,
     pub local: String,
     pub pathmaker: String,
-    /// period between captures
+    /// period between captures, in seconds
     pub period: u64,
     /// seconds after midnight to offset all times
     pub offset: Option<u64>,
-    /// FIXME: why?  we have `period` above
+    /// loop periods, in seconds
     pub loop_period: Option<u64>,
     pub flatten: Option<bool>,
 }
@@ -111,6 +119,7 @@ impl SourceConfig {
 
     pub fn sdo_0335() -> Self {
         let mut s = Self::sdo();
+        s.name = "Solar Data Obs, 0335 variant".to_string();
         s.pathmaker = "SDO _1024_0335.ogv".to_string();
         s.abbrev = "sdo_0335".to_string();
         s
@@ -273,6 +282,7 @@ mod tests {
     use super::*;
     use crate::mirror::Mirror;
     use crate::{display_duration, display_systime, CaptureMissing, StandardTimeRange, TimeRange};
+    use std::collections::HashSet;
     use std::time::{Duration, SystemTime};
 
     #[test]
@@ -280,6 +290,22 @@ mod tests {
         Config::from_str("Solar Data Observatory").unwrap();
         Config::from_str("sdo").unwrap();
         // Config::from_str("SDO").unwrap();
+    }
+
+    // FIXME: isn't there a type-driven way to ensure unique strings?
+    // this test is a workaround
+    #[test]
+    fn sourceconfig_uniqueness() {
+        let mut names = HashSet::new();
+        let mut abbrevs = HashSet::new();
+        for s in SourceConfigs::default() {
+            assert!(names.insert(s.name.clone()), "duplicate name '{}'", s.name);
+            assert!(
+                abbrevs.insert(s.abbrev.clone()),
+                "duplicate abbrev '{}'",
+                s.abbrev
+            );
+        }
     }
 
     fn assert_valid_mirror(m: &Mirror) {

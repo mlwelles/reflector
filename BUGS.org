@@ -21,7 +21,12 @@ disable tests which would otherwise work:
  - df4aabb289c08b9020d96747b9dbbefaabc9f2dd
 
 * operation testing and bug chasing
-** TODO sdo
+**  sdo
+*** TODO sdo offset not working correctly
+
+The daily fail doesn't show up until late in the evening, but my logic
+to capture this not working.
+
 ** INPROGRESS goes
    - State "INPROGRESS" from "TODO"       [2025-08-21 Thu 11:22]
 * TODO local destination storage abstraction
@@ -39,6 +44,10 @@ Organize project for playback and shared.
 * TODO zero length files in local store considered valid
 * TODO logging is so ugly
 
+Default behavior should be to give a raw untimestamped log when called
+in an 'interactive' context (using POSIX definition), use syslog and
+timestamped stdout/stderr otherwise.
+
 #+begin_example
 ts="2025-08-21T15:10:56.013043Z" lvl="INFO" msg="matched on goesabi" target="reflector::config" module="reflector::config"
 ts="2025-08-21T15:10:56.327345Z" lvl="INFO" msg="got mirror <mirror GOES ABI_TrueColor>" target="reflector" module="reflector"
@@ -48,3 +57,15 @@ ts="2025-08-21T15:10:56.385927Z" lvl="INFO" msg="attempting to fill missing ABI_
 ts="2025-08-21T15:10:56.448070Z" lvl="WARN" msg="error retrieveing resource ABI_TrueColor_20250821_1510z.png: UnexpectedResponse(Response { status: FileUnavailable, body: [53, 53, 48, 32, 70, 97, 105, 108, 101, 100, 32, 116, 111, 32, 111, 112, 101, 110, 32, 102, 105, 108, 101, 46, 13, 10] })" target="reflector::remote::ftp" module="reflector::remote::ftp"
 #+end_example
 
+It might make sense to run all logging through, say:
+ cfg.info()
+ cfg.warn()
+ cfg.error()
+... or would it?
+
+* INPROGRESS loop periods are off
+  - State "INPROGRESS" from "TODO"       [2025-09-01 Mon 00:31]
+
+captured with a failing test, mirror::tests::periods_and_ranges
+
+* TODO rename SourceConfig to MirrorSpecification

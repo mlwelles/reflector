@@ -157,6 +157,7 @@ impl RemoteClient for Ftp {
     }
 }
 
+#[cfg(feature = "network_tests")]
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -173,14 +174,18 @@ mod tests {
     // const FTPSERVER: &str = "sopa.coo";
     // const MOCK_RESOURCE: &str = "README";
 
+    fn mock_dir() -> String {
+        "/gnu".to_string()
+    }
+
+    // FIXME: not really a mock, actually a real FTP server
     fn mock_url() -> Url {
-        let u = format!("ftp://{}/gnu/", FTPSERVER);
+        let u = format!("ftp://{}{}/", FTPSERVER, mock_dir());
         Url::parse(&u).unwrap()
     }
 
     fn mock_resource_url(rsrc: &str) -> Url {
         let u = mock_url();
-        // let u = u.join(&format!("{}/{}", u.path(), rsrc)).unwrap();
         let u = u.join(rsrc).unwrap();
         eprintln!("CHECK A: {u}");
         u
@@ -206,11 +211,8 @@ mod tests {
 
     #[test]
     fn cwd() {
-        let dir = "/gnu";
-        let base = format!("ftp://{}{}", FTPSERVER, dir);
-        let base = Url::parse(&base).unwrap();
-        let mut ftp = Ftp::new(&base, None).unwrap();
-        assert_eq!(dir, ftp.stream.pwd().unwrap());
+        let mut m = mock();
+        assert_eq!(mock_dir(), m.stream.pwd().unwrap());
     }
 
     #[test]

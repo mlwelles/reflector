@@ -4,7 +4,7 @@ use reflector::{Config, Mirror};
 use std::env;
 
 fn captures(cfg: &Config, m: &Mirror) {
-    match m.period_timerange(&cfg.loops) {
+    match m.loop_period_timerange(&cfg.loops) {
         Ok(per) => {
             let cc = m.captures_in_range(&per);
             println!("{} captures in {} periods:", cc.len(), cfg.loops);
