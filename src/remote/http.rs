@@ -122,23 +122,47 @@ impl RemoteClient for Http {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use httpmock::prelude::*;
     use std::env;
     use std::fs;
 
-    const MOCK_URL: &str = "http://deb.debian.org/debian";
     const MOCK_RESOURCE: &str = "README.html";
 
-    fn mock() -> Http {
-        Http::from_str(MOCK_URL).expect("unable to setup mock from base URL")
+    fn mock_server() -> httpmock::MockServer {
+        let server = httpmock::MockServer::start();
+        server.mock(|when, then| {
+            when.matches(|req: &HttpMockRequest| {
+                eprintln!("considering {} {}...", req.method, req.path);
+                if !(req.method == "HEAD" || req.method == "GET") {
+                    eprintln!("  ... false, bad method");
+                    return false;
+                }
+                if req.path == "/"
+                    || req.path == MOCK_RESOURCE
+                    || req.path == format!("/{MOCK_RESOURCE}")
+                {
+                    true
+                } else {
+                    eprintln!("  ... false, bad path {}", req.path);
+                    false
+                }
+            });
+            then.status(200);
+        });
+        server
+    }
+
+    fn mock() -> (Http, httpmock::MockServer) {
+        let srv = mock_server();
+        let m = Http::from_str(&srv.base_url()).expect("unable to setup mock from base URL");
+        (m, srv)
     }
 
     #[test]
     fn url() {
-        let exp = format!("{}/{}", MOCK_URL, MOCK_RESOURCE);
-        assert_eq!(
-            Url::parse(&exp).unwrap(),
-            mock().url(MOCK_RESOURCE).unwrap()
-        )
+        let (m, srv) = mock();
+        let exp = format!("{}/{}", srv.base_url(), MOCK_RESOURCE);
+        assert_eq!(Url::parse(&exp).unwrap(), m.url(MOCK_RESOURCE).unwrap())
     }
 
     #[test]
@@ -153,22 +177,22 @@ mod tests {
 
     #[test]
     fn ping() {
-        let mut m = mock();
+        let mut m = mock().0;
         m.ping().unwrap();
     }
 
     #[test]
     fn exists() {
-        let m = mock();
+        let m = mock().0;
         let e = m.exists(MOCK_RESOURCE).unwrap();
-        assert!(e, "resource exists");
+        assert!(e, "resource should exist");
         let e = m.exists("asdfasdfasdfafdasfdasdf").unwrap();
-        assert!(!e, "resource doesn't exist");
+        assert!(!e, "resource shouldn't exist");
     }
 
     #[test]
     fn get() {
-        let mut m = mock();
+        let mut m = mock().0;
         let path = PathBuf::from("/dev/null");
         let got = m.get(MOCK_RESOURCE, path.clone()).unwrap();
         assert_eq!(MOCK_RESOURCE, got.resource);
@@ -177,7 +201,7 @@ mod tests {
 
     #[test]
     fn validation() {
-        let mut m = mock();
+        let mut m = mock().0;
         let mut t = env::temp_dir();
         t.push("reflector-http-validation-test");
         fs::create_dir_all(&t).expect("failed to create temp directory");
@@ -190,7 +214,7 @@ mod tests {
     #[test]
     fn not_found() {
         let path = PathBuf::from("/dev/null");
-        let fail = mock().get("asdfasfdasfd", path);
+        let fail = mock().0.get("asdfasfdasfd", path);
         assert!(fail.is_err())
     }
 }
